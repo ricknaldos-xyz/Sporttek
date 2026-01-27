@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { TierBadge } from '@/components/player/TierBadge'
 import { FileText } from 'lucide-react'
@@ -36,12 +37,13 @@ export function StudentCard({ student }: StudentCardProps) {
     <GlassCard intensity="light" padding="md" hover="lift" asChild>
       <Link href={`/coach/students/${student.id}`}>
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="relative h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {student.avatarUrl ? (
-              <img
+              <Image
                 src={student.avatarUrl}
                 alt=""
-                className="h-full w-full rounded-full object-cover"
+                fill
+                className="object-cover rounded-full"
               />
             ) : (
               <span className="text-lg font-bold text-primary">

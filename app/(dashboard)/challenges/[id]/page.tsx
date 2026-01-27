@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
@@ -141,9 +142,9 @@ export default function ChallengeDetailPage() {
     const avatar = player.avatarUrl || player.user.image
     return (
       <div className="flex flex-col items-center gap-2 text-center">
-        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+        <div className="relative h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
           {avatar ? (
-            <img src={avatar} alt="" className="h-full w-full object-cover" />
+            <Image src={avatar} alt="" fill className="object-cover" />
           ) : (
             <span className="text-2xl font-bold text-primary">
               {name.charAt(0).toUpperCase()}

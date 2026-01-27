@@ -65,7 +65,7 @@ export function generateStringingOrderNumber(): string {
   const year = now.getFullYear()
   const month = String(now.getMonth() + 1).padStart(2, '0')
   const day = String(now.getDate()).padStart(2, '0')
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase()
+  const random = Math.random().toString(36).substring(2, 10).toUpperCase()
   return `STR-${year}${month}${day}-${random}`
 }
 

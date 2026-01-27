@@ -77,35 +77,47 @@ export async function POST(request: NextRequest) {
           const orderId = session.metadata?.orderId
 
           if (orderType === 'shop_order' && orderId) {
-            await prisma.shopOrder.update({
+            const existingOrder = await prisma.shopOrder.findUnique({
               where: { id: orderId },
-              data: {
-                status: 'PAID',
-                stripeCheckoutSessionId: session.id,
-                paidAt: new Date(),
-              },
+              select: { status: true },
             })
+            if (existingOrder && existingOrder.status === 'PENDING_PAYMENT') {
+              await prisma.shopOrder.update({
+                where: { id: orderId },
+                data: {
+                  status: 'PAID',
+                  stripeCheckoutSessionId: session.id,
+                  paidAt: new Date(),
+                },
+              })
 
-            // Clear the user's cart
-            const userId = session.metadata?.userId
-            if (userId) {
-              const cart = await prisma.cart.findUnique({ where: { userId } })
-              if (cart) {
-                await prisma.cartItem.deleteMany({ where: { cartId: cart.id } })
+              // Clear the user's cart
+              const userId = session.metadata?.userId
+              if (userId) {
+                const cart = await prisma.cart.findUnique({ where: { userId } })
+                if (cart) {
+                  await prisma.cartItem.deleteMany({ where: { cartId: cart.id } })
+                }
               }
             }
           }
 
           if (orderType === 'stringing_order' && orderId) {
-            await prisma.stringingOrder.update({
+            const existingOrder = await prisma.stringingOrder.findUnique({
               where: { id: orderId },
-              data: {
-                status: 'CONFIRMED',
-                stripeCheckoutSessionId: session.id,
-                paidAt: new Date(),
-                confirmedAt: new Date(),
-              },
+              select: { status: true },
             })
+            if (existingOrder && existingOrder.status === 'PENDING_PAYMENT') {
+              await prisma.stringingOrder.update({
+                where: { id: orderId },
+                data: {
+                  status: 'CONFIRMED',
+                  stripeCheckoutSessionId: session.id,
+                  paidAt: new Date(),
+                  confirmedAt: new Date(),
+                },
+              })
+            }
           }
         }
         break

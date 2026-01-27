@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GraduationCap, Users, Star, UserPlus, Loader2, ArrowRight } from 'lucide-react'
@@ -174,12 +175,13 @@ export default function CoachDashboardPage() {
                 <GlassCard key={s.id} intensity="light" padding="md" hover="lift" asChild>
                   <Link href={`/coach/students/${s.id}`}>
                     <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div className="relative h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {s.student.avatarUrl ? (
-                          <img
+                          <Image
                             src={s.student.avatarUrl}
                             alt=""
-                            className="h-full w-full rounded-full object-cover"
+                            fill
+                            className="object-cover rounded-full"
                           />
                         ) : (
                           <span className="text-sm font-bold text-primary">

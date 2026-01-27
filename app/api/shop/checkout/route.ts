@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { createShopCheckoutSession } from '@/lib/shop-stripe'
+import { Prisma } from '@prisma/client'
 
 const checkoutSchema = z.object({
   shippingName: z.string().min(2, 'Nombre requerido').max(100),
@@ -12,6 +13,13 @@ const checkoutSchema = z.object({
   shippingCity: z.string().max(50).default('Lima'),
   shippingNotes: z.string().max(500).optional(),
 })
+
+function generateOrderNumber(): string {
+  const now = new Date()
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '')
+  const random = Math.random().toString(36).substring(2, 10).toUpperCase()
+  return `ORD-${dateStr}-${random}`
+}
 
 // POST - Create checkout session
 export async function POST(request: NextRequest) {
@@ -86,38 +94,54 @@ export async function POST(request: NextRequest) {
     const shippingCents = 1500
     const totalCents = subtotalCents + shippingCents
 
-    // Generate order number
-    const now = new Date()
-    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '')
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase()
-    const orderNumber = `ORD-${dateStr}-${random}`
+    // Create order with retry for order number uniqueness
+    let order
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        order = await prisma.shopOrder.create({
+          data: {
+            userId: session.user.id,
+            orderNumber: generateOrderNumber(),
+            subtotalCents,
+            shippingCents,
+            totalCents,
+            shippingName: parsed.data.shippingName,
+            shippingPhone: parsed.data.shippingPhone,
+            shippingAddress: parsed.data.shippingAddress,
+            shippingDistrict: parsed.data.shippingDistrict,
+            shippingCity: parsed.data.shippingCity,
+            shippingNotes: parsed.data.shippingNotes,
+            items: {
+              create: cart.items.map((item) => ({
+                productId: item.product.id,
+                quantity: item.quantity,
+                priceCents: item.product.priceCents,
+                productName: item.product.name,
+                productSlug: item.product.slug,
+              })),
+            },
+          },
+          include: { items: true },
+        })
+        break
+      } catch (e) {
+        if (
+          e instanceof Prisma.PrismaClientKnownRequestError &&
+          e.code === 'P2002' &&
+          attempt < 2
+        ) {
+          continue
+        }
+        throw e
+      }
+    }
 
-    // Create order
-    const order = await prisma.shopOrder.create({
-      data: {
-        userId: session.user.id,
-        orderNumber,
-        subtotalCents,
-        shippingCents,
-        totalCents,
-        shippingName: parsed.data.shippingName,
-        shippingPhone: parsed.data.shippingPhone,
-        shippingAddress: parsed.data.shippingAddress,
-        shippingDistrict: parsed.data.shippingDistrict,
-        shippingCity: parsed.data.shippingCity,
-        shippingNotes: parsed.data.shippingNotes,
-        items: {
-          create: cart.items.map((item) => ({
-            productId: item.product.id,
-            quantity: item.quantity,
-            priceCents: item.product.priceCents,
-            productName: item.product.name,
-            productSlug: item.product.slug,
-          })),
-        },
-      },
-      include: { items: true },
-    })
+    if (!order) {
+      return NextResponse.json(
+        { error: 'Error al generar numero de pedido' },
+        { status: 500 }
+      )
+    }
 
     // Create Stripe checkout session
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
@@ -132,11 +156,6 @@ export async function POST(request: NextRequest) {
       successUrl: `${baseUrl}/tienda/checkout/success?orderId=${order.id}`,
       cancelUrl: `${baseUrl}/tienda/carrito`,
       customerEmail: session.user.email!,
-    })
-
-    // Clear cart after order creation
-    await prisma.cartItem.deleteMany({
-      where: { cartId: cart.id },
     })
 
     return NextResponse.json({ checkoutUrl: checkoutSession.url })

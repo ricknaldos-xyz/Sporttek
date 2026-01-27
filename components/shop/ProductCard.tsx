@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
@@ -26,10 +27,12 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Image */}
         <div className="relative h-48 bg-secondary/50 rounded-t-2xl overflow-hidden flex items-center justify-center">
           {product.thumbnailUrl ? (
-            <img
+            <Image
               src={product.thumbnailUrl}
               alt={product.name}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 50vw, 25vw"
             />
           ) : (
             <ShoppingBag className="h-12 w-12 text-muted-foreground/40" />

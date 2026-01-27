@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
+import { GlassButton } from '@/components/ui/glass-button'
 import { StringingOrderCard } from '@/components/stringing/StringingOrderCard'
 import { Loader2, Package } from 'lucide-react'
 
@@ -51,12 +53,17 @@ export default function PedidosEncordadoPage() {
         </div>
       ) : orders.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
-          <div className="text-center text-muted-foreground">
-            <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No tienes pedidos</p>
-            <p className="text-sm mt-1">
+          <div className="text-center py-8">
+            <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <p className="text-lg font-medium mb-2">No tienes pedidos aun</p>
+            <p className="text-sm text-muted-foreground mb-4">
               Aun no has solicitado ningun servicio de encordado.
             </p>
+            <Link href="/encordado">
+              <GlassButton variant="solid" size="sm">
+                Solicitar encordado
+              </GlassButton>
+            </Link>
           </div>
         </GlassCard>
       ) : (

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { GlassCard } from '@/components/ui/glass-card'
@@ -75,12 +76,13 @@ export default async function PublicPlayerProfilePage({
         {/* Info */}
         <GlassCard intensity="light" padding="lg" className="md:col-span-2">
           <div className="flex items-start gap-4 mb-6">
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="relative h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
               {profile.avatarUrl || profile.user.image ? (
-                <img
-                  src={profile.avatarUrl || profile.user.image || ''}
+                <Image
+                  src={(profile.avatarUrl || profile.user.image)!}
                   alt={displayName}
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               ) : (
                 <span className="text-2xl font-bold text-primary">

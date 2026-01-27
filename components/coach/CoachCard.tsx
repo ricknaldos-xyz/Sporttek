@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { Star, MapPin, GraduationCap, Users, BadgeCheck, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
@@ -30,12 +31,13 @@ export function CoachCard({ coach }: CoachCardProps) {
     <GlassCard intensity="light" padding="lg" hover="lift" asChild>
       <Link href={`/marketplace/${coach.id}`}>
         <div className="flex items-start gap-4">
-          <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+          <div className="relative h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
             {coach.userImage ? (
-              <img
+              <Image
                 src={coach.userImage}
                 alt=""
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               <GraduationCap className="h-7 w-7 text-primary" />

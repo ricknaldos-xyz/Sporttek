@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
@@ -174,9 +175,9 @@ export default function ClubDetailPage() {
                   href={`/player/${member.profile.userId}`}
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
                 >
-                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div className="relative h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                     {avatar ? (
-                      <img src={avatar} alt="" className="h-full w-full object-cover" />
+                      <Image src={avatar} alt="" fill className="object-cover" />
                     ) : (
                       <span className="text-sm font-bold text-primary">
                         {name.charAt(0).toUpperCase()}

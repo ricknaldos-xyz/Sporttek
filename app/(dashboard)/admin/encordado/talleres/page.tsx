@@ -99,6 +99,7 @@ export default function AdminTalleresPage() {
   const handleToggleActive = async (workshop: Workshop) => {
     try {
       if (workshop.isActive) {
+        if (!window.confirm('¿Estas seguro de desactivar este taller?')) return
         const res = await fetch(`/api/admin/stringing/workshops/${workshop.id}`, {
           method: 'DELETE',
         })

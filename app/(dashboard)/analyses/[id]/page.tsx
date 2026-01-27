@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import Image from 'next/image'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { GlassButton } from '@/components/ui/glass-button'
@@ -141,11 +142,12 @@ export default async function AnalysisDetailPage({
                     <Play className="h-8 w-8 text-muted-foreground" />
                   </div>
                 ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={item.url}
                     alt={item.filename}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 25vw"
                   />
                 )}
                 {item.angle && (

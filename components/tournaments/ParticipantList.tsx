@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { TierBadge } from '@/components/player/TierBadge'
 import { Trophy } from 'lucide-react'
@@ -48,12 +49,13 @@ export function ParticipantList({ participants }: ParticipantListProps) {
             </span>
 
             {/* Avatar */}
-            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="relative h-8 w-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
               {p.avatarUrl ? (
-                <img
+                <Image
                   src={p.avatarUrl}
                   alt={p.displayName || 'Avatar'}
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               ) : (
                 <span className="text-xs font-medium text-muted-foreground">

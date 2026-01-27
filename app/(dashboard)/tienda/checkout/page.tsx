@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { CheckoutForm } from '@/components/shop/CheckoutForm'
@@ -127,12 +128,14 @@ export default function CheckoutPage() {
             <div className="space-y-3 mb-4">
               {items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-secondary/50 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  <div className="relative h-10 w-10 rounded-lg bg-secondary/50 overflow-hidden flex-shrink-0 flex items-center justify-center">
                     {item.product.thumbnailUrl ? (
-                      <img
+                      <Image
                         src={item.product.thumbnailUrl}
                         alt={item.product.name}
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="40px"
                       />
                     ) : (
                       <ShoppingBag className="h-4 w-4 text-muted-foreground/40" />

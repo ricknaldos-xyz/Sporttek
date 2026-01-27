@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
@@ -167,9 +168,9 @@ export default function RankingsPage() {
                 </div>
 
                 {/* Player Info */}
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="relative h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                   {player.avatarUrl ? (
-                    <img src={player.avatarUrl} alt="" className="h-full w-full object-cover" />
+                    <Image src={player.avatarUrl} alt="" fill className="object-cover" />
                   ) : (
                     <span className="text-sm font-bold text-primary">
                       {(player.displayName || '?').charAt(0).toUpperCase()}

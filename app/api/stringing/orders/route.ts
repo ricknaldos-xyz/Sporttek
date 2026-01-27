@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import {
   STRINGING_SERVICE_TYPES,
@@ -110,35 +111,53 @@ export async function POST(request: NextRequest) {
     }
 
     const totalCents = servicePriceCents + pickupFeeCents + stringPriceCents
-    const orderNumber = generateStringingOrderNumber()
 
-    const order = await prisma.stringingOrder.create({
-      data: {
-        orderNumber,
-        userId: session.user.id,
-        status: 'PENDING_PAYMENT',
-        serviceType: data.serviceType,
-        deliveryMode: data.deliveryMode,
-        racketBrand: data.racketBrand,
-        racketModel: data.racketModel,
-        racketNotes: data.racketNotes,
-        stringName: data.stringName,
-        stringProductId: data.stringProductId,
-        tensionMain: data.tensionMain,
-        tensionCross: data.tensionCross,
-        workshopId: data.workshopId,
-        pickupAddress: data.pickupAddress,
-        pickupDistrict: data.pickupDistrict,
-        deliveryAddress: data.deliveryAddress,
-        deliveryDistrict: data.deliveryDistrict,
-        contactPhone: data.contactPhone,
-        preferredPickupDate: data.preferredPickupDate ? new Date(data.preferredPickupDate) : null,
-        servicePriceCents,
-        pickupFeeCents,
-        stringPriceCents,
-        totalCents,
-      },
-    })
+    let order
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        order = await prisma.stringingOrder.create({
+          data: {
+            orderNumber: generateStringingOrderNumber(),
+            userId: session.user.id,
+            status: 'PENDING_PAYMENT',
+            serviceType: data.serviceType,
+            deliveryMode: data.deliveryMode,
+            racketBrand: data.racketBrand,
+            racketModel: data.racketModel,
+            racketNotes: data.racketNotes,
+            stringName: data.stringName,
+            stringProductId: data.stringProductId,
+            tensionMain: data.tensionMain,
+            tensionCross: data.tensionCross,
+            workshopId: data.workshopId,
+            pickupAddress: data.pickupAddress,
+            pickupDistrict: data.pickupDistrict,
+            deliveryAddress: data.deliveryAddress,
+            deliveryDistrict: data.deliveryDistrict,
+            contactPhone: data.contactPhone,
+            preferredPickupDate: data.preferredPickupDate ? new Date(data.preferredPickupDate) : null,
+            servicePriceCents,
+            pickupFeeCents,
+            stringPriceCents,
+            totalCents,
+          },
+        })
+        break
+      } catch (e) {
+        if (
+          e instanceof Prisma.PrismaClientKnownRequestError &&
+          e.code === 'P2002' &&
+          attempt < 2
+        ) {
+          continue
+        }
+        throw e
+      }
+    }
+
+    if (!order) {
+      return NextResponse.json({ error: 'Error al generar numero de pedido' }, { status: 500 })
+    }
 
     return NextResponse.json({ id: order.id, orderNumber: order.orderNumber }, { status: 201 })
   } catch (error) {

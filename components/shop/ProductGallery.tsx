@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { ShoppingBag } from 'lucide-react'
 
 interface ProductGalleryProps {
@@ -22,11 +23,13 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   return (
     <div className="space-y-3">
       {/* Main image */}
-      <div className="aspect-square rounded-xl bg-secondary/50 overflow-hidden">
-        <img
+      <div className="relative aspect-square rounded-xl bg-secondary/50 overflow-hidden">
+        <Image
           src={images[selectedIndex]}
           alt={productName}
-          className="h-full w-full object-cover"
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
         />
       </div>
 
@@ -37,16 +40,18 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             <button
               key={index}
               onClick={() => setSelectedIndex(index)}
-              className={`flex-shrink-0 h-16 w-16 rounded-lg overflow-hidden border-2 transition-all ${
+              className={`relative flex-shrink-0 h-16 w-16 rounded-lg overflow-hidden border-2 transition-all ${
                 selectedIndex === index
                   ? 'border-primary'
                   : 'border-transparent opacity-70 hover:opacity-100'
               }`}
             >
-              <img
+              <Image
                 src={img}
                 alt={`${productName} ${index + 1}`}
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
+                sizes="64px"
               />
             </button>
           ))}

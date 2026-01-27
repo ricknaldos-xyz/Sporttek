@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GraduationCap, Star, MapPin, Loader2, ChevronRight } from 'lucide-react'
@@ -68,9 +69,9 @@ export default function MarketplacePage() {
             <GlassCard key={coach.id} intensity="light" padding="lg" hover="lift" asChild>
               <Link href={`/marketplace/${coach.id}`}>
                 <div className="flex items-start gap-4">
-                  <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div className="relative h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                     {coach.user.image ? (
-                      <img src={coach.user.image} alt="" className="h-full w-full object-cover" />
+                      <Image src={coach.user.image} alt="" fill className="object-cover" />
                     ) : (
                       <GraduationCap className="h-7 w-7 text-primary" />
                     )}

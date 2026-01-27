@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
-import { Flag, Check, X, Loader2, Clock } from 'lucide-react'
+import { Flag, Check, X, Loader2, Clock, Swords } from 'lucide-react'
 import { toast } from 'sonner'
 import type { SkillTier } from '@prisma/client'
 
@@ -132,12 +134,17 @@ export default function ChallengesPage() {
         </div>
       ) : challenges.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
-          <div className="text-center text-muted-foreground">
-            <Flag className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No hay desafios</p>
-            <p className="text-sm mt-1">
+          <div className="text-center py-8">
+            <Swords className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <p className="text-lg font-medium mb-2">No hay desafios aun</p>
+            <p className="text-sm text-muted-foreground mb-4">
               {tab === 'received' ? 'Aun no has recibido desafios' : 'Aun no has enviado desafios'}
             </p>
+            <Link href="/rankings">
+              <GlassButton variant="solid" size="sm">
+                Buscar oponentes
+              </GlassButton>
+            </Link>
           </div>
         </GlassCard>
       ) : (
@@ -149,9 +156,9 @@ export default function ChallengesPage() {
             return (
               <GlassCard key={challenge.id} intensity="light" padding="md">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div className="relative h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                     {opponent.avatarUrl || opponent.user.image ? (
-                      <img src={opponent.avatarUrl || opponent.user.image || ''} alt="" className="h-full w-full object-cover" />
+                      <Image src={(opponent.avatarUrl || opponent.user.image)!} alt="" fill className="object-cover" />
                     ) : (
                       <span className="text-lg font-bold text-primary">
                         {opponentName.charAt(0).toUpperCase()}

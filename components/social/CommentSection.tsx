@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
@@ -105,12 +106,13 @@ export function CommentSection({ targetId, targetType }: CommentSectionProps) {
                   href={`/player/${comment.author.userId}`}
                   className="flex-shrink-0"
                 >
-                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                  <div className="relative h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                     {avatar ? (
-                      <img
+                      <Image
                         src={avatar}
                         alt=""
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     ) : (
                       <span className="text-xs font-bold text-primary">

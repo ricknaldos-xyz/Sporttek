@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
@@ -73,10 +74,15 @@ export default function CommunityPage() {
         </div>
       ) : items.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
-          <div className="text-center text-muted-foreground">
-            <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">Tu feed esta vacio</p>
-            <p className="text-sm mt-1">Sigue a otros jugadores para ver su actividad</p>
+          <div className="text-center py-8">
+            <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <p className="text-lg font-medium mb-2">Tu feed esta vacio</p>
+            <p className="text-sm text-muted-foreground mb-4">Sigue a otros jugadores para ver su actividad</p>
+            <Link href="/rankings">
+              <GlassButton variant="solid" size="sm">
+                Explorar jugadores
+              </GlassButton>
+            </Link>
           </div>
         </GlassCard>
       ) : (
@@ -89,12 +95,13 @@ export default function CommunityPage() {
               <GlassCard key={item.id} intensity="light" padding="md">
                 <div className="flex items-start gap-4">
                   <Link href={`/player/${item.profile.userId}`} className="flex-shrink-0">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                    <div className="relative h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                       {item.profile.avatarUrl || item.profile.user.image ? (
-                        <img
-                          src={item.profile.avatarUrl || item.profile.user.image || ''}
+                        <Image
+                          src={(item.profile.avatarUrl || item.profile.user.image)!}
                           alt=""
-                          className="h-full w-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       ) : (
                         <span className="text-sm font-bold text-primary">

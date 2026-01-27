@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { GlassCard } from '@/components/ui/glass-card'
@@ -35,9 +36,9 @@ export function PlayerCard({
       <Link href={`/player/${userId}`}>
         <div className="flex items-center gap-4">
           {/* Avatar */}
-          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+          <div className="relative h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
             {avatarUrl ? (
-              <img src={avatarUrl} alt={displayName || ''} className="h-full w-full object-cover" />
+              <Image src={avatarUrl} alt={displayName || ''} fill className="object-cover" />
             ) : (
               <span className="text-lg font-bold text-primary">
                 {(displayName || '?').charAt(0).toUpperCase()}

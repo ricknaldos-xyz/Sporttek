@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
+import { GlassButton } from '@/components/ui/glass-button'
 import { OrderStatusBadge } from '@/components/shop/OrderStatusBadge'
 import { ClipboardList, Loader2, Package } from 'lucide-react'
 
@@ -67,10 +69,15 @@ export default function PedidosPage() {
 
       {orders.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
-          <div className="text-center text-muted-foreground">
-            <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No tienes pedidos aun</p>
-            <p className="text-sm mt-1">Cuando realices una compra, tus pedidos apareceran aqui</p>
+          <div className="text-center py-8">
+            <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <p className="text-lg font-medium mb-2">No tienes pedidos aun</p>
+            <p className="text-sm text-muted-foreground mb-4">Cuando realices una compra, tus pedidos apareceran aqui</p>
+            <Link href="/tienda">
+              <GlassButton variant="solid" size="sm">
+                Ir a la tienda
+              </GlassButton>
+            </Link>
           </div>
         </GlassCard>
       ) : (
@@ -111,13 +118,15 @@ export default function PedidosPage() {
                     {order.items.slice(0, 4).map((item) => (
                       <div
                         key={item.id}
-                        className="h-10 w-10 rounded-lg bg-secondary/50 overflow-hidden flex-shrink-0 flex items-center justify-center"
+                        className="relative h-10 w-10 rounded-lg bg-secondary/50 overflow-hidden flex-shrink-0 flex items-center justify-center"
                       >
                         {item.product.thumbnailUrl ? (
-                          <img
+                          <Image
                             src={item.product.thumbnailUrl}
                             alt={item.product.name}
-                            className="h-full w-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="40px"
                           />
                         ) : (
                           <Package className="h-4 w-4 text-muted-foreground/40" />

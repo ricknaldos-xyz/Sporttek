@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
@@ -145,12 +146,13 @@ export default function StudentDetailPage() {
       {/* Student Info */}
       <GlassCard intensity="light" padding="lg">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="relative h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {student.student.avatarUrl ? (
-              <img
+              <Image
                 src={student.student.avatarUrl}
                 alt=""
-                className="h-full w-full rounded-full object-cover"
+                fill
+                className="object-cover rounded-full"
               />
             ) : (
               <span className="text-2xl font-bold text-primary">

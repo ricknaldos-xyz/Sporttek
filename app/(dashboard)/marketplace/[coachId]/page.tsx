@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import {
@@ -108,9 +109,9 @@ export default function CoachProfilePage() {
       {/* Header */}
       <GlassCard intensity="light" padding="lg">
         <div className="flex items-start gap-4">
-          <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+          <div className="relative h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
             {coach.user.image ? (
-              <img src={coach.user.image} alt="" className="h-full w-full object-cover" />
+              <Image src={coach.user.image} alt="" fill className="object-cover" />
             ) : (
               <GraduationCap className="h-10 w-10 text-primary" />
             )}

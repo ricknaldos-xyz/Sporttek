@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { TierBadge } from '@/components/player/TierBadge'
 import { Target, Medal, Trophy, Flame } from 'lucide-react'
@@ -41,9 +42,9 @@ export function FeedCard({ item }: FeedCardProps) {
     <GlassCard intensity="light" padding="md">
       <div className="flex items-start gap-4">
         <Link href={`/player/${item.profile.userId}`} className="flex-shrink-0">
-          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+          <div className="relative h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
             {avatar ? (
-              <img src={avatar} alt="" className="h-full w-full object-cover" />
+              <Image src={avatar} alt="" fill className="object-cover" />
             ) : (
               <span className="text-sm font-bold text-primary">
                 {playerName.charAt(0).toUpperCase()}

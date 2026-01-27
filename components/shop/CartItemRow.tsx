@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { GlassButton } from '@/components/ui/glass-button'
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
@@ -29,12 +30,14 @@ export function CartItemRow({ item, onQuantityChange, onRemove }: CartItemRowPro
   return (
     <div className="flex items-center gap-4 py-3">
       {/* Thumbnail */}
-      <div className="h-16 w-16 rounded-lg bg-secondary/50 overflow-hidden flex-shrink-0 flex items-center justify-center">
+      <div className="relative h-16 w-16 rounded-lg bg-secondary/50 overflow-hidden flex-shrink-0 flex items-center justify-center">
         {item.product.thumbnailUrl ? (
-          <img
+          <Image
             src={item.product.thumbnailUrl}
             alt={item.product.name}
-            className="h-full w-full object-cover"
+            fill
+            className="object-cover"
+            sizes="64px"
           />
         ) : (
           <ShoppingBag className="h-6 w-6 text-muted-foreground/40" />

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { OrderStatusBadge } from '@/components/shop/OrderStatusBadge'
@@ -133,12 +134,14 @@ export default function OrderDetailPage() {
             <div className="space-y-4">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-4">
-                  <div className="h-14 w-14 rounded-lg bg-secondary/50 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  <div className="relative h-14 w-14 rounded-lg bg-secondary/50 overflow-hidden flex-shrink-0 flex items-center justify-center">
                     {item.product.thumbnailUrl ? (
-                      <img
+                      <Image
                         src={item.product.thumbnailUrl}
                         alt={item.productName}
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="56px"
                       />
                     ) : (
                       <Package className="h-6 w-6 text-muted-foreground/40" />
