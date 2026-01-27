@@ -49,7 +49,7 @@ export async function retrieveRelevantChunks(
   let paramIdx = 3 // $1 = vector, $2 = limit
 
   if (sportSlug) {
-    conditions.push(`(dc.sport_slug = $${paramIdx} OR dc.sport_slug IS NULL)`)
+    conditions.push(`(dc."sportSlug" = $${paramIdx} OR dc."sportSlug" IS NULL)`)
     params.push(sportSlug)
     paramIdx++
   }
@@ -82,12 +82,12 @@ export async function retrieveRelevantChunks(
         dc.content,
         dc.category,
         dc.technique,
-        dc.sport_slug AS "sportSlug",
-        dc.page_start AS "pageStart",
-        d.original_name AS "documentFilename",
+        dc."sportSlug" AS "sportSlug",
+        dc."pageStart" AS "pageStart",
+        d."originalName" AS "documentFilename",
         1 - (dc.embedding <=> $1::vector) AS similarity
       FROM document_chunks dc
-      JOIN documents d ON dc.document_id = d.id
+      JOIN documents d ON dc."documentId" = d.id
       ${whereClause}
       AND 1 - (dc.embedding <=> $1::vector) > ${threshold}
       ORDER BY dc.embedding <=> $1::vector

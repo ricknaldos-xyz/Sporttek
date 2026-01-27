@@ -87,11 +87,11 @@ export async function processDocument(documentId: string): Promise<void> {
 
         await prisma.$executeRawUnsafe(
           `INSERT INTO document_chunks (
-            id, document_id, content, chunk_index, page_start, page_end,
-            sport_slug, category, technique, token_count, embedding, created_at
+            id, "documentId", content, "chunkIndex", "pageStart", "pageEnd",
+            "sportSlug", category, technique, "tokenCount", embedding, "createdAt"
           ) VALUES (
             gen_random_uuid()::text, $1, $2, $3, $4, $5,
-            $6, $7::\"ChunkCategory\", $8, $9, $10::vector, NOW()
+            $6, $7::"ChunkCategory", $8, $9, $10::vector, NOW()
           )`,
           documentId,
           chunk.content,
