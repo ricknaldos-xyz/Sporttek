@@ -37,9 +37,11 @@ export function VideoRequirements() {
       {requirements.map((req) => (
         <div
           key={req.label}
-          className="bg-muted/30 rounded-lg p-3 flex flex-col items-center text-center"
+          className="glass-ultralight border-glass rounded-xl p-3 flex flex-col items-center text-center"
         >
-          <req.icon className="h-5 w-5 text-muted-foreground mb-2" />
+          <div className="glass-light border-glass rounded-lg p-1.5 mb-2">
+            <req.icon className="h-4 w-4 text-muted-foreground" />
+          </div>
           <p className="text-xs text-muted-foreground">{req.label}</p>
           <p className="text-sm font-medium">{req.value}</p>
         </div>

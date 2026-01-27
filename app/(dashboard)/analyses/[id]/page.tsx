@@ -2,7 +2,9 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassCard } from '@/components/ui/glass-card'
+import { GlassBadge } from '@/components/ui/glass-badge'
 import {
   ArrowLeft,
   AlertTriangle,
@@ -36,11 +38,11 @@ async function getAnalysis(id: string, userId: string) {
   })
 }
 
-const severityColors = {
-  CRITICAL: 'bg-red-100 text-red-700 border-red-200',
-  HIGH: 'bg-orange-100 text-orange-700 border-orange-200',
-  MEDIUM: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  LOW: 'bg-blue-100 text-blue-700 border-blue-200',
+const severityVariants = {
+  CRITICAL: 'destructive' as const,
+  HIGH: 'warning' as const,
+  MEDIUM: 'warning' as const,
+  LOW: 'primary' as const,
 }
 
 const severityLabels = {
@@ -74,11 +76,11 @@ export default async function AnalysisDetailPage({
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <GlassButton variant="ghost" size="icon" asChild>
           <Link href="/analyses">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-        </Button>
+        </GlassButton>
         <div className="flex-1">
           <h1 className="text-2xl font-bold">
             {analysis.technique.name}
@@ -89,50 +91,50 @@ export default async function AnalysisDetailPage({
           </p>
         </div>
         {analysis.overallScore && (
-          <div className="text-center">
+          <div className="text-center glass-primary border-glass rounded-xl px-4 py-2">
             <div className={cn('text-4xl font-bold', scoreColor)}>
               {analysis.overallScore.toFixed(1)}
             </div>
-            <div className="text-sm text-muted-foreground">Puntuacion</div>
+            <div className="text-sm text-muted-foreground">/10</div>
           </div>
         )}
       </div>
 
       {/* Status Banner */}
       {analysis.status === 'PROCESSING' && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-yellow-700">
+        <GlassCard intensity="light" padding="md" className="bg-warning/5 border-warning/20 flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-warning border-t-transparent rounded-full animate-spin" />
+          <p className="text-warning">
             Tu analisis esta siendo procesado. Esto puede tomar unos segundos.
           </p>
-        </div>
+        </GlassCard>
       )}
 
       {analysis.status === 'FAILED' && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <GlassCard intensity="light" padding="md" className="bg-destructive/5 border-destructive/20">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-red-700 font-medium">Error al procesar</p>
-              <p className="text-red-600 text-sm mb-3">{analysis.errorMessage}</p>
+              <p className="text-destructive font-medium">Error al procesar</p>
+              <p className="text-destructive/80 text-sm mb-3">{analysis.errorMessage}</p>
               <RetryAnalysisButton
                 analysisId={analysis.id}
                 retryCount={analysis.retryCount}
               />
             </div>
           </div>
-        </div>
+        </GlassCard>
       )}
 
       {/* Media Preview */}
       {analysis.mediaItems.length > 0 && (
-        <div className="bg-card border border-border rounded-xl p-4">
+        <GlassCard intensity="light" padding="lg">
           <h2 className="font-semibold mb-3">Archivos analizados</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {analysis.mediaItems.map((item) => (
               <div
                 key={item.id}
-                className="aspect-video bg-muted rounded-lg overflow-hidden relative"
+                className="aspect-video glass-ultralight border-glass rounded-lg overflow-hidden relative"
               >
                 {item.type === 'VIDEO' ? (
                   <div className="w-full h-full flex items-center justify-center">
@@ -147,14 +149,14 @@ export default async function AnalysisDetailPage({
                   />
                 )}
                 {item.angle && (
-                  <span className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-2 py-0.5 rounded">
+                  <span className="absolute bottom-1 right-1 glass-medium text-white text-xs px-2 py-0.5 rounded">
                     {item.angle}
                   </span>
                 )}
               </div>
             ))}
           </div>
-        </div>
+        </GlassCard>
       )}
 
       {analysis.status === 'COMPLETED' && (
@@ -169,38 +171,42 @@ export default async function AnalysisDetailPage({
 
           {/* Summary */}
           {analysis.summary && (
-            <div className="bg-card border border-border rounded-xl p-5">
+            <GlassCard intensity="light" padding="lg">
               <h2 className="font-semibold mb-3">Resumen del analisis</h2>
               <p className="text-muted-foreground">{analysis.summary}</p>
-            </div>
+            </GlassCard>
           )}
 
           {/* Strengths & Priority */}
           <div className="grid md:grid-cols-2 gap-4">
             {analysis.strengths.length > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-5">
+              <GlassCard intensity="light" padding="lg" className="bg-success/5 border-success/20">
                 <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <h2 className="font-semibold text-green-900">Fortalezas</h2>
+                  <div className="bg-success/20 rounded-lg p-1.5">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                  </div>
+                  <h2 className="font-semibold text-success">Fortalezas</h2>
                 </div>
                 <ul className="space-y-2">
                   {analysis.strengths.map((strength, i) => (
-                    <li key={i} className="text-green-800 text-sm">
+                    <li key={i} className="text-success/90 text-sm">
                       • {strength}
                     </li>
                   ))}
                 </ul>
-              </div>
+              </GlassCard>
             )}
 
             {analysis.priorityFocus && (
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-5">
+              <GlassCard intensity="primary" padding="lg">
                 <div className="flex items-center gap-2 mb-3">
-                  <Target className="h-5 w-5 text-primary" />
+                  <div className="glass-light border-glass rounded-lg p-1.5">
+                    <Target className="h-4 w-4 text-primary" />
+                  </div>
                   <h2 className="font-semibold">Enfoque Prioritario</h2>
                 </div>
                 <p className="text-muted-foreground">{analysis.priorityFocus}</p>
-              </div>
+              </GlassCard>
             )}
           </div>
 
@@ -214,9 +220,10 @@ export default async function AnalysisDetailPage({
                 <SeverityExplainer />
               </div>
               {analysis.issues.map((issue) => (
-                <div
+                <GlassCard
                   key={issue.id}
-                  className="bg-card border border-border rounded-xl p-5"
+                  intensity="light"
+                  padding="lg"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -225,19 +232,14 @@ export default async function AnalysisDetailPage({
                         {issue.category}
                       </span>
                     </div>
-                    <span
-                      className={cn(
-                        'px-2 py-1 rounded-md text-xs font-medium border',
-                        severityColors[issue.severity]
-                      )}
-                    >
+                    <GlassBadge variant={severityVariants[issue.severity]}>
                       {severityLabels[issue.severity]}
-                    </span>
+                    </GlassBadge>
                   </div>
 
                   <p className="text-muted-foreground mb-4">{issue.description}</p>
 
-                  <div className="bg-muted/50 rounded-lg p-4 mb-4">
+                  <div className="glass-ultralight border-glass rounded-xl p-4 mb-4">
                     <h4 className="font-medium text-sm mb-2">Como corregirlo:</h4>
                     <p className="text-sm text-muted-foreground">
                       {issue.correction}
@@ -255,35 +257,37 @@ export default async function AnalysisDetailPage({
                             key={i}
                             className="text-sm text-muted-foreground flex items-start gap-2"
                           >
-                            <Dumbbell className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                            <Dumbbell className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
                             {drill}
                           </li>
                         ))}
                       </ul>
                     </div>
                   )}
-                </div>
+                </GlassCard>
               ))}
             </div>
           )}
 
           {/* Training Plan CTA */}
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 text-center">
+          <GlassCard intensity="primary" padding="xl" className="text-center">
             {analysis.trainingPlan ? (
               <>
                 <h3 className="font-semibold mb-2">Plan de Entrenamiento</h3>
                 <p className="text-muted-foreground mb-4">
                   Ya tienes un plan generado para este analisis
                 </p>
-                <Button asChild>
+                <GlassButton variant="solid" asChild>
                   <Link href={`/training/${analysis.trainingPlan.id}`}>
                     Ver Plan de Entrenamiento
                   </Link>
-                </Button>
+                </GlassButton>
               </>
             ) : (
               <>
-                <Dumbbell className="h-10 w-10 mx-auto mb-3 text-primary" />
+                <div className="glass-light border-glass rounded-2xl p-4 w-fit mx-auto mb-4">
+                  <Dumbbell className="h-10 w-10 text-primary" />
+                </div>
                 <h3 className="font-semibold mb-2">
                   Genera tu Plan de Entrenamiento
                 </h3>
@@ -291,14 +295,14 @@ export default async function AnalysisDetailPage({
                   Basado en los problemas detectados, podemos crear un plan
                   personalizado de ejercicios para mejorar tu tecnica
                 </p>
-                <Button asChild>
+                <GlassButton variant="solid" asChild>
                   <Link href={`/training/generate?analysisId=${analysis.id}`}>
                     Generar Plan
                   </Link>
-                </Button>
+                </GlassButton>
               </>
             )}
-          </div>
+          </GlassCard>
         </>
       )}
     </div>

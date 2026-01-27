@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
 import { RefreshCw, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -65,7 +65,7 @@ export function RetryAnalysisButton({
 
   return (
     <div className="flex items-center gap-3">
-      <Button
+      <GlassButton
         onClick={handleRetry}
         disabled={isRetrying || !canRetry}
         variant="outline"
@@ -81,7 +81,7 @@ export function RetryAnalysisButton({
             Reintentar analisis
           </>
         )}
-      </Button>
+      </GlassButton>
       {retryCount > 0 && (
         <span className="text-sm text-muted-foreground">
           Intentos: {retryCount}/{maxRetries}

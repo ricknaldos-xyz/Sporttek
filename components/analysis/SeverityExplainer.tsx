@@ -2,35 +2,36 @@
 
 import { useState } from 'react'
 import { HelpCircle, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassBadge } from '@/components/ui/glass-badge'
 import { cn } from '@/lib/utils'
 
 const severityLevels = [
   {
     level: 'CRITICAL',
     label: 'Critico',
-    color: 'bg-red-100 text-red-700 border-red-200',
+    variant: 'destructive' as const,
     description:
       'Errores fundamentales que afectan gravemente tu rendimiento o pueden causar lesiones. Debes corregirlos inmediatamente.',
   },
   {
     level: 'HIGH',
     label: 'Alto',
-    color: 'bg-orange-100 text-orange-700 border-orange-200',
+    variant: 'warning' as const,
     description:
       'Problemas importantes que limitan significativamente tu tecnica. Prioriza corregirlos en tu entrenamiento.',
   },
   {
     level: 'MEDIUM',
     label: 'Medio',
-    color: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    variant: 'warning' as const,
     description:
       'Areas de mejora que impactan tu consistencia. Trabaja en ellos despues de los problemas criticos.',
   },
   {
     level: 'LOW',
     label: 'Bajo',
-    color: 'bg-blue-100 text-blue-700 border-blue-200',
+    variant: 'primary' as const,
     description:
       'Ajustes finos para optimizar tu tecnica. Utiles para pasar al siguiente nivel.',
   },
@@ -41,7 +42,7 @@ export function SeverityExplainer() {
 
   return (
     <>
-      <Button
+      <GlassButton
         variant="ghost"
         size="sm"
         onClick={() => setIsOpen(true)}
@@ -49,7 +50,7 @@ export function SeverityExplainer() {
       >
         <HelpCircle className="h-4 w-4 mr-2" />
         Que significan los niveles?
-      </Button>
+      </GlassButton>
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -57,12 +58,12 @@ export function SeverityExplainer() {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
-          <div className="relative bg-card border border-border rounded-xl shadow-xl max-w-md w-full mx-4 overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="relative glass-heavy border-glass-strong rounded-2xl shadow-glass-xl max-w-md w-full mx-4 overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-glass">
               <h3 className="font-semibold">Niveles de severidad</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -71,30 +72,25 @@ export function SeverityExplainer() {
               {severityLevels.map((severity) => (
                 <div
                   key={severity.level}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
+                  className="flex items-start gap-3 p-3 rounded-xl glass-ultralight border-glass"
                 >
-                  <span
-                    className={cn(
-                      'px-2 py-1 rounded-md text-xs font-medium border shrink-0',
-                      severity.color
-                    )}
-                  >
+                  <GlassBadge variant={severity.variant} className="shrink-0">
                     {severity.label}
-                  </span>
+                  </GlassBadge>
                   <p className="text-sm text-muted-foreground">
                     {severity.description}
                   </p>
                 </div>
               ))}
             </div>
-            <div className="p-4 border-t border-border">
-              <Button
+            <div className="p-4 border-t border-glass">
+              <GlassButton
                 onClick={() => setIsOpen(false)}
                 className="w-full"
                 variant="outline"
               >
                 Entendido
-              </Button>
+              </GlassButton>
             </div>
           </div>
         </div>

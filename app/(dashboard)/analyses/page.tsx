@@ -2,7 +2,9 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Video, ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassCard } from '@/components/ui/glass-card'
+import { GlassBadge } from '@/components/ui/glass-badge'
 import { formatRelativeTime } from '@/lib/utils'
 
 async function getAnalyses(userId: string) {
@@ -36,97 +38,104 @@ export default async function AnalysesPage() {
             Historial de todos tus analisis de tecnica
           </p>
         </div>
-        <Button asChild>
+        <GlassButton variant="solid" asChild>
           <Link href="/analyze">
             <Video className="mr-2 h-4 w-4" />
             Nuevo Analisis
           </Link>
-        </Button>
+        </GlassButton>
       </div>
 
       {analyses.length > 0 ? (
         <div className="grid gap-4">
           {analyses.map((analysis) => (
-            <Link
+            <GlassCard
               key={analysis.id}
-              href={`/analyses/${analysis.id}`}
-              className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors flex items-center gap-4"
+              intensity="light"
+              padding="lg"
+              hover="lift"
+              className="flex items-center gap-4 cursor-pointer"
+              asChild
             >
-              <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center text-3xl flex-shrink-0">
-                {analysis.technique.sport.slug === 'tennis' ? '🎾' : '🏅'}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold">{analysis.technique.name}</h3>
-                  {analysis.variant && (
-                    <span className="text-sm text-muted-foreground">
-                      - {analysis.variant.name}
-                    </span>
-                  )}
+              <Link href={`/analyses/${analysis.id}`}>
+                <div className="w-16 h-16 glass-primary border-glass rounded-xl flex items-center justify-center text-3xl flex-shrink-0">
+                  {analysis.technique.sport.slug === 'tennis' ? '🎾' : '🏅'}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {analysis.technique.sport.name}
-                </p>
-                <div className="flex items-center gap-4 mt-2 text-sm">
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      analysis.status === 'COMPLETED'
-                        ? 'bg-green-100 text-green-700'
-                        : analysis.status === 'PROCESSING'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : analysis.status === 'FAILED'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {analysis.status === 'COMPLETED'
-                      ? 'Completado'
-                      : analysis.status === 'PROCESSING'
-                      ? 'Procesando'
-                      : analysis.status === 'FAILED'
-                      ? 'Error'
-                      : 'Pendiente'}
-                  </span>
-                  {analysis._count.issues > 0 && (
-                    <span className="text-muted-foreground">
-                      {analysis._count.issues} problema
-                      {analysis._count.issues > 1 ? 's' : ''} detectado
-                      {analysis._count.issues > 1 ? 's' : ''}
-                    </span>
-                  )}
-                  <span className="text-muted-foreground">
-                    {formatRelativeTime(analysis.createdAt)}
-                  </span>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-4 flex-shrink-0">
-                {analysis.overallScore && (
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
-                      {analysis.overallScore.toFixed(1)}
-                    </div>
-                    <div className="text-xs text-muted-foreground">/10</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold">{analysis.technique.name}</h3>
+                    {analysis.variant && (
+                      <span className="text-sm text-muted-foreground">
+                        - {analysis.variant.name}
+                      </span>
+                    )}
                   </div>
-                )}
-                <ArrowRight className="h-5 w-5 text-muted-foreground" />
-              </div>
-            </Link>
+                  <p className="text-sm text-muted-foreground">
+                    {analysis.technique.sport.name}
+                  </p>
+                  <div className="flex items-center gap-3 mt-2 text-sm">
+                    <GlassBadge
+                      variant={
+                        analysis.status === 'COMPLETED'
+                          ? 'success'
+                          : analysis.status === 'PROCESSING'
+                          ? 'warning'
+                          : analysis.status === 'FAILED'
+                          ? 'destructive'
+                          : 'default'
+                      }
+                    >
+                      {analysis.status === 'COMPLETED'
+                        ? 'Completado'
+                        : analysis.status === 'PROCESSING'
+                        ? 'Procesando'
+                        : analysis.status === 'FAILED'
+                        ? 'Error'
+                        : 'Pendiente'}
+                    </GlassBadge>
+                    {analysis._count.issues > 0 && (
+                      <span className="text-muted-foreground">
+                        {analysis._count.issues} problema
+                        {analysis._count.issues > 1 ? 's' : ''} detectado
+                        {analysis._count.issues > 1 ? 's' : ''}
+                      </span>
+                    )}
+                    <span className="text-muted-foreground">
+                      {formatRelativeTime(analysis.createdAt)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 flex-shrink-0">
+                  {analysis.overallScore && (
+                    <div className="text-center glass-primary border-glass rounded-xl px-3 py-2">
+                      <div className="text-2xl font-bold text-primary">
+                        {analysis.overallScore.toFixed(1)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">/10</div>
+                    </div>
+                  )}
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                </div>
+              </Link>
+            </GlassCard>
           ))}
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-xl p-12 text-center">
-          <Video className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+        <GlassCard intensity="light" padding="xl" className="text-center">
+          <div className="glass-ultralight border-glass rounded-2xl p-4 w-fit mx-auto mb-4">
+            <Video className="h-12 w-12 text-muted-foreground" />
+          </div>
           <h3 className="text-lg font-medium mb-2">No tienes analisis aun</h3>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             Sube tu primer video para que nuestra IA analice tu tecnica y te de
             recomendaciones personalizadas
           </p>
-          <Button asChild size="lg">
+          <GlassButton variant="solid" size="lg" asChild>
             <Link href="/analyze">Crear primer analisis</Link>
-          </Button>
-        </div>
+          </GlassButton>
+        </GlassCard>
       )}
     </div>
   )

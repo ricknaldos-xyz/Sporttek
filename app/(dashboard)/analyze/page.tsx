@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassCard } from '@/components/ui/glass-card'
 import { toast } from 'sonner'
 import {
   ChevronLeft,
@@ -274,11 +275,13 @@ export default function AnalyzePage() {
   if (processing) {
     return (
       <div className="max-w-2xl mx-auto py-12 text-center">
-        <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-        <h2 className="text-xl font-semibold mb-2">Analizando tu tecnica...</h2>
-        <p className="text-muted-foreground">
-          Nuestra IA esta revisando tu video. Esto puede tomar unos segundos.
-        </p>
+        <GlassCard intensity="medium" padding="xl" className="space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+          <h2 className="text-xl font-semibold">Analizando tu tecnica...</h2>
+          <p className="text-muted-foreground">
+            Nuestra IA esta revisando tu video. Esto puede tomar unos segundos.
+          </p>
+        </GlassCard>
       </div>
     )
   }
@@ -298,10 +301,10 @@ export default function AnalyzePage() {
             >
               <div
                 className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
+                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-[var(--duration-normal)]',
                   i <= currentStepIndex
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
+                    ? 'bg-primary text-primary-foreground shadow-glass-glow'
+                    : 'glass-ultralight border-glass text-muted-foreground'
                 )}
               >
                 {i < currentStepIndex ? (
@@ -313,8 +316,8 @@ export default function AnalyzePage() {
               {i < steps.length - 1 && (
                 <div
                   className={cn(
-                    'h-1 flex-1 mx-2',
-                    i < currentStepIndex ? 'bg-primary' : 'bg-muted'
+                    'h-1 flex-1 mx-2 rounded-full transition-all duration-[var(--duration-normal)]',
+                    i < currentStepIndex ? 'bg-primary' : 'glass-ultralight'
                   )}
                 />
               )}
@@ -326,7 +329,7 @@ export default function AnalyzePage() {
             <span
               key={s.id}
               className={cn(
-                'text-center',
+                'text-center transition-colors duration-[var(--duration-normal)]',
                 s.id === step ? 'text-primary font-medium' : 'text-muted-foreground'
               )}
             >
@@ -337,7 +340,7 @@ export default function AnalyzePage() {
       </div>
 
       {/* Content */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <GlassCard intensity="medium" padding="lg">
         {step === 'sport' && (
           <div>
             <h2 className="text-xl font-semibold mb-2">Selecciona el deporte</h2>
@@ -356,10 +359,10 @@ export default function AnalyzePage() {
                     key={sport.id}
                     onClick={() => setSelectedSport(sport)}
                     className={cn(
-                      'p-4 rounded-lg border-2 text-left transition-colors',
+                      'p-4 rounded-xl text-left transition-all duration-[var(--duration-normal)]',
                       selectedSport?.id === sport.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
+                        ? 'glass-primary border-glass shadow-glass-glow'
+                        : 'glass-ultralight border-glass hover:glass-light'
                     )}
                   >
                     <div className="text-3xl mb-2">
@@ -391,10 +394,10 @@ export default function AnalyzePage() {
                     key={technique.id}
                     onClick={() => setSelectedTechnique(technique)}
                     className={cn(
-                      'p-4 rounded-lg border-2 text-left transition-colors',
+                      'p-4 rounded-xl text-left transition-all duration-[var(--duration-normal)]',
                       selectedTechnique?.id === technique.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
+                        ? 'glass-primary border-glass shadow-glass-glow'
+                        : 'glass-ultralight border-glass hover:glass-light'
                     )}
                   >
                     <div className="flex items-center justify-between">
@@ -404,10 +407,10 @@ export default function AnalyzePage() {
                           <div
                             key={i}
                             className={cn(
-                              'w-2 h-2 rounded-full',
+                              'w-2 h-2 rounded-full transition-colors',
                               i < technique.difficulty
                                 ? 'bg-primary'
-                                : 'bg-muted'
+                                : 'glass-ultralight border-glass'
                             )}
                           />
                         ))}
@@ -439,10 +442,10 @@ export default function AnalyzePage() {
               <button
                 onClick={() => setSelectedVariant(null)}
                 className={cn(
-                  'p-4 rounded-lg border-2 text-left transition-colors',
+                  'p-4 rounded-xl text-left transition-all duration-[var(--duration-normal)]',
                   selectedVariant === null
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
+                    ? 'glass-primary border-glass shadow-glass-glow'
+                    : 'glass-ultralight border-glass hover:glass-light'
                 )}
               >
                 <h3 className="font-medium">General</h3>
@@ -456,10 +459,10 @@ export default function AnalyzePage() {
                   key={variant.id}
                   onClick={() => setSelectedVariant(variant)}
                   className={cn(
-                    'p-4 rounded-lg border-2 text-left transition-colors',
+                    'p-4 rounded-xl text-left transition-all duration-[var(--duration-normal)]',
                     selectedVariant?.id === variant.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50'
+                      ? 'glass-primary border-glass shadow-glass-glow'
+                      : 'glass-ultralight border-glass hover:glass-light'
                   )}
                 >
                   <h3 className="font-medium">{variant.name}</h3>
@@ -485,7 +488,7 @@ export default function AnalyzePage() {
             <VideoRequirements />
             <VideoGuidelines />
 
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors mt-4">
+            <div className="border-2 border-dashed border-glass rounded-xl p-8 text-center hover:border-primary/50 hover:glass-ultralight transition-all duration-[var(--duration-normal)] mt-4">
               <input
                 type="file"
                 id="file-upload"
@@ -495,7 +498,9 @@ export default function AnalyzePage() {
                 onChange={handleFileChange}
               />
               <label htmlFor="file-upload" className="cursor-pointer">
-                <Upload className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
+                <div className="glass-light border-glass rounded-2xl p-4 w-fit mx-auto mb-4">
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                </div>
                 <p className="font-medium mb-1">
                   Arrastra archivos o haz clic para seleccionar
                 </p>
@@ -510,10 +515,10 @@ export default function AnalyzePage() {
                 {files.map((file, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                    className="flex items-center justify-between p-3 glass-ultralight border-glass rounded-xl"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <div className="w-10 h-10 glass-primary border-glass rounded-lg flex items-center justify-center">
                         {file.type.startsWith('video/') ? '🎬' : '📷'}
                       </div>
                       <div>
@@ -527,7 +532,7 @@ export default function AnalyzePage() {
                     </div>
                     <button
                       onClick={() => removeFile(index)}
-                      className="p-1 hover:bg-background rounded"
+                      className="p-1.5 hover:glass-light rounded-lg transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -539,17 +544,17 @@ export default function AnalyzePage() {
         )}
 
         {/* Navigation */}
-        <div className="flex justify-between mt-8 pt-6 border-t border-border">
-          <Button
+        <div className="flex justify-between mt-8 pt-6 border-t border-glass">
+          <GlassButton
             variant="outline"
             onClick={goBack}
             disabled={step === 'sport' || uploading}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
             Atras
-          </Button>
+          </GlassButton>
 
-          <Button onClick={goNext} disabled={!canGoNext() || uploading}>
+          <GlassButton variant="solid" onClick={goNext} disabled={!canGoNext() || uploading}>
             {uploading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -563,9 +568,9 @@ export default function AnalyzePage() {
                 <ChevronRight className="ml-2 h-4 w-4" />
               </>
             )}
-          </Button>
+          </GlassButton>
         </div>
-      </div>
+      </GlassCard>
     </div>
   )
 }

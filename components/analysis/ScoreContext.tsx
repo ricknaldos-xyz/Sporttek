@@ -2,6 +2,7 @@
 
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { GlassCard } from '@/components/ui/glass-card'
 
 interface ScoreContextProps {
   score: number
@@ -64,7 +65,7 @@ export function ScoreContext({ score, averageScore, previousScore }: ScoreContex
   const isImproving = previousDifference !== null && previousDifference > 0
 
   return (
-    <div className="bg-muted/50 rounded-xl p-5">
+    <GlassCard intensity="light" padding="lg">
       <div className="flex items-center justify-between mb-4">
         <div>
           <span className={cn('text-lg font-semibold', scoreInfo.color)}>
@@ -78,24 +79,24 @@ export function ScoreContext({ score, averageScore, previousScore }: ScoreContex
 
       <div className="grid grid-cols-2 gap-4">
         {/* Comparison to average */}
-        <div className="bg-card rounded-lg p-3">
+        <div className="glass-ultralight border-glass rounded-xl p-3">
           <p className="text-xs text-muted-foreground mb-1">vs Promedio</p>
           <div className="flex items-center gap-2">
             {isAboveAverage ? (
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <TrendingUp className="h-4 w-4 text-success" />
             ) : difference === 0 ? (
-              <Minus className="h-4 w-4 text-yellow-500" />
+              <Minus className="h-4 w-4 text-warning" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-red-500" />
+              <TrendingDown className="h-4 w-4 text-destructive" />
             )}
             <span
               className={cn(
                 'font-medium',
                 isAboveAverage
-                  ? 'text-green-600'
+                  ? 'text-success'
                   : difference === 0
-                  ? 'text-yellow-600'
-                  : 'text-red-600'
+                  ? 'text-warning'
+                  : 'text-destructive'
               )}
             >
               {difference > 0 ? '+' : ''}
@@ -109,24 +110,24 @@ export function ScoreContext({ score, averageScore, previousScore }: ScoreContex
 
         {/* Comparison to previous */}
         {previousDifference !== null && (
-          <div className="bg-card rounded-lg p-3">
+          <div className="glass-ultralight border-glass rounded-xl p-3">
             <p className="text-xs text-muted-foreground mb-1">vs Anterior</p>
             <div className="flex items-center gap-2">
               {isImproving ? (
-                <TrendingUp className="h-4 w-4 text-green-500" />
+                <TrendingUp className="h-4 w-4 text-success" />
               ) : previousDifference === 0 ? (
-                <Minus className="h-4 w-4 text-yellow-500" />
+                <Minus className="h-4 w-4 text-warning" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-red-500" />
+                <TrendingDown className="h-4 w-4 text-destructive" />
               )}
               <span
                 className={cn(
                   'font-medium',
                   isImproving
-                    ? 'text-green-600'
+                    ? 'text-success'
                     : previousDifference === 0
-                    ? 'text-yellow-600'
-                    : 'text-red-600'
+                    ? 'text-warning'
+                    : 'text-destructive'
                 )}
               >
                 {previousDifference > 0 ? '+' : ''}
@@ -139,6 +140,6 @@ export function ScoreContext({ score, averageScore, previousScore }: ScoreContex
           </div>
         )}
       </div>
-    </div>
+    </GlassCard>
   )
 }

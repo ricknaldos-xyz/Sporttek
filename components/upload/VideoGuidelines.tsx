@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Check, X, ChevronDown, ChevronUp, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -61,13 +60,13 @@ export function VideoGuidelines() {
   const badExamples = examples.filter((e) => !e.isGood)
 
   return (
-    <div className="bg-muted/50 rounded-xl border border-border overflow-hidden">
+    <div className="glass-ultralight border-glass rounded-xl overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-muted/80 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:glass-light transition-all duration-[var(--duration-normal)]"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+          <div className="glass-primary border-glass rounded-lg p-2">
             <Lightbulb className="h-4 w-4 text-primary" />
           </div>
           <span className="font-medium">Tips para un mejor analisis</span>
@@ -83,7 +82,7 @@ export function VideoGuidelines() {
         <div className="px-4 pb-4 space-y-4">
           {/* Good examples */}
           <div>
-            <h4 className="text-sm font-medium text-green-700 mb-2 flex items-center gap-2">
+            <h4 className="text-sm font-medium text-success mb-2 flex items-center gap-2">
               <Check className="h-4 w-4" />
               Recomendado
             </h4>
@@ -91,12 +90,12 @@ export function VideoGuidelines() {
               {goodExamples.map((example) => (
                 <div
                   key={example.label}
-                  className="bg-green-50 border border-green-200 rounded-lg p-3"
+                  className="bg-success/5 border border-success/20 rounded-xl p-3 backdrop-blur-sm"
                 >
-                  <p className="text-sm font-medium text-green-800">
+                  <p className="text-sm font-medium text-success">
                     {example.label}
                   </p>
-                  <p className="text-xs text-green-600 mt-1">
+                  <p className="text-xs text-success/80 mt-1">
                     {example.description}
                   </p>
                 </div>
@@ -106,7 +105,7 @@ export function VideoGuidelines() {
 
           {/* Bad examples */}
           <div>
-            <h4 className="text-sm font-medium text-red-700 mb-2 flex items-center gap-2">
+            <h4 className="text-sm font-medium text-destructive mb-2 flex items-center gap-2">
               <X className="h-4 w-4" />
               Evitar
             </h4>
@@ -114,12 +113,12 @@ export function VideoGuidelines() {
               {badExamples.map((example) => (
                 <div
                   key={example.label}
-                  className="bg-red-50 border border-red-200 rounded-lg p-3"
+                  className="bg-destructive/5 border border-destructive/20 rounded-xl p-3 backdrop-blur-sm"
                 >
-                  <p className="text-sm font-medium text-red-800">
+                  <p className="text-sm font-medium text-destructive">
                     {example.label}
                   </p>
-                  <p className="text-xs text-red-600 mt-1">
+                  <p className="text-xs text-destructive/80 mt-1">
                     {example.description}
                   </p>
                 </div>
