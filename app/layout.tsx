@@ -17,6 +17,13 @@ export const metadata: Metadata = {
   title: 'SportTech - Analisis Deportivo con IA',
   description: 'Mejora tu tecnica deportiva con analisis de video impulsado por inteligencia artificial',
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

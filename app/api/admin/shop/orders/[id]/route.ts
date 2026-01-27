@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { OrderStatus } from '@prisma/client'
+import { SHOP_ORDER_TRANSITIONS, isValidTransition } from '@/lib/order-transitions'
 
 const updateOrderSchema = z.object({
   status: z.nativeEnum(OrderStatus),
@@ -80,17 +81,7 @@ export async function PATCH(
     const { status } = parsed.data
 
     // Validate state transition
-    const VALID_TRANSITIONS: Record<string, string[]> = {
-      PENDING_PAYMENT: ['PAID', 'CANCELLED'],
-      PAID: ['PROCESSING', 'CANCELLED'],
-      PROCESSING: ['SHIPPED', 'CANCELLED'],
-      SHIPPED: ['DELIVERED'],
-      DELIVERED: [],
-      CANCELLED: [],
-      REFUNDED: [],
-    }
-
-    if (!VALID_TRANSITIONS[existing.status]?.includes(status)) {
+    if (!isValidTransition(SHOP_ORDER_TRANSITIONS, existing.status, status)) {
       return NextResponse.json(
         { error: `Transicion de estado no valida: ${existing.status} -> ${status}` },
         { status: 400 }

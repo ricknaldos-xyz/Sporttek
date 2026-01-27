@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { isPlayerTierAllowed } from '@/lib/tiers'
 
 // POST - Register for tournament
 export async function POST(
@@ -46,19 +47,13 @@ export async function POST(
     }
 
     // Validate skill tier requirements
-    const TIER_ORDER = ['BRONCE', 'PLATA', 'ORO', 'PLATINO', 'DIAMANTE']
-    const playerTierIndex = TIER_ORDER.indexOf(profile.skillTier)
-    if (tournament.minTier) {
-      const minIndex = TIER_ORDER.indexOf(tournament.minTier)
-      if (playerTierIndex < minIndex) {
+    if (!isPlayerTierAllowed(profile.skillTier, tournament.minTier, tournament.maxTier)) {
+      const playerTierIndex = ['BRONCE', 'PLATA', 'ORO', 'PLATINO', 'DIAMANTE'].indexOf(profile.skillTier)
+      const minIndex = tournament.minTier ? ['BRONCE', 'PLATA', 'ORO', 'PLATINO', 'DIAMANTE'].indexOf(tournament.minTier) : -1
+      if (tournament.minTier && playerTierIndex < minIndex) {
         return NextResponse.json({ error: 'Tu nivel es menor al requerido' }, { status: 403 })
       }
-    }
-    if (tournament.maxTier) {
-      const maxIndex = TIER_ORDER.indexOf(tournament.maxTier)
-      if (playerTierIndex > maxIndex) {
-        return NextResponse.json({ error: 'Tu nivel excede el maximo permitido' }, { status: 403 })
-      }
+      return NextResponse.json({ error: 'Tu nivel excede el maximo permitido' }, { status: 403 })
     }
 
     const participant = await prisma.tournamentParticipant.create({
