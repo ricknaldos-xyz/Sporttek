@@ -110,6 +110,200 @@ export const TENNIS_TECHNIQUES: Record<string, string> = {
 - Minimo, controlado
 - Raqueta no cruza el cuerpo
 - Recuperacion rapida a posicion lista`,
+
+  return: `
+## BIOMECANICA CORRECTA DEL RESTO DE SAQUE
+
+### Posicion de Anticipacion:
+- Posicion baja, rodillas flexionadas, peso en puntas de los pies
+- Raqueta al frente en posicion semi-preparada
+- Ubicacion segun el tipo de saque esperado
+
+### Split Step:
+- Salto pequeno sincronizado con el impacto del sacador
+- Aterrizar con ambos pies, rodillas flexionadas
+- Listo para explotar en cualquier direccion
+
+### Backswing Reducido:
+- Backswing 50% mas corto que un groundstroke normal
+- Preparacion compacta y rapida
+- Usar el ritmo y velocidad del saque entrante
+
+### Punto de Contacto:
+- Adelante del cuerpo, firme y decidido
+- Aprovechar el ritmo del saque para la devolucion
+- Bloqueo solido contra primeros saques rapidos
+
+### Recuperacion:
+- Explosiva hacia el centro de la linea de fondo
+- Preparacion inmediata para el siguiente golpe`,
+
+  approach: `
+## BIOMECANICA CORRECTA DEL GOLPE DE APROXIMACION
+
+### Lectura y Posicionamiento:
+- Detectar pelota corta temprano y avanzar sin dudar
+- Moverse hacia la pelota mientras se prepara el golpe
+- Decision de direccion antes de llegar a la pelota
+
+### Preparacion en Movimiento:
+- Backswing compacto mientras se avanza
+- No detenerse para golpear — impactar en movimiento
+- Peso transferido hacia adelante durante todo el golpe
+
+### Punto de Contacto:
+- Adelante del cuerpo con peso en el pie delantero
+- Trayectoria baja y profunda al lado debil del oponente
+- Control sobre potencia — la posicion en la red gana el punto
+
+### Transicion a la Red:
+- Continuar avanzando despues del golpe sin pausa
+- Split step al llegar a la zona de volea
+- Cerrar el angulo cubriendo el lado del golpe de aproximacion`,
+
+  smash: `
+## BIOMECANICA CORRECTA DEL REMATE
+
+### Posicionamiento:
+- Moverse debajo de la pelota con pasos laterales o cruzados
+- NUNCA girar de espaldas a la red
+- Brazo no dominante apunta a la pelota como guia visual
+
+### Preparacion:
+- Similar al saque: raqueta atras detras de la cabeza
+- Codo alto, muñeca relajada
+- Rodillas ligeramente flexionadas para impulso
+
+### Punto de Contacto:
+- Brazo completamente extendido hacia arriba
+- Contacto en el punto mas alto posible
+- Pronacion del antebrazo en el impacto
+- Dirigir al espacio abierto, no solo buscar potencia
+
+### Follow-through:
+- Natural hacia abajo y al frente
+- Peso transferido hacia adelante
+- Recuperacion inmediata a posicion de red`,
+
+  dropshot: `
+## BIOMECANICA CORRECTA DE LA DEJADA
+
+### Disfraz (Clave):
+- Preparacion IDENTICA al groundstroke normal
+- El oponente no debe detectar la dejada hasta despues del contacto
+- Misma posicion corporal y backswing que un golpe regular
+
+### Grip y Contacto:
+- Grip Continental para maximo control del spin
+- Cara de raqueta abierta, deslizar debajo de la pelota
+- Toque suave — la raqueta "acaricia" la pelota
+- Backspin pronunciado para que la pelota no avance tras botar
+
+### Follow-through:
+- Minimo — la raqueta casi se detiene despues del contacto
+- No empujar la pelota, dejar que el angulo haga el trabajo
+
+### Seleccion Tactica:
+- Ejecutar cuando el oponente esta atras de la linea de fondo
+- Evitar intentar desde posicion defensiva
+- Alternar con golpes profundos para mantener al oponente adivinando`,
+
+  lob: `
+## BIOMECANICA CORRECTA DEL GLOBO
+
+### Preparacion Disfrazada:
+- Preparacion identica al groundstroke o passing shot
+- El oponente no debe anticipar el globo
+- Misma postura y backswing inicial
+
+### Contacto:
+- Cara de raqueta abierta, contacto debajo de la pelota
+- Swing de abajo hacia arriba para generar la elevacion
+- Control preciso de la fuerza para lograr profundidad correcta
+
+### Trayectoria:
+- Altura suficiente para que el oponente no alcance con smash
+- Profundidad cerca de la linea de fondo
+- Considerar el viento y las condiciones del techo (indoor)
+
+### Follow-through:
+- Hacia arriba y adelante, siguiendo la trayectoria deseada
+- Mantener el equilibrio para estar listo si la pelota vuelve`,
+
+  halfvolley: `
+## BIOMECANICA CORRECTA DE LA MEDIA VOLEA
+
+### Posicionamiento:
+- Rodillas MUY flexionadas, centro de gravedad extremadamente bajo
+- La raqueta debe llegar casi al nivel del suelo
+- Paso adelante hacia la pelota con el pie contrario
+
+### Grip y Raqueta:
+- Grip Continental para versatilidad
+- Cara de raqueta ligeramente abierta para elevar sobre la red
+- Cabeza de la raqueta firme, sin aflojarse
+
+### Contacto:
+- Timing critico: justo despues del bote, la pelota apenas sube
+- Movimiento de bloqueo firme, NO swing completo
+- Absorber el impacto con la raqueta firme
+- Dirigir con la cara de la raqueta, no con el swing
+
+### Follow-through:
+- Corto y controlado hacia el objetivo
+- Mantener posicion baja durante todo el golpe
+- Recuperacion inmediata a posicion de volea`,
+
+  passing: `
+## BIOMECANICA CORRECTA DEL PASSING SHOT
+
+### Lectura del Oponente:
+- Evaluar la posicion del oponente en la red ANTES de golpear
+- Decidir direccion (paralelo vs cruzado) basado en su posicion
+- Considerar el globo como alternativa si el oponente esta bien posicionado
+
+### Preparacion Bajo Presion:
+- Preparacion rapida y compacta a pesar de la presion del approach
+- No apresurarse — tomar la pelota en la zona de confort
+- Mantener la calma y la tecnica limpia
+
+### Punto de Contacto:
+- Firme y dirigido al espacio abierto
+- Trayectoria baja sobre la red para dificultar la volea
+- Precision sobre potencia — no intentar winners imposibles
+
+### Variedad:
+- Alternar entre paralelo y cruzado para ser impredecible
+- Usar topspin para que la pelota caiga a los pies del oponente
+- El globo es siempre una opcion valida`,
+
+  footwork: `
+## BIOMECANICA CORRECTA DEL TRABAJO DE PIES
+
+### Posicion Base:
+- Rodillas flexionadas, peso en las puntas de los pies
+- Pies al ancho de hombros, equilibrio centrado
+- Pies activos, nunca completamente quietos (pequeños rebotes)
+
+### Split Step:
+- Ejecutar en CADA golpe del oponente sin excepcion
+- Salto pequeno y aterrizaje con rodillas flexionadas
+- Permite reaccionar explosivamente en cualquier direccion
+
+### Movimiento Lateral:
+- Pasos laterales rapidos (shuffle) para distancias cortas
+- Paso cruzado para cubrir distancias largas
+- NUNCA cruzar los pies durante el shuffle lateral
+
+### Recuperacion:
+- Vuelta explosiva al centro despues de CADA golpe
+- No quedarse viendo el golpe — moverse inmediatamente
+- Primer paso rapido en la direccion correcta
+
+### Ajuste Final:
+- Pasos pequenos y rapidos para posicionamiento preciso
+- Llegar a la pelota con el peso equilibrado
+- Base estable en el momento del impacto`,
 }
 
 export const TENNIS_VARIANTS: Record<string, Record<string, string>> = {
@@ -167,6 +361,189 @@ VARIANTE: REVES A DOS MANOS
 - Ambas manos permanecen en la raqueta
 - Mayor control y potencia de rotacion
 - Swing mas compacto`,
+  },
+  return: {
+    'first-serve-return': `
+VARIANTE: RESTO DE PRIMER SAQUE
+- Posicion mas retrasada (1-2 metros detras de la linea de fondo)
+- Backswing minimo, casi bloqueo
+- Prioridad: devolver profundo y en juego
+- Usar el ritmo del saque, no generar potencia propia
+- Ideal: devolucion profunda al centro para neutralizar`,
+
+    'second-serve-return': `
+VARIANTE: RESTO DE SEGUNDO SAQUE
+- Posicion adelantada, dentro o sobre la linea de fondo
+- Swing mas completo, similar a groundstroke
+- Oportunidad de atacar y tomar control del punto
+- Buscar golpe agresivo a una esquina
+- Avanzar hacia adelante con el golpe`,
+
+    'block-return': `
+VARIANTE: RESTO BLOQUEADO
+- Sin backswing, raqueta firme al frente como pared
+- Cara ligeramente abierta para elevar sobre la red
+- Ideal contra saques muy rapidos o con mucho efecto
+- Usar el ritmo del saque completamente
+- Devolucion profunda y controlada`,
+  },
+  approach: {
+    'forehand-approach': `
+VARIANTE: APROXIMACION DE DERECHA
+- Grip Semi-Western o Eastern
+- Topspin controlado o plano segun la situacion
+- Mas opciones de angulo disponibles
+- Dirigir preferiblemente al reves del oponente`,
+
+    'backhand-approach': `
+VARIANTE: APROXIMACION DE REVES
+- Preparacion compacta y dirigida
+- Generalmente cruzada o por el centro
+- Slice de reves es muy efectivo como approach
+- Mantener trayectoria baja y profunda`,
+
+    'slice-approach': `
+VARIANTE: APROXIMACION CORTADA (SLICE)
+- Cara de raqueta abierta, movimiento de arriba hacia abajo
+- La pelota se mantiene muy baja despues del bote
+- Da mas tiempo para llegar a la red
+- Dificil de atacar con passing por la baja altura
+- Ideal para transicion fluida a posicion de volea`,
+  },
+  smash: {
+    'standard-smash': `
+VARIANTE: REMATE ESTANDAR
+- Pies plantados en el suelo, base solida
+- Mayor control y precision
+- Usado cuando la pelota no esta demasiado alta o atras
+- Mecanica similar al saque pero sin lanzamiento`,
+
+    'jump-smash': `
+VARIANTE: REMATE CON SALTO
+- Impulso vertical con ambas piernas
+- Contacto en el punto mas alto del salto
+- Mayor alcance para pelotas altas o retrasadas
+- Requiere excelente timing y coordinacion
+- Aterrizaje controlado para recuperacion`,
+
+    'backhand-smash': `
+VARIANTE: REMATE DE REVES
+- Giro de hombros rapido para posicionarse
+- Contacto sobre el hombro no dominante
+- Menos potencia que el remate de derecha
+- Usado como recurso de emergencia
+- Requiere excelente coordinacion`,
+  },
+  dropshot: {
+    'forehand-dropshot': `
+VARIANTE: DEJADA DE DERECHA
+- Preparacion identica a la derecha normal
+- Mas natural de disfrazar por la variedad de grips
+- Mayor variedad de angulos posibles
+- Abrir cara de raqueta en el ultimo momento`,
+
+    'backhand-dropshot': `
+VARIANTE: DEJADA DE REVES
+- Se integra naturalmente con el slice de reves
+- Dificil de leer para el oponente (parece slice normal)
+- Usar grip Continental
+- Reducir la velocidad del swing en el ultimo momento`,
+  },
+  lob: {
+    'topspin-lob': `
+VARIANTE: GLOBO CON TOPSPIN
+- Swing de abajo hacia arriba con cepillado pronunciado
+- El topspin hace que la pelota caiga mas rapido dentro de la cancha
+- Mas agresivo y dificil de alcanzar
+- Requiere buena tecnica de brushing
+- Ideal como golpe ofensivo sorpresivo`,
+
+    'defensive-lob': `
+VARIANTE: GLOBO DEFENSIVO
+- Muy alto para ganar maximo tiempo
+- Profundo para empujar al oponente hacia la linea de fondo
+- Desde posicion de emergencia (estirado, desequilibrado)
+- Prioridad: sobrevivir el punto y reposicionarse
+- Cara de raqueta muy abierta`,
+
+    'offensive-lob': `
+VARIANTE: GLOBO OFENSIVO
+- Disfrazado como passing shot hasta el ultimo momento
+- Menos alto que el defensivo, pero mas rapido
+- Pasa justo sobre el alcance del oponente
+- Busca ganar el punto directamente
+- Requiere lectura perfecta de la posicion del rival`,
+  },
+  halfvolley: {
+    'forehand-halfvolley': `
+VARIANTE: MEDIA VOLEA DE DERECHA
+- Grip Continental o Eastern
+- Paso adelante con pie contrario
+- Mas natural y con mejor control de angulo
+- Bloqueo firme con muñeca estable`,
+
+    'backhand-halfvolley': `
+VARIANTE: MEDIA VOLEA DE REVES
+- Grip Continental obligatorio
+- Paso adelante con pie del lado dominante
+- Mas dificil, requiere mas fuerza de muñeca
+- Mantener cabeza de raqueta firme`,
+  },
+  passing: {
+    'down-the-line-passing': `
+VARIANTE: PASSING PARALELO
+- Por la linea lateral, menor margen de error
+- Mas sorpresivo si el oponente se mueve al centro
+- Requiere timing preciso y contacto firme
+- Efectivo cuando el oponente cubre el cruzado`,
+
+    'crosscourt-passing': `
+VARIANTE: PASSING CRUZADO
+- En diagonal, mayor margen sobre la red (parte mas baja)
+- Mas distancia de cancha disponible
+- Opcion mas segura estadisticamente
+- Efectivo con angulo pronunciado`,
+
+    'topspin-passing': `
+VARIANTE: PASSING CON TOPSPIN
+- Topspin pronunciado que hace caer la pelota a los pies
+- La pelota baja rapidamente despues de cruzar la red
+- Dificil de volear porque llega bajo
+- Mayor margen sobre la red por el efecto
+- Ideal para passing cruzado con angulo`,
+  },
+  footwork: {
+    'split-step': `
+VARIANTE: SPLIT STEP
+- Salto pequeno justo cuando el oponente hace contacto
+- Aterrizar con pies al ancho de hombros, rodillas flexionadas
+- Base de TODO movimiento en tenis
+- Sin split step, la reaccion es demasiado lenta
+- Debe ser automatico en cada punto`,
+
+    'recovery-step': `
+VARIANTE: PASO DE RECUPERACION
+- Vuelta explosiva al centro despues de cada golpe
+- No caminar — moverse con urgencia
+- La velocidad de recuperacion define el nivel del jugador
+- Orientarse hacia el centro de la linea de fondo
+- Estar listo para el split step al llegar`,
+
+    'crossover-step': `
+VARIANTE: PASO CRUZADO
+- Pie trasero cruza POR ENCIMA del pie delantero
+- Para cubrir distancias largas lateralmente
+- Mas rapido que el shuffle lateral para distancias grandes
+- Transicion a pasos de ajuste al acercarse a la pelota
+- Usado para bolas anchas y defensivas`,
+
+    'lateral-shuffle': `
+VARIANTE: DESPLAZAMIENTO LATERAL
+- Pasos laterales rapidos SIN cruzar los pies
+- Mayor equilibrio y control durante el movimiento
+- Para distancias cortas y ajustes finos
+- Mantener centro de gravedad bajo
+- Ideal para posicionamiento cerca de la pelota`,
   },
 }
 

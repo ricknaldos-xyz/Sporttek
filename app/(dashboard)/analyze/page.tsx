@@ -12,10 +12,12 @@ import {
   Upload,
   X,
   Check,
+  Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { VideoGuidelines } from '@/components/upload/VideoGuidelines'
 import { VideoRequirements } from '@/components/upload/VideoRequirements'
+import { DetectionConfirmation } from '@/components/analyze/DetectionConfirmation'
 
 interface Sport {
   id: string
@@ -40,7 +42,33 @@ interface Variant {
   description: string | null
 }
 
-type Step = 'sport' | 'technique' | 'variant' | 'upload' | 'processing'
+interface DetectionResponse {
+  detected: {
+    technique: {
+      id: string
+      slug: string
+      name: string
+      description: string | null
+    }
+    variant: {
+      id: string
+      slug: string
+      name: string
+    } | null
+    confidence: number
+    reasoning: string
+  } | null
+  multipleDetected?: boolean
+  alternatives?: Array<{
+    technique: { id: string; slug: string; name: string }
+    variant: { id: string; slug: string; name: string } | null
+    confidence: number
+  }>
+  warning?: string
+  reasoning?: string
+}
+
+type Step = 'sport' | 'technique' | 'variant' | 'upload' | 'detecting' | 'detection-confirm' | 'processing'
 
 export default function AnalyzePage() {
   const router = useRouter()
@@ -56,6 +84,11 @@ export default function AnalyzePage() {
   const [processing, setProcessing] = useState(false)
   const [loadingSports, setLoadingSports] = useState(true)
   const [loadingTechniques, setLoadingTechniques] = useState(false)
+  const [autoDetectMode, setAutoDetectMode] = useState(false)
+  const [detectionResult, setDetectionResult] = useState<DetectionResponse | null>(null)
+  const [uploadedMediaItems, setUploadedMediaItems] = useState<
+    Array<{ url: string; type: string; filename: string; size: number }>
+  >([])
 
   // Fetch sports on mount
   useEffect(() => {
@@ -128,6 +161,133 @@ export default function AnalyzePage() {
     setFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
+  async function uploadFiles(): Promise<
+    Array<{ url: string; type: string; filename: string; size: number }>
+  > {
+    const mediaItems: Array<{
+      url: string
+      type: string
+      filename: string
+      size: number
+    }> = []
+
+    for (const file of files) {
+      const isVideo = file.type.startsWith('video/')
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!uploadRes.ok) {
+        throw new Error('Error al subir archivo')
+      }
+
+      const uploadData = await uploadRes.json()
+      mediaItems.push({
+        url: uploadData.url,
+        type: isVideo ? 'VIDEO' : 'IMAGE',
+        filename: file.name,
+        size: file.size,
+      })
+    }
+
+    return mediaItems
+  }
+
+  async function handleAutoDetect() {
+    if (!selectedSport || files.length === 0) return
+
+    setUploading(true)
+    try {
+      // Upload files first
+      const mediaItems = await uploadFiles()
+      setUploadedMediaItems(mediaItems)
+      setUploading(false)
+
+      // Run detection
+      setStep('detecting')
+      const detectionForm = new FormData()
+      detectionForm.append('sportId', selectedSport.id)
+      detectionForm.append(
+        'fileUrls',
+        JSON.stringify(
+          mediaItems.map((m) => ({
+            url: m.url,
+            type: m.type,
+            filename: m.filename,
+          }))
+        )
+      )
+
+      const detRes = await fetch('/api/analyze/detect-technique', {
+        method: 'POST',
+        body: detectionForm,
+      })
+
+      if (!detRes.ok) {
+        throw new Error('Error al detectar la tecnica')
+      }
+
+      const detection: DetectionResponse = await detRes.json()
+      setDetectionResult(detection)
+
+      if (!detection.detected) {
+        toast.error(detection.warning || 'No se pudo detectar la tecnica')
+        setAutoDetectMode(false)
+        setStep('technique')
+        return
+      }
+
+      setStep('detection-confirm')
+    } catch (error) {
+      toast.error('Error al detectar la tecnica')
+      setUploading(false)
+      setAutoDetectMode(false)
+      setStep('technique')
+    }
+  }
+
+  async function handleDetectionConfirm(techniqueId: string, variantId: string | null) {
+    setProcessing(true)
+    setStep('processing')
+
+    try {
+      // Create analysis with detected technique
+      const analysisRes = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          techniqueId,
+          variantId,
+          mediaItems: uploadedMediaItems,
+        }),
+      })
+
+      if (!analysisRes.ok) {
+        throw new Error('Error al crear analisis')
+      }
+
+      const analysis = await analysisRes.json()
+
+      const processRes = await fetch(`/api/analyze/${analysis.id}/process`, {
+        method: 'POST',
+      })
+
+      if (!processRes.ok) {
+        throw new Error('Error al procesar analisis')
+      }
+
+      toast.success('Analisis completado!')
+      router.push(`/analyses/${analysis.id}`)
+    } catch (error) {
+      toast.error('Error al procesar el analisis')
+      setProcessing(false)
+    }
+  }
+
   const handleSubmit = async () => {
     if (!selectedSport || !selectedTechnique || files.length === 0) {
       toast.error('Por favor completa todos los campos')
@@ -137,38 +297,7 @@ export default function AnalyzePage() {
     setUploading(true)
 
     try {
-      // Upload files to storage
-      const mediaItems: {
-        url: string
-        type: string
-        filename: string
-        size: number
-      }[] = []
-
-      for (const file of files) {
-        const isVideo = file.type.startsWith('video/')
-
-        const formData = new FormData()
-        formData.append('file', file)
-
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        })
-
-        if (!uploadRes.ok) {
-          throw new Error('Error al subir archivo')
-        }
-
-        const uploadData = await uploadRes.json()
-
-        mediaItems.push({
-          url: uploadData.url,
-          type: isVideo ? 'VIDEO' : 'IMAGE',
-          filename: file.name,
-          size: file.size,
-        })
-      }
+      const mediaItems = await uploadFiles()
 
       // Create analysis record
       const analysisRes = await fetch('/api/analyze', {
@@ -191,7 +320,7 @@ export default function AnalyzePage() {
       setProcessing(true)
       setStep('processing')
 
-      // Start AI processing (Gemini processes videos directly)
+      // Start AI processing
       const processRes = await fetch(`/api/analyze/${analysis.id}/process`, {
         method: 'POST',
       })
@@ -209,12 +338,18 @@ export default function AnalyzePage() {
     }
   }
 
-  const steps = [
-    { id: 'sport', label: 'Deporte' },
-    { id: 'technique', label: 'Tecnica' },
-    { id: 'variant', label: 'Variante' },
-    { id: 'upload', label: 'Video' },
-  ]
+  const steps = autoDetectMode
+    ? [
+        { id: 'sport', label: 'Deporte' },
+        { id: 'upload', label: 'Video' },
+        { id: 'detection-confirm', label: 'Deteccion' },
+      ]
+    : [
+        { id: 'sport', label: 'Deporte' },
+        { id: 'technique', label: 'Tecnica' },
+        { id: 'variant', label: 'Variante' },
+        { id: 'upload', label: 'Video' },
+      ]
 
   const currentStepIndex = steps.findIndex((s) => s.id === step)
 
@@ -225,7 +360,7 @@ export default function AnalyzePage() {
       case 'technique':
         return !!selectedTechnique
       case 'variant':
-        return true // Variant is optional
+        return true
       case 'upload':
         return files.length > 0
       default:
@@ -236,7 +371,11 @@ export default function AnalyzePage() {
   const goNext = () => {
     switch (step) {
       case 'sport':
-        setStep('technique')
+        if (autoDetectMode) {
+          setStep('upload')
+        } else {
+          setStep('technique')
+        }
         break
       case 'technique':
         if (variants.length > 0) {
@@ -249,7 +388,11 @@ export default function AnalyzePage() {
         setStep('upload')
         break
       case 'upload':
-        handleSubmit()
+        if (autoDetectMode) {
+          handleAutoDetect()
+        } else {
+          handleSubmit()
+        }
         break
     }
   }
@@ -263,11 +406,16 @@ export default function AnalyzePage() {
         setStep('technique')
         break
       case 'upload':
-        if (variants.length > 0) {
+        if (autoDetectMode) {
+          setStep('sport')
+        } else if (variants.length > 0) {
           setStep('variant')
         } else {
           setStep('technique')
         }
+        break
+      case 'detection-confirm':
+        setStep('upload')
         break
     }
   }
@@ -280,6 +428,20 @@ export default function AnalyzePage() {
           <h2 className="text-xl font-semibold">Analizando tu tecnica...</h2>
           <p className="text-muted-foreground">
             Nuestra IA esta revisando tu video. Esto puede tomar unos segundos.
+          </p>
+        </GlassCard>
+      </div>
+    )
+  }
+
+  if (step === 'detecting') {
+    return (
+      <div className="max-w-2xl mx-auto py-12 text-center">
+        <GlassCard intensity="medium" padding="xl" className="space-y-4">
+          <Sparkles className="h-12 w-12 mx-auto text-primary animate-pulse" />
+          <h2 className="text-xl font-semibold">Detectando tecnica...</h2>
+          <p className="text-muted-foreground">
+            Nuestra IA esta analizando tu video para identificar la tecnica
           </p>
         </GlassCard>
       </div>
@@ -371,6 +533,29 @@ export default function AnalyzePage() {
                     <h3 className="font-medium">{sport.name}</h3>
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* Auto-detect toggle */}
+            {selectedSport && (
+              <div className="mt-6 pt-6 border-t border-glass">
+                <button
+                  onClick={() => setAutoDetectMode(!autoDetectMode)}
+                  className={cn(
+                    'w-full p-4 rounded-xl text-left transition-all duration-[var(--duration-normal)] flex items-center gap-3',
+                    autoDetectMode
+                      ? 'glass-primary border-glass shadow-glass-glow'
+                      : 'glass-ultralight border-glass hover:glass-light'
+                  )}
+                >
+                  <Sparkles className={cn('h-5 w-5', autoDetectMode ? 'text-primary' : 'text-muted-foreground')} />
+                  <div>
+                    <h3 className="font-medium">Auto-detectar tecnica</h3>
+                    <p className="text-sm text-muted-foreground">
+                      La IA identifica automaticamente la tecnica desde tu video
+                    </p>
+                  </div>
+                </button>
               </div>
             )}
           </div>
@@ -481,8 +666,9 @@ export default function AnalyzePage() {
           <div>
             <h2 className="text-xl font-semibold mb-2">Sube tu video o fotos</h2>
             <p className="text-muted-foreground mb-6">
-              Graba tu {selectedTechnique?.name.toLowerCase()} desde diferentes angulos
-              para un mejor analisis
+              {autoDetectMode
+                ? 'Sube tu video y la IA detectara automaticamente la tecnica'
+                : `Graba tu ${selectedTechnique?.name.toLowerCase()} desde diferentes angulos para un mejor analisis`}
             </p>
 
             <VideoRequirements />
@@ -543,33 +729,55 @@ export default function AnalyzePage() {
           </div>
         )}
 
-        {/* Navigation */}
-        <div className="flex justify-between mt-8 pt-6 border-t border-glass">
-          <GlassButton
-            variant="outline"
-            onClick={goBack}
-            disabled={step === 'sport' || uploading}
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Atras
-          </GlassButton>
+        {step === 'detection-confirm' && detectionResult?.detected && (
+          <DetectionConfirmation
+            detected={detectionResult.detected}
+            multipleDetected={detectionResult.multipleDetected || false}
+            alternatives={detectionResult.alternatives || []}
+            onConfirm={handleDetectionConfirm}
+            onManualSelect={() => {
+              setAutoDetectMode(false)
+              setStep('technique')
+            }}
+          />
+        )}
 
-          <GlassButton variant="solid" onClick={goNext} disabled={!canGoNext() || uploading}>
-            {uploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Subiendo...
-              </>
-            ) : step === 'upload' ? (
-              'Analizar'
-            ) : (
-              <>
-                Siguiente
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </GlassButton>
-        </div>
+        {/* Navigation (hidden during detection-confirm — it has its own buttons) */}
+        {step !== 'detection-confirm' && (
+          <div className="flex justify-between mt-8 pt-6 border-t border-glass">
+            <GlassButton
+              variant="outline"
+              onClick={goBack}
+              disabled={step === 'sport' || uploading}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Atras
+            </GlassButton>
+
+            <GlassButton variant="solid" onClick={goNext} disabled={!canGoNext() || uploading}>
+              {uploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Subiendo...
+                </>
+              ) : step === 'upload' ? (
+                autoDetectMode ? (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Detectar y analizar
+                  </>
+                ) : (
+                  'Analizar'
+                )
+              ) : (
+                <>
+                  Siguiente
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </GlassButton>
+          </div>
+        )}
       </GlassCard>
     </div>
   )
