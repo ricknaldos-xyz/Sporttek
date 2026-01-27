@@ -66,6 +66,20 @@ enum BadgeType {
   STREAK_100
 }
 
+enum DocumentStatus {
+  UPLOADING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ChunkCategory {
+  THEORY
+  EXERCISE
+  TRAINING_PLAN
+  GENERAL
+}
+
 // ============================================
 // USER & AUTH
 // ============================================
@@ -108,6 +122,9 @@ model User {
 
   // Auth tokens
   verificationTokens VerificationToken[]
+
+  // RAG documents
+  documents       Document[]
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -478,4 +495,51 @@ model ActivityLog {
   @@unique([userId, date])
   @@index([userId, date])
   @@map("activity_logs")
+}
+
+// ============================================
+// RAG - KNOWLEDGE BASE
+// ============================================
+
+model Document {
+  id           String         @id @default(cuid())
+  filename     String
+  originalName String
+  fileUrl      String
+  fileSize     Int
+  pageCount    Int?
+  sportSlug    String?
+  language     String         @default("es")
+  status       DocumentStatus @default(UPLOADING)
+  errorMessage String?
+  uploadedById String
+  uploadedBy   User           @relation(fields: [uploadedById], references: [id])
+  chunks       DocumentChunk[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("documents")
+}
+
+model DocumentChunk {
+  id         String        @id @default(cuid())
+  documentId String
+  document   Document      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  content    String
+  chunkIndex Int
+  pageStart  Int?
+  pageEnd    Int?
+  sportSlug  String?
+  category   ChunkCategory @default(GENERAL)
+  technique  String?
+  tokenCount Int?
+  createdAt  DateTime      @default(now())
+
+  // Note: embedding vector(768) column added via raw SQL migration (Gemini text-embedding-004)
+
+  @@index([documentId])
+  @@index([sportSlug])
+  @@index([category])
+  @@index([technique])
+  @@map("document_chunks")
 }

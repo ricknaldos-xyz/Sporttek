@@ -174,7 +174,8 @@ export function buildTennisPrompt(
   techniqueSlug: string,
   variantSlug: string | null,
   correctForm: unknown,
-  commonErrors: unknown
+  commonErrors: unknown,
+  ragContext?: string
 ): string {
   const technique = TENNIS_TECHNIQUES[techniqueSlug] || ''
   const variant = variantSlug
@@ -195,6 +196,7 @@ ${technique}
 ${variant}
 ${additionalContext}
 ${errorsContext}
+${ragContext || ''}
 
 ## INSTRUCCIONES DE ANALISIS
 

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { Severity } from '@prisma/client'
+import { retrieveRelevantChunks } from '@/lib/rag/retriever'
 
 interface GeneratePlanOptions {
   analysisId: string
@@ -95,12 +96,48 @@ export async function generateTrainingPlan({
     },
   })
 
-  // --- Phase A: Build exercise pool from AI drills + template supplements ---
+  // --- Phase A: Build exercise pool from RAG + AI drills + template supplements ---
   const exercisePool: ExerciseBlueprint[] = []
 
+  // RAG: Retrieve real exercises from knowledge base for each issue
   for (const issue of sortedIssues) {
-    // AI-generated drills (PRIMARY source)
-    for (const drill of issue.drills.slice(0, 2)) {
+    try {
+      const ragChunks = await retrieveRelevantChunks(
+        `${issue.title} ${issue.category} ejercicio drill corrección ${analysis.technique.name}`,
+        {
+          sportSlug: analysis.technique.sport.slug,
+          category: ['EXERCISE', 'TRAINING_PLAN'],
+          technique: analysis.technique.slug,
+          limit: 2,
+          threshold: 0.35,
+        }
+      )
+
+      for (const chunk of ragChunks) {
+        exercisePool.push({
+          name: extractExerciseName(chunk.content),
+          description: chunk.content.substring(0, 300),
+          instructions: chunk.content,
+          sets: extractNumber(chunk.content, /(\d+)\s*series/i) ?? 3,
+          reps: extractNumber(chunk.content, /(\d+)\s*repet/i) ?? 15,
+          durationMins: extractNumber(chunk.content, /(\d+)\s*min/i),
+          frequency: calculateFrequency(issue.severity),
+          videoUrl: null,
+          imageUrls: [],
+          issueId: issue.id,
+        })
+      }
+    } catch (error) {
+      console.warn('RAG exercise retrieval skipped for issue:', issue.id, error)
+    }
+  }
+
+  for (const issue of sortedIssues) {
+    // Skip AI drills if RAG already found exercises for this issue
+    const hasRagExercise = exercisePool.some((e) => e.issueId === issue.id)
+
+    // AI-generated drills (SECONDARY source if no RAG exercises)
+    for (const drill of hasRagExercise ? [] : issue.drills.slice(0, 2)) {
       // Extract drill name (before the colon if present)
       const drillName = drill.includes(':') ? drill.split(':')[0].trim() : drill
       const drillInstructions = drill.includes(':')
@@ -351,4 +388,24 @@ function calculateFrequency(severity: Severity): string {
     case 'LOW':
       return '2x_week'
   }
+}
+
+function extractExerciseName(text: string): string {
+  // Try to extract a title-like first line
+  const firstLine = text.split('\n')[0].trim()
+  // Remove numbering like "1.", "1)", "- "
+  const cleaned = firstLine.replace(/^[\d]+[.)]\s*/, '').replace(/^[-•]\s*/, '')
+  // Cap at 60 chars
+  if (cleaned.length > 0 && cleaned.length <= 60) return cleaned
+  if (cleaned.length > 60) return cleaned.substring(0, 57) + '...'
+  return 'Ejercicio de referencia'
+}
+
+function extractNumber(text: string, pattern: RegExp): number | null {
+  const match = text.match(pattern)
+  if (match) {
+    const num = parseInt(match[1], 10)
+    if (!isNaN(num) && num > 0 && num < 1000) return num
+  }
+  return null
 }

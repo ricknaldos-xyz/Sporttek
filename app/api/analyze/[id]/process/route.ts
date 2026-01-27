@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { getGeminiClient } from '@/lib/gemini/client'
 import { buildTennisPrompt } from '@/lib/openai/prompts/tennis'
 import { sendAnalysisCompleteEmail } from '@/lib/email'
+import { retrieveRelevantChunks } from '@/lib/rag/retriever'
+import { buildRagContext } from '@/lib/rag/context-builder'
 import { readFile } from 'fs/promises'
 import path from 'path'
 
@@ -70,6 +72,21 @@ export async function POST(
     })
 
     try {
+      // Retrieve RAG context from knowledge base
+      let ragContext = ''
+      try {
+        const retrievalQuery = `${analysis.technique.name} ${analysis.variant?.name || ''} técnica biomecánica errores ejercicios`
+        const ragChunks = await retrieveRelevantChunks(retrievalQuery, {
+          sportSlug: analysis.technique.sport.slug,
+          technique: analysis.technique.slug,
+          limit: 5,
+          threshold: 0.3,
+        })
+        ragContext = buildRagContext(ragChunks)
+      } catch (error) {
+        console.warn('RAG retrieval skipped:', error)
+      }
+
       // Build prompt based on sport and technique
       let prompt: string
 
@@ -78,10 +95,11 @@ export async function POST(
           analysis.technique.slug,
           analysis.variant?.slug || null,
           analysis.technique.correctForm,
-          analysis.technique.commonErrors
+          analysis.technique.commonErrors,
+          ragContext
         )
       } else {
-        prompt = `Analiza la tecnica deportiva en el video/imagenes y proporciona feedback detallado en formato JSON.`
+        prompt = `Analiza la tecnica deportiva en el video/imagenes y proporciona feedback detallado en formato JSON.${ragContext}`
       }
 
       const genAI = getGeminiClient()
