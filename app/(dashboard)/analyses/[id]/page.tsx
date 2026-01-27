@@ -1,7 +1,29 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Image from 'next/image'
 import { notFound, redirect } from 'next/navigation'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const analysis = await prisma.analysis.findUnique({
+    where: { id },
+    include: { technique: { include: { sport: true } } },
+  })
+
+  if (!analysis) {
+    return { title: 'Analisis no encontrado | SportTech' }
+  }
+
+  return {
+    title: `${analysis.technique.name} - ${analysis.technique.sport.name} | SportTech`,
+    description: `Resultados del analisis de ${analysis.technique.name} en ${analysis.technique.sport.name}. Revisa tu puntuacion y recomendaciones.`,
+  }
+}
 import Link from 'next/link'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassCard } from '@/components/ui/glass-card'

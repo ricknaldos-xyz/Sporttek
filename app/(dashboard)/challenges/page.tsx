@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
-import { Flag, Check, X, Loader2, Clock, Swords } from 'lucide-react'
+import { Flag, Check, X, Loader2, Clock, Swords, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import type { SkillTier } from '@prisma/client'
 
@@ -37,6 +37,7 @@ interface Challenge {
 export default function ChallengesPage() {
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [tab, setTab] = useState<'received' | 'sent'>('received')
   const [actioning, setActioning] = useState<string | null>(null)
 
@@ -46,14 +47,14 @@ export default function ChallengesPage() {
 
   async function fetchChallenges() {
     setLoading(true)
+    setError(false)
     try {
       const res = await fetch(`/api/challenges?type=${tab}`)
-      if (res.ok) {
-        const data = await res.json()
-        setChallenges(data)
-      }
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setChallenges(data)
     } catch {
-      console.error('Failed to fetch challenges')
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -128,7 +129,18 @@ export default function ChallengesPage() {
         </GlassButton>
       </div>
 
-      {loading ? (
+      {error ? (
+        <div className="flex items-center justify-center py-16">
+          <GlassCard intensity="medium" padding="xl" className="max-w-md text-center">
+            <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive opacity-70" />
+            <h2 className="text-xl font-bold mb-2">Error al cargar</h2>
+            <p className="text-muted-foreground mb-6">No se pudo cargar la informacion.</p>
+            <GlassButton variant="solid" onClick={() => fetchChallenges()}>
+              Intentar de nuevo
+            </GlassButton>
+          </GlassCard>
+        </div>
+      ) : loading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>

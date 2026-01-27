@@ -134,7 +134,7 @@ export default function PricingPage() {
 
               <div className="mb-6">
                 <span className="text-4xl font-bold">
-                  ${plan.price.toFixed(2)}
+                  S/{plan.price.toFixed(2)}
                 </span>
                 {plan.price > 0 && (
                   <span className="text-muted-foreground">/mes</span>
@@ -180,7 +180,7 @@ export default function PricingPage() {
 
       <div className="mt-12 text-center text-sm text-muted-foreground">
         <p>
-          Los precios estan en USD. Puedes cancelar tu suscripcion en cualquier
+          Los precios estan en Soles (PEN). Puedes cancelar tu suscripcion en cualquier
           momento desde tu perfil.
         </p>
       </div>

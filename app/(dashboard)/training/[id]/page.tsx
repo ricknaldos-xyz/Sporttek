@@ -1,6 +1,24 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const plan = await prisma.trainingPlan.findUnique({
+    where: { id },
+    select: { title: true },
+  })
+
+  return {
+    title: plan ? `${plan.title} | SportTech` : 'Plan de Entrenamiento | SportTech',
+    description: 'Detalle de tu plan de entrenamiento con ejercicios y seguimiento de progreso.',
+  }
+}
 import Link from 'next/link'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassCard } from '@/components/ui/glass-card'

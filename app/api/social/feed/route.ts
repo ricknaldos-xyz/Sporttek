@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getBlockedProfileIds } from '@/lib/blocks'
 
 // GET - Feed (own + followed players' activity)
 export async function GET(request: NextRequest) {
@@ -24,14 +25,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
     }
 
-    // Get IDs of people I follow
-    const following = await prisma.follow.findMany({
+    // Get blocked profile IDs to exclude from feed
+    const blockedIds = await getBlockedProfileIds(profile.id)
+
+    // Use subquery to get following IDs + own profile, excluding blocked
+    const followingIds = await prisma.follow.findMany({
       where: { followerId: profile.id },
       select: { followingId: true },
-    })
+    }).then(follows => follows.map(f => f.followingId))
 
-    const followingIds = following.map((f) => f.followingId)
-    const profileIds = [profile.id, ...followingIds]
+    const profileIds = [profile.id, ...followingIds].filter(id => !blockedIds.includes(id))
 
     const [items, total] = await Promise.all([
       prisma.feedItem.findMany({

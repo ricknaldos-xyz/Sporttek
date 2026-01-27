@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Mi Perfil de Jugador | SportTech',
+  description: 'Tu perfil de jugador con Skill Score, radar de tecnicas y estadisticas de partidos.',
+}
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { GlassCard } from '@/components/ui/glass-card'

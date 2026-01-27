@@ -8,7 +8,7 @@ import { z } from 'zod'
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(8),
 })
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -30,7 +30,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
-        const { email, password } = validated.data
+        const { password } = validated.data
+        const email = validated.data.email.toLowerCase()
 
         const user = await prisma.user.findUnique({
           where: { email },
@@ -73,11 +74,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id as string
-        token.role = (user as { role: string }).role
-        token.subscription = (user as { subscription: string }).subscription
-        token.accountType = (user as { accountType: string }).accountType
-        token.hasPlayerProfile = (user as { hasPlayerProfile: boolean }).hasPlayerProfile
-        token.hasCoachProfile = (user as { hasCoachProfile: boolean }).hasCoachProfile
+        token.role = user.role
+        token.subscription = user.subscription
+        token.accountType = user.accountType
+        token.hasPlayerProfile = user.hasPlayerProfile
+        token.hasCoachProfile = user.hasCoachProfile
       }
       return token
     },

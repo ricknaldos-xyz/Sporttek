@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, markTokenAsUsed } from '@/lib/tokens'
+import { verifyToken } from '@/lib/tokens'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,9 +14,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       return NextResponse.json(
-        { error: 'La contrasena debe tener al menos 6 caracteres' },
+        { error: 'La contrasena debe tener al menos 8 caracteres' },
         { status: 400 }
       )
     }
@@ -34,19 +34,34 @@ export async function POST(request: NextRequest) {
     // Hash the new password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Update user password
-    await prisma.user.update({
-      where: { id: result.userId },
-      data: { password: hashedPassword },
-    })
+    // Atomically mark token as used + update password to prevent TOCTOU
+    await prisma.$transaction(async (tx) => {
+      // Mark token as used first -- a concurrent request will fail here
+      const updated = await tx.verificationToken.updateMany({
+        where: { token, usedAt: null },
+        data: { usedAt: new Date() },
+      })
+      if (updated.count === 0) {
+        throw new Error('TOKEN_ALREADY_USED')
+      }
 
-    // Mark token as used
-    await markTokenAsUsed(token)
+      // Update user password
+      await tx.user.update({
+        where: { id: result.userId },
+        data: { password: hashedPassword },
+      })
+    })
 
     return NextResponse.json({
       message: 'Contrasena actualizada exitosamente',
     })
   } catch (error) {
+    if (error instanceof Error && error.message === 'TOKEN_ALREADY_USED') {
+      return NextResponse.json(
+        { error: 'Este enlace ya ha sido utilizado' },
+        { status: 400 }
+      )
+    }
     console.error('Reset password error:', error)
     return NextResponse.json(
       { error: 'Error al restablecer la contrasena' },

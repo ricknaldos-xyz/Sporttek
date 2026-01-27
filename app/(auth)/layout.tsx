@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import { Target } from 'lucide-react'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Autenticacion | SportTech',
+  description: 'Inicia sesion o crea tu cuenta en SportTech para mejorar tu tecnica deportiva.',
+}
 
 export default function AuthLayout({
   children,

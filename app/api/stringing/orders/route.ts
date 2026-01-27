@@ -53,22 +53,51 @@ const createOrderSchema = z.object({
 )
 
 // GET - List user's stringing orders
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    const orders = await prisma.stringingOrder.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        workshop: true,
+    const { searchParams } = new URL(request.url)
+    const paginated = searchParams.has('page')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')))
+    const skip = (page - 1) * limit
+
+    const where = { userId: session.user.id }
+    const include = { workshop: true }
+
+    if (!paginated) {
+      const orders = await prisma.stringingOrder.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include,
+      })
+      return NextResponse.json(orders)
+    }
+
+    const [orders, total] = await Promise.all([
+      prisma.stringingOrder.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include,
+        skip,
+        take: limit,
+      }),
+      prisma.stringingOrder.count({ where }),
+    ])
+
+    return NextResponse.json({
+      data: orders,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     })
-
-    return NextResponse.json(orders)
   } catch (error) {
     console.error('List stringing orders error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

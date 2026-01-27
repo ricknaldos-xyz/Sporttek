@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 }
 
 // GET - Match history
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user) {
@@ -76,37 +76,68 @@ export async function GET() {
       return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
     }
 
-    const matches = await prisma.match.findMany({
-      where: {
-        OR: [
-          { player1Id: profile.id },
-          { player2Id: profile.id },
-        ],
+    const { searchParams } = new URL(request.url)
+    const paginated = searchParams.has('page')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')))
+    const skip = (page - 1) * limit
+
+    const where = {
+      OR: [
+        { player1Id: profile.id },
+        { player2Id: profile.id },
+      ],
+    }
+    const include = {
+      player1: {
+        select: {
+          userId: true,
+          displayName: true,
+          avatarUrl: true,
+          skillTier: true,
+          user: { select: { name: true, image: true } },
+        },
       },
-      orderBy: { playedAt: 'desc' },
-      include: {
-        player1: {
-          select: {
-            userId: true,
-            displayName: true,
-            avatarUrl: true,
-            skillTier: true,
-            user: { select: { name: true, image: true } },
-          },
+      player2: {
+        select: {
+          userId: true,
+          displayName: true,
+          avatarUrl: true,
+          skillTier: true,
+          user: { select: { name: true, image: true } },
         },
-        player2: {
-          select: {
-            userId: true,
-            displayName: true,
-            avatarUrl: true,
-            skillTier: true,
-            user: { select: { name: true, image: true } },
-          },
-        },
+      },
+    }
+
+    if (!paginated) {
+      const matches = await prisma.match.findMany({
+        where,
+        orderBy: { playedAt: 'desc' },
+        include,
+      })
+      return NextResponse.json(matches)
+    }
+
+    const [matches, total] = await Promise.all([
+      prisma.match.findMany({
+        where,
+        orderBy: { playedAt: 'desc' },
+        include,
+        skip,
+        take: limit,
+      }),
+      prisma.match.count({ where }),
+    ])
+
+    return NextResponse.json({
+      data: matches,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     })
-
-    return NextResponse.json(matches)
   } catch (error) {
     console.error('Get matches error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

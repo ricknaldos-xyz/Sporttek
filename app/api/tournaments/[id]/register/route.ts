@@ -45,6 +45,22 @@ export async function POST(
       return NextResponse.json({ error: 'El torneo esta lleno' }, { status: 400 })
     }
 
+    // Validate skill tier requirements
+    const TIER_ORDER = ['BRONCE', 'PLATA', 'ORO', 'PLATINO', 'DIAMANTE']
+    const playerTierIndex = TIER_ORDER.indexOf(profile.skillTier)
+    if (tournament.minTier) {
+      const minIndex = TIER_ORDER.indexOf(tournament.minTier)
+      if (playerTierIndex < minIndex) {
+        return NextResponse.json({ error: 'Tu nivel es menor al requerido' }, { status: 403 })
+      }
+    }
+    if (tournament.maxTier) {
+      const maxIndex = TIER_ORDER.indexOf(tournament.maxTier)
+      if (playerTierIndex > maxIndex) {
+        return NextResponse.json({ error: 'Tu nivel excede el maximo permitido' }, { status: 403 })
+      }
+    }
+
     const participant = await prisma.tournamentParticipant.create({
       data: {
         tournamentId,

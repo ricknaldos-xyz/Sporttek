@@ -58,6 +58,16 @@ export async function POST(request: NextRequest) {
           const plan = session.metadata?.plan as 'PRO' | 'ELITE' | undefined
 
           if (userId && plan) {
+            // Idempotency check: skip if subscription already applied
+            const currentUser = await prisma.user.findUnique({
+              where: { id: userId },
+              select: { stripeSubscriptionId: true, subscription: true },
+            })
+
+            if (currentUser?.stripeSubscriptionId === subscription.id && currentUser?.subscription === plan) {
+              break
+            }
+
             const periodEnd = getSubscriptionPeriodEnd(subscription)
 
             await prisma.user.update({
@@ -145,6 +155,19 @@ export async function POST(request: NextRequest) {
           }
 
           const periodEnd = getSubscriptionPeriodEnd(subscription)
+
+          // Idempotency check: skip if subscription data already matches
+          const currentUser = await prisma.user.findUnique({
+            where: { id: customer.metadata.userId },
+            select: { subscription: true, stripeCurrentPeriodEnd: true },
+          })
+
+          if (
+            currentUser?.subscription === plan &&
+            currentUser?.stripeCurrentPeriodEnd?.getTime() === periodEnd?.getTime()
+          ) {
+            break
+          }
 
           await prisma.user.update({
             where: { id: customer.metadata.userId },

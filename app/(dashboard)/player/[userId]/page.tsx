@@ -1,6 +1,25 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ userId: string }>
+}): Promise<Metadata> {
+  const { userId } = await params
+  const profile = await prisma.playerProfile.findUnique({
+    where: { userId },
+    select: { displayName: true, skillTier: true },
+  })
+
+  const name = profile?.displayName || 'Jugador'
+  return {
+    title: `${name} - Perfil de Jugador | SportTech`,
+    description: `Perfil publico de ${name} en SportTech. Consulta su Skill Score y estadisticas.`,
+  }
+}
 import { GlassCard } from '@/components/ui/glass-card'
 import { TierBadge } from '@/components/player/TierBadge'
 import { SkillScoreDisplay } from '@/components/player/SkillScoreDisplay'

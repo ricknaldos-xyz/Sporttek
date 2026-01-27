@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
-import { Users, Loader2, Trophy, Target, Flame, Medal } from 'lucide-react'
+import { Users, Loader2, Trophy, Target, Flame, Medal, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import type { SkillTier, FeedItemType } from '@prisma/client'
 
@@ -38,21 +38,24 @@ const feedIcons: Record<string, typeof Trophy> = {
 export default function CommunityPage() {
   const [items, setItems] = useState<FeedItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  async function fetchFeed() {
+    setLoading(true)
+    setError(false)
+    try {
+      const res = await fetch('/api/social/feed?limit=30')
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setItems(data.items)
+    } catch {
+      setError(true)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    async function fetchFeed() {
-      try {
-        const res = await fetch('/api/social/feed?limit=30')
-        if (res.ok) {
-          const data = await res.json()
-          setItems(data.items)
-        }
-      } catch {
-        console.error('Failed to fetch feed')
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchFeed()
   }, [])
 
@@ -68,7 +71,18 @@ export default function CommunityPage() {
         </GlassButton>
       </div>
 
-      {loading ? (
+      {error ? (
+        <div className="flex items-center justify-center py-16">
+          <GlassCard intensity="medium" padding="xl" className="max-w-md text-center">
+            <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive opacity-70" />
+            <h2 className="text-xl font-bold mb-2">Error al cargar</h2>
+            <p className="text-muted-foreground mb-6">No se pudo cargar la informacion.</p>
+            <GlassButton variant="solid" onClick={() => fetchFeed()}>
+              Intentar de nuevo
+            </GlassButton>
+          </GlassCard>
+        </div>
+      ) : loading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>

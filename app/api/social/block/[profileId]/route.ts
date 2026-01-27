@@ -15,9 +15,22 @@ export async function POST(
 
     const { profileId } = await params
 
+    const myProfile = await prisma.playerProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    })
+
+    if (!myProfile) {
+      return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
+    }
+
+    if (myProfile.id === profileId) {
+      return NextResponse.json({ error: 'No puedes bloquearte a ti mismo' }, { status: 400 })
+    }
+
     await prisma.block.create({
       data: {
-        blockerId: session.user.id,
+        blockerId: myProfile.id,
         blockedId: profileId,
       },
     })
@@ -45,9 +58,18 @@ export async function DELETE(
 
     const { profileId } = await params
 
+    const myProfile = await prisma.playerProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    })
+
+    if (!myProfile) {
+      return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
+    }
+
     await prisma.block.deleteMany({
       where: {
-        blockerId: session.user.id,
+        blockerId: myProfile.id,
         blockedId: profileId,
       },
     })

@@ -91,21 +91,52 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    const analyses = await prisma.analysis.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        technique: {
-          include: { sport: true },
-        },
-        variant: true,
-        _count: {
-          select: { issues: true },
-        },
+    const { searchParams } = new URL(request.url)
+    const paginated = searchParams.has('page')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')))
+    const skip = (page - 1) * limit
+
+    const where = { userId: session.user.id }
+    const include = {
+      technique: {
+        include: { sport: true },
+      },
+      variant: true,
+      _count: {
+        select: { issues: true },
+      },
+    }
+
+    if (!paginated) {
+      const analyses = await prisma.analysis.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include,
+      })
+      return NextResponse.json(analyses)
+    }
+
+    const [analyses, total] = await Promise.all([
+      prisma.analysis.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include,
+        skip,
+        take: limit,
+      }),
+      prisma.analysis.count({ where }),
+    ])
+
+    return NextResponse.json({
+      data: analyses,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     })
-
-    return NextResponse.json(analyses)
   } catch (error) {
     console.error('Fetch analyses error:', error)
     return NextResponse.json(

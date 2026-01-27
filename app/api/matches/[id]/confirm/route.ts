@@ -62,81 +62,110 @@ export async function PATCH(
 
     const { result, score, sets } = validated.data
 
-    // Update match confirmation
-    const updateData: Record<string, unknown> = {}
-    if (isPlayer1) {
-      updateData.player1Confirmed = true
-      updateData.player1Result = result
-    } else {
-      updateData.player2Confirmed = true
-      updateData.player2Result = result === 'WIN' ? 'LOSS' : result === 'LOSS' ? 'WIN' : result
-    }
+    // Wrap confirmation + ELO update in a transaction to prevent race conditions
+    const updated = await prisma.$transaction(async (tx) => {
+      // Re-read the match inside the transaction (optimistic lock)
+      const currentMatch = await tx.match.findUnique({
+        where: { id },
+        include: {
+          player1: { select: { id: true, matchElo: true, matchesPlayed: true } },
+          player2: { select: { id: true, matchElo: true, matchesPlayed: true } },
+        },
+      })
 
-    if (score) updateData.score = score
-    if (sets) updateData.sets = sets
+      if (!currentMatch) {
+        throw new Error('MATCH_NOT_FOUND')
+      }
 
-    const updated = await prisma.match.update({
-      where: { id },
-      data: updateData,
-    })
+      // Check if this player already confirmed
+      if (isPlayer1 && currentMatch.player1Confirmed) {
+        throw new Error('ALREADY_CONFIRMED')
+      }
+      if (isPlayer2 && currentMatch.player2Confirmed) {
+        throw new Error('ALREADY_CONFIRMED')
+      }
 
-    // If both players confirmed, update ELO
-    if (updated.player1Confirmed && updated.player2Confirmed) {
-      const p1Won = updated.player1Result === 'WIN'
-      const p2Won = updated.player2Result === 'WIN'
+      // Update match confirmation
+      const updateData: Record<string, unknown> = {}
+      if (isPlayer1) {
+        updateData.player1Confirmed = true
+        updateData.player1Result = result
+      } else {
+        updateData.player2Confirmed = true
+        updateData.player2Result = result === 'WIN' ? 'LOSS' : result === 'LOSS' ? 'WIN' : result
+      }
 
-      if (p1Won || p2Won) {
-        const p1Elo = calculateElo(
-          match.player1.matchElo,
-          match.player2.matchElo,
-          p1Won ? 1 : 0,
-          match.player1.matchesPlayed
-        )
-        const p2Elo = calculateElo(
-          match.player2.matchElo,
-          match.player1.matchElo,
-          p2Won ? 1 : 0,
-          match.player2.matchesPlayed
-        )
+      if (score) updateData.score = score
+      if (sets) updateData.sets = sets
 
-        await Promise.all([
-          prisma.playerProfile.update({
-            where: { id: match.player1Id },
+      const updatedMatch = await tx.match.update({
+        where: { id },
+        data: updateData,
+      })
+
+      // If both players confirmed, update ELO inside the same transaction
+      if (updatedMatch.player1Confirmed && updatedMatch.player2Confirmed) {
+        const p1Won = updatedMatch.player1Result === 'WIN'
+        const p2Won = updatedMatch.player2Result === 'WIN'
+
+        if (p1Won || p2Won) {
+          const p1Elo = calculateElo(
+            currentMatch.player1.matchElo,
+            currentMatch.player2.matchElo,
+            p1Won ? 1 : 0,
+            currentMatch.player1.matchesPlayed
+          )
+          const p2Elo = calculateElo(
+            currentMatch.player2.matchElo,
+            currentMatch.player1.matchElo,
+            p2Won ? 1 : 0,
+            currentMatch.player2.matchesPlayed
+          )
+
+          await tx.playerProfile.update({
+            where: { id: currentMatch.player1Id },
             data: {
               matchElo: p1Elo.newElo,
               matchesPlayed: { increment: 1 },
               ...(p1Won ? { matchesWon: { increment: 1 } } : {}),
             },
-          }),
-          prisma.playerProfile.update({
-            where: { id: match.player2Id },
+          })
+
+          await tx.playerProfile.update({
+            where: { id: currentMatch.player2Id },
             data: {
               matchElo: p2Elo.newElo,
               matchesPlayed: { increment: 1 },
               ...(p2Won ? { matchesWon: { increment: 1 } } : {}),
             },
-          }),
-          prisma.match.update({
+          })
+
+          await tx.match.update({
             where: { id },
             data: {
               player1EloChange: p1Elo.eloChange,
               player2EloChange: p2Elo.eloChange,
             },
-          }),
-        ])
-
-        // Update challenge status if linked
-        if (match.challengeId) {
-          await prisma.challenge.update({
-            where: { id: match.challengeId },
-            data: { status: 'COMPLETED' },
           })
+
+          // Update challenge status if linked
+          if (currentMatch.challengeId) {
+            await tx.challenge.update({
+              where: { id: currentMatch.challengeId },
+              data: { status: 'COMPLETED' },
+            })
+          }
         }
       }
-    }
+
+      return updatedMatch
+    })
 
     return NextResponse.json(updated)
   } catch (error) {
+    if (error instanceof Error && error.message === 'ALREADY_CONFIRMED') {
+      return NextResponse.json({ error: 'Ya confirmaste este partido' }, { status: 400 })
+    }
     console.error('Confirm match error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }

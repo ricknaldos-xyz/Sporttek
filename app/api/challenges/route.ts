@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
+import { isBlocked } from '@/lib/blocks'
 import { z } from 'zod'
 
 const createChallengeSchema = z.object({
@@ -45,6 +47,11 @@ export async function POST(request: NextRequest) {
     }
     if (challengerProfile.id === challengedProfile.id) {
       return NextResponse.json({ error: 'No puedes desafiarte a ti mismo' }, { status: 400 })
+    }
+
+    // Check if blocked
+    if (await isBlocked(challengerProfile.id, challengedProfile.id)) {
+      return NextResponse.json({ error: 'No puedes realizar esta accion' }, { status: 403 })
     }
 
     // Check for existing pending challenge
@@ -105,8 +112,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {}
+    const where: Prisma.ChallengeWhereInput = {}
     if (type === 'sent') {
       where.challengerId = profile.id
     } else if (type === 'received') {
@@ -118,34 +124,63 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    const challenges = await prisma.challenge.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        challenger: {
-          select: {
-            userId: true,
-            displayName: true,
-            avatarUrl: true,
-            skillTier: true,
-            compositeScore: true,
-            user: { select: { name: true, image: true } },
-          },
-        },
-        challenged: {
-          select: {
-            userId: true,
-            displayName: true,
-            avatarUrl: true,
-            skillTier: true,
-            compositeScore: true,
-            user: { select: { name: true, image: true } },
-          },
+    const paginated = searchParams.has('page')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')))
+    const skip = (page - 1) * limit
+
+    const include = {
+      challenger: {
+        select: {
+          userId: true,
+          displayName: true,
+          avatarUrl: true,
+          skillTier: true,
+          compositeScore: true,
+          user: { select: { name: true, image: true } },
         },
       },
-    })
+      challenged: {
+        select: {
+          userId: true,
+          displayName: true,
+          avatarUrl: true,
+          skillTier: true,
+          compositeScore: true,
+          user: { select: { name: true, image: true } },
+        },
+      },
+    }
 
-    return NextResponse.json(challenges)
+    if (!paginated) {
+      const challenges = await prisma.challenge.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include,
+      })
+      return NextResponse.json(challenges)
+    }
+
+    const [challenges, total] = await Promise.all([
+      prisma.challenge.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include,
+        skip,
+        take: limit,
+      }),
+      prisma.challenge.count({ where }),
+    ])
+
+    return NextResponse.json({
+      data: challenges,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    })
   } catch (error) {
     console.error('List challenges error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

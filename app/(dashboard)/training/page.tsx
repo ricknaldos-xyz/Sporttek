@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Entrenamiento | SportTech',
+  description: 'Tus planes de entrenamiento personalizados basados en analisis de tecnica deportiva.',
+}
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Dumbbell, Calendar, CheckCircle, ArrowRight } from 'lucide-react'
@@ -43,7 +50,7 @@ const statusLabels = {
 
 export default async function TrainingPage() {
   const session = await auth()
-  if (!session?.user) return null
+  if (!session?.user) redirect('/login')
 
   const plans = await getTrainingPlans(session.user.id)
   const activePlans = plans.filter((p) => p.status === 'ACTIVE')

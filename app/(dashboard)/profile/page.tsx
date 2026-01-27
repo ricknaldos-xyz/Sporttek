@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
+
+export const metadata: Metadata = {
+  title: 'Mi Perfil | SportTech',
+  description: 'Gestiona tu perfil, revisa tus estadisticas y preferencias en SportTech.',
+}
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { User, Mail, Calendar, Trophy } from 'lucide-react'

@@ -14,7 +14,7 @@ export default auth((req) => {
   const isPublicPattern = publicPatterns.some((pattern) => pathname.startsWith(pattern))
 
   // API routes that don't require authentication
-  const publicApiRoutes = ['/api/auth', '/api/public', '/api/shop/products', '/api/stringing/workshops', '/api/stringing/coverage']
+  const publicApiRoutes = ['/api/auth', '/api/public', '/api/shop/products', '/api/stringing/workshops', '/api/stringing/coverage', '/api/cron', '/api/rankings']
   const isPublicApiRoute = publicApiRoutes.some((route) => pathname.startsWith(route))
 
   // If user is logged in and trying to access auth pages, redirect to dashboard
@@ -27,6 +27,24 @@ export default auth((req) => {
     const loginUrl = new URL('/login', req.nextUrl)
     loginUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(loginUrl)
+  }
+
+  // Admin route protection
+  const isAdminPage = pathname.startsWith('/admin')
+  const isAdminApi = pathname.startsWith('/api/admin')
+
+  if ((isAdminPage || isAdminApi) && isLoggedIn) {
+    const role = (req.auth as { user?: { role?: string } })?.user?.role
+
+    if (role !== 'ADMIN') {
+      if (isAdminApi) {
+        return NextResponse.json(
+          { error: 'Forbidden: Admin access required' },
+          { status: 403 }
+        )
+      }
+      return NextResponse.redirect(new URL('/dashboard', req.nextUrl))
+    }
   }
 
   return NextResponse.next()

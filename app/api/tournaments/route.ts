@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { Prisma, TournamentStatus } from '@prisma/client'
 import { z } from 'zod'
 
 const createTournamentSchema = z.object({
@@ -81,9 +82,10 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)
     const skip = (page - 1) * limit
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = { country }
-    if (status) where.status = status
+    const where: Prisma.TournamentWhereInput = { country }
+    if (status && Object.values(TournamentStatus).includes(status as TournamentStatus)) {
+      where.status = status as TournamentStatus
+    }
 
     const [tournaments, total] = await Promise.all([
       prisma.tournament.findMany({

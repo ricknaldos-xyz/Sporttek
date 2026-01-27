@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
+
+export const metadata: Metadata = {
+  title: 'Mis Analisis | SportTech',
+  description: 'Historial de todos tus analisis de tecnica deportiva con resultados y puntuaciones.',
+}
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Video, ArrowRight } from 'lucide-react'

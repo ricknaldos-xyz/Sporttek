@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user) {
@@ -89,15 +89,44 @@ export async function GET() {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
     }
 
-    const documents = await prisma.document.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: { select: { chunks: true } },
-        uploadedBy: { select: { name: true, email: true } },
+    const { searchParams } = new URL(request.url)
+    const paginated = searchParams.has('page')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')))
+    const skip = (page - 1) * limit
+
+    const include = {
+      _count: { select: { chunks: true } },
+      uploadedBy: { select: { name: true, email: true } },
+    }
+
+    if (!paginated) {
+      const documents = await prisma.document.findMany({
+        orderBy: { createdAt: 'desc' },
+        include,
+      })
+      return NextResponse.json(documents)
+    }
+
+    const [documents, total] = await Promise.all([
+      prisma.document.findMany({
+        orderBy: { createdAt: 'desc' },
+        include,
+        skip,
+        take: limit,
+      }),
+      prisma.document.count(),
+    ])
+
+    return NextResponse.json({
+      data: documents,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     })
-
-    return NextResponse.json(documents)
   } catch (error) {
     console.error('Document list error:', error)
     return NextResponse.json({ error: 'Error al listar documentos' }, { status: 500 })

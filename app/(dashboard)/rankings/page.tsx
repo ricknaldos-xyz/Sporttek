@@ -6,7 +6,7 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
 import { PlayerCard } from '@/components/player/PlayerCard'
-import { Trophy, Medal, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { Trophy, Medal, ChevronLeft, ChevronRight, Loader2, AlertTriangle } from 'lucide-react'
 import type { SkillTier } from '@prisma/client'
 
 interface RankingPlayer {
@@ -46,6 +46,7 @@ export default function RankingsPage() {
   const [rankings, setRankings] = useState<RankingPlayer[]>([])
   const [myPosition, setMyPosition] = useState<MyPosition | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [tierFilter, setTierFilter] = useState('')
@@ -57,6 +58,7 @@ export default function RankingsPage() {
 
   async function fetchRankings() {
     setLoading(true)
+    setError(false)
     try {
       const params = new URLSearchParams({
         country: 'PE',
@@ -66,11 +68,12 @@ export default function RankingsPage() {
       if (tierFilter) params.set('skillTier', tierFilter)
 
       const res = await fetch(`/api/rankings?${params}`)
+      if (!res.ok) throw new Error('Failed to fetch')
       const data = await res.json()
       setRankings(data.rankings)
       setTotalPages(data.pagination.totalPages)
     } catch {
-      console.error('Failed to fetch rankings')
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -135,8 +138,22 @@ export default function RankingsPage() {
         ))}
       </div>
 
+      {/* Error State */}
+      {error && !loading && (
+        <div className="flex items-center justify-center py-16">
+          <GlassCard intensity="medium" padding="xl" className="max-w-md text-center">
+            <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive opacity-70" />
+            <h2 className="text-xl font-bold mb-2">Error al cargar</h2>
+            <p className="text-muted-foreground mb-6">No se pudo cargar la informacion.</p>
+            <GlassButton variant="solid" onClick={() => fetchRankings()}>
+              Intentar de nuevo
+            </GlassButton>
+          </GlassCard>
+        </div>
+      )}
+
       {/* Rankings Table */}
-      <GlassCard intensity="light" padding="none">
+      {!error && <GlassCard intensity="light" padding="none">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -205,7 +222,7 @@ export default function RankingsPage() {
             ))}
           </div>
         )}
-      </GlassCard>
+      </GlassCard>}
 
       {/* Pagination */}
       {totalPages > 1 && (

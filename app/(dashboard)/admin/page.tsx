@@ -5,6 +5,7 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { Upload, FileText, Trash2, Play, RefreshCw, Shield } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface DocumentItem {
   id: string
@@ -32,6 +33,7 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false)
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
   const [sportSlug, setSportSlug] = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -70,16 +72,17 @@ export default function AdminPage() {
 
       if (!res.ok) {
         const data = await res.json()
-        alert(data.error || 'Error al subir documento')
+        toast.error(data.error || 'Error al subir documento')
         return
       }
 
+      toast.success('Documento subido correctamente')
       form.reset()
       setSportSlug('')
       await fetchDocuments()
     } catch (error) {
       console.error('Upload failed:', error)
-      alert('Error al subir documento')
+      toast.error('Error al subir documento')
     } finally {
       setUploading(false)
     }
@@ -93,12 +96,14 @@ export default function AdminPage() {
       })
       if (!res.ok) {
         const data = await res.json()
-        alert(data.error || 'Error al procesar')
+        toast.error(data.error || 'Error al procesar')
+      } else {
+        toast.success('Documento procesado correctamente')
       }
       await fetchDocuments()
     } catch (error) {
       console.error('Process failed:', error)
-      alert('Error al procesar documento')
+      toast.error('Error al procesar documento')
     } finally {
       setProcessingIds((prev) => {
         const next = new Set(prev)
@@ -109,16 +114,20 @@ export default function AdminPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este documento y todos sus chunks?')) return
+    setConfirmDeleteId(null)
     try {
       const res = await fetch(`/api/admin/documents/${id}`, {
         method: 'DELETE',
       })
       if (res.ok) {
+        toast.success('Documento eliminado')
         await fetchDocuments()
+      } else {
+        toast.error('Error al eliminar documento')
       }
     } catch (error) {
       console.error('Delete failed:', error)
+      toast.error('Error al eliminar documento')
     }
   }
 
@@ -247,7 +256,7 @@ export default function AdminPage() {
                     <GlassButton
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDelete(doc.id)}
+                      onClick={() => setConfirmDeleteId(doc.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </GlassButton>
@@ -258,6 +267,27 @@ export default function AdminPage() {
           </div>
         )}
       </GlassCard>
+
+      {/* Delete confirmation dialog */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setConfirmDeleteId(null)} />
+          <div className="relative bg-card border border-border rounded-xl p-6 max-w-sm mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold mb-2">Confirmar eliminacion</h3>
+            <p className="text-muted-foreground text-sm mb-6">
+              ¿Eliminar este documento y todos sus chunks? Esta accion no se puede deshacer.
+            </p>
+            <div className="flex justify-end gap-3">
+              <GlassButton variant="ghost" onClick={() => setConfirmDeleteId(null)}>
+                Cancelar
+              </GlassButton>
+              <GlassButton variant="destructive" onClick={() => handleDelete(confirmDeleteId)}>
+                Eliminar
+              </GlassButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

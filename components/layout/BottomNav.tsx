@@ -3,13 +3,13 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Trophy, ShoppingBag, Wrench, User } from 'lucide-react'
+import { LayoutDashboard, Trophy, Bell, ShoppingBag, User } from 'lucide-react'
 
 const tabs = [
   { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Rankings', href: '/rankings', icon: Trophy },
+  { name: 'Avisos', href: '/notifications', icon: Bell },
   { name: 'Tienda', href: '/tienda', icon: ShoppingBag },
-  { name: 'Encordado', href: '/encordado', icon: Wrench },
   { name: 'Perfil', href: '/profile', icon: User },
 ]
 

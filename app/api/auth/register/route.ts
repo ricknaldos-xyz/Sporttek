@@ -8,7 +8,7 @@ import { generateToken } from '@/lib/tokens'
 const registerSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   email: z.string().email('Email invalido'),
-  password: z.string().min(6, 'La contrasena debe tener al menos 6 caracteres'),
+  password: z.string().min(8, 'La contrasena debe tener al menos 8 caracteres'),
   accountType: z.enum(['PLAYER', 'COACH']).optional().default('PLAYER'),
 })
 
@@ -24,7 +24,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { name, email, password, accountType } = validated.data
+    const { name, password, accountType } = validated.data
+    const email = validated.data.email.toLowerCase()
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({

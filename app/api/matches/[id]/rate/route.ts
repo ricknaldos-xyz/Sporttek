@@ -65,19 +65,18 @@ export async function POST(
       },
     })
 
-    // Update sportsmanship rating on rated player's profile
-    const allRatings = await prisma.matchRating.findMany({
+    // Update sportsmanship rating on rated player's profile using aggregate
+    const ratingAgg = await prisma.matchRating.aggregate({
       where: { ratedId },
-      select: { sportsmanship: true },
+      _avg: { sportsmanship: true, punctuality: true, skillAccuracy: true },
+      _count: { _all: true },
     })
-
-    const avgSportsmanship = allRatings.reduce((sum, r) => sum + r.sportsmanship, 0) / allRatings.length
 
     await prisma.playerProfile.update({
       where: { id: ratedId },
       data: {
-        sportsmanshipRating: avgSportsmanship,
-        totalRatings: allRatings.length,
+        sportsmanshipRating: ratingAgg._avg.sportsmanship ?? 0,
+        totalRatings: ratingAgg._count._all,
       },
     })
 

@@ -96,17 +96,13 @@ export default function AdminTalleresPage() {
     }
   }
 
+  const [confirmDeactivateId, setConfirmDeactivateId] = useState<string | null>(null)
+
   const handleToggleActive = async (workshop: Workshop) => {
     try {
       if (workshop.isActive) {
-        if (!window.confirm('¿Estas seguro de desactivar este taller?')) return
-        const res = await fetch(`/api/admin/stringing/workshops/${workshop.id}`, {
-          method: 'DELETE',
-        })
-        if (res.ok) {
-          toast.success('Taller desactivado')
-          fetchWorkshops()
-        }
+        setConfirmDeactivateId(workshop.id)
+        return
       } else {
         const res = await fetch(`/api/admin/stringing/workshops/${workshop.id}`, {
           method: 'PATCH',
@@ -117,6 +113,24 @@ export default function AdminTalleresPage() {
           toast.success('Taller activado')
           fetchWorkshops()
         }
+      }
+    } catch {
+      toast.error('Error al cambiar estado del taller')
+    }
+  }
+
+  const handleConfirmDeactivate = async () => {
+    if (!confirmDeactivateId) return
+    setConfirmDeactivateId(null)
+    try {
+      const res = await fetch(`/api/admin/stringing/workshops/${confirmDeactivateId}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        toast.success('Taller desactivado')
+        fetchWorkshops()
+      } else {
+        toast.error('Error al desactivar taller')
       }
     } catch {
       toast.error('Error al cambiar estado del taller')
@@ -258,6 +272,27 @@ export default function AdminTalleresPage() {
           </GlassCard>
         )}
       </div>
+
+      {/* Deactivation confirmation dialog */}
+      {confirmDeactivateId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setConfirmDeactivateId(null)} />
+          <div className="relative bg-card border border-border rounded-xl p-6 max-w-sm mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold mb-2">Confirmar desactivacion</h3>
+            <p className="text-muted-foreground text-sm mb-6">
+              ¿Estas seguro de desactivar este taller?
+            </p>
+            <div className="flex justify-end gap-3">
+              <GlassButton variant="ghost" onClick={() => setConfirmDeactivateId(null)}>
+                Cancelar
+              </GlassButton>
+              <GlassButton variant="destructive" onClick={handleConfirmDeactivate}>
+                Desactivar
+              </GlassButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

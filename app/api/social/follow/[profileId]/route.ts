@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { isBlocked } from '@/lib/blocks'
 import { createNotification } from '@/lib/notifications'
 
 // POST - Follow a player
@@ -38,24 +39,30 @@ export async function POST(
       return NextResponse.json({ error: 'Jugador no encontrado' }, { status: 404 })
     }
 
-    await prisma.follow.create({
-      data: {
-        followerId: myProfile.id,
-        followingId: targetProfileId,
-      },
-    })
+    // Check if blocked
+    if (await isBlocked(myProfile.id, targetProfileId)) {
+      return NextResponse.json({ error: 'No puedes realizar esta accion' }, { status: 403 })
+    }
 
-    // Update follower counts
-    await Promise.all([
-      prisma.playerProfile.update({
+    // Create follow + update counts atomically in a transaction
+    await prisma.$transaction(async (tx) => {
+      await tx.follow.create({
+        data: {
+          followerId: myProfile.id,
+          followingId: targetProfileId,
+        },
+      })
+
+      await tx.playerProfile.update({
         where: { id: myProfile.id },
         data: { followingCount: { increment: 1 } },
-      }),
-      prisma.playerProfile.update({
+      })
+
+      await tx.playerProfile.update({
         where: { id: targetProfileId },
         data: { followersCount: { increment: 1 } },
-      }),
-    ])
+      })
+    })
 
     // Notify
     createNotification({
@@ -99,29 +106,35 @@ export async function DELETE(
       return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
     }
 
-    await prisma.follow.delete({
-      where: {
-        followerId_followingId: {
+    // Delete follow + decrement counts atomically; only decrement if record existed
+    await prisma.$transaction(async (tx) => {
+      const deleted = await tx.follow.deleteMany({
+        where: {
           followerId: myProfile.id,
           followingId: targetProfileId,
         },
-      },
-    })
+      })
 
-    // Update follower counts
-    await Promise.all([
-      prisma.playerProfile.update({
+      if (deleted.count === 0) {
+        throw new Error('NOT_FOLLOWING')
+      }
+
+      await tx.playerProfile.update({
         where: { id: myProfile.id },
         data: { followingCount: { decrement: 1 } },
-      }),
-      prisma.playerProfile.update({
+      })
+
+      await tx.playerProfile.update({
         where: { id: targetProfileId },
         data: { followersCount: { decrement: 1 } },
-      }),
-    ])
+      })
+    })
 
     return NextResponse.json({ followed: false })
   } catch (error) {
+    if (error instanceof Error && error.message === 'NOT_FOLLOWING') {
+      return NextResponse.json({ error: 'No sigues a este jugador' }, { status: 400 })
+    }
     console.error('Unfollow error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }

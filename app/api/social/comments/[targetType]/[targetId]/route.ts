@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getBlockedProfileIds } from '@/lib/blocks'
 
 // GET - List comments for a target
 export async function GET(
@@ -18,12 +19,20 @@ export async function GET(
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)
     const offset = parseInt(searchParams.get('offset') || '0')
 
+    // Get blocked profile IDs to exclude from results
+    const profile = await prisma.playerProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    })
+    const blockedIds = profile ? await getBlockedProfileIds(profile.id) : []
+
     const [comments, total] = await Promise.all([
       prisma.comment.findMany({
         where: {
           targetId,
           targetType,
           isHidden: false,
+          ...(blockedIds.length > 0 && { authorId: { notIn: blockedIds } }),
         },
         orderBy: { createdAt: 'desc' },
         skip: offset,
@@ -45,6 +54,7 @@ export async function GET(
           targetId,
           targetType,
           isHidden: false,
+          ...(blockedIds.length > 0 && { authorId: { notIn: blockedIds } }),
         },
       }),
     ])

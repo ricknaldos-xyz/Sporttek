@@ -79,6 +79,27 @@ export async function PATCH(
     }
 
     if (parsed.data.status) {
+      // Validate state transition
+      const VALID_TRANSITIONS: Record<string, string[]> = {
+        PENDING_PAYMENT: ['CONFIRMED', 'STRINGING_CANCELLED'],
+        CONFIRMED: ['PICKUP_SCHEDULED', 'STRINGING_CANCELLED'],
+        PICKUP_SCHEDULED: ['RECEIVED_AT_WORKSHOP', 'STRINGING_CANCELLED'],
+        RECEIVED_AT_WORKSHOP: ['IN_PROGRESS', 'STRINGING_CANCELLED'],
+        IN_PROGRESS: ['STRINGING_COMPLETED'],
+        STRINGING_COMPLETED: ['READY_FOR_PICKUP', 'OUT_FOR_DELIVERY'],
+        READY_FOR_PICKUP: ['DELIVERED'],
+        OUT_FOR_DELIVERY: ['DELIVERED'],
+        DELIVERED: [],
+        STRINGING_CANCELLED: [],
+      }
+
+      if (!VALID_TRANSITIONS[existing.status]?.includes(parsed.data.status)) {
+        return NextResponse.json(
+          { error: `Transicion de estado no valida: ${existing.status} -> ${parsed.data.status}` },
+          { status: 400 }
+        )
+      }
+
       data.status = parsed.data.status
 
       const statusTimestamps: Record<string, string> = {

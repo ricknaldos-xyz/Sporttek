@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import { GlassButton } from '@/components/ui/glass-button'
 import {
@@ -18,9 +19,21 @@ import {
   Users,
   ShoppingBag,
   Wrench,
+  Medal,
+  CircleDot,
+  Bell,
+  GraduationCap,
+  Shield,
 } from 'lucide-react'
 
-const navigation = [
+interface NavItem {
+  name: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  tourId: string
+}
+
+const mainNavigation: NavItem[] = [
   {
     name: 'Dashboard',
     href: '/dashboard',
@@ -45,6 +58,9 @@ const navigation = [
     icon: Dumbbell,
     tourId: 'training',
   },
+]
+
+const competitionNavigation: NavItem[] = [
   {
     name: 'Rankings',
     href: '/rankings',
@@ -64,11 +80,35 @@ const navigation = [
     tourId: 'challenges',
   },
   {
+    name: 'Torneos',
+    href: '/tournaments',
+    icon: Medal,
+    tourId: 'tournaments',
+  },
+  {
+    name: 'Partidos',
+    href: '/matches',
+    icon: CircleDot,
+    tourId: 'matches',
+  },
+]
+
+const communityNavigation: NavItem[] = [
+  {
     name: 'Comunidad',
     href: '/community',
     icon: Users,
     tourId: 'community',
   },
+  {
+    name: 'Notificaciones',
+    href: '/notifications',
+    icon: Bell,
+    tourId: 'notifications',
+  },
+]
+
+const servicesNavigation: NavItem[] = [
   {
     name: 'Tienda',
     href: '/tienda',
@@ -81,6 +121,9 @@ const navigation = [
     icon: Wrench,
     tourId: 'stringing',
   },
+]
+
+const profileNavigation: NavItem[] = [
   {
     name: 'Mi Perfil',
     href: '/profile',
@@ -89,8 +132,63 @@ const navigation = [
   },
 ]
 
-export function Sidebar() {
+function NavSection({ items, label }: { items: NavItem[]; label?: string }) {
   const pathname = usePathname()
+
+  if (items.length === 0) return null
+
+  return (
+    <div>
+      {label && (
+        <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
+          {label}
+        </p>
+      )}
+      {items.map((item) => {
+        const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+        return (
+          <Link
+            key={item.name}
+            href={item.href}
+            data-tour={item.tourId}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-[var(--duration-normal)]',
+              isActive
+                ? 'glass-primary border-glass text-primary shadow-glass'
+                : 'text-muted-foreground hover:glass-ultralight hover:text-foreground'
+            )}
+          >
+            <item.icon className="h-5 w-5" />
+            {item.name}
+            {isActive && <ChevronRight className="ml-auto h-4 w-4" />}
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
+export function Sidebar() {
+  const { data: session } = useSession()
+  const user = session?.user as { hasCoachProfile?: boolean; role?: string } | undefined
+
+  const roleNavigation: NavItem[] = []
+  if (user?.hasCoachProfile) {
+    roleNavigation.push({
+      name: 'Coach Dashboard',
+      href: '/coach/dashboard',
+      icon: GraduationCap,
+      tourId: 'coach-dashboard',
+    })
+  }
+  if (user?.role === 'ADMIN') {
+    roleNavigation.push({
+      name: 'Admin',
+      href: '/admin',
+      icon: Shield,
+      tourId: 'admin',
+    })
+  }
 
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 glass-light border-r border-glass">
@@ -103,27 +201,22 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              data-tour={item.tourId}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-[var(--duration-normal)]',
-                isActive
-                  ? 'glass-primary border-glass text-primary shadow-glass'
-                  : 'text-muted-foreground hover:glass-ultralight hover:text-foreground'
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              {item.name}
-              {isActive && <ChevronRight className="ml-auto h-4 w-4" />}
-            </Link>
-          )
-        })}
+      <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
+        <NavSection items={mainNavigation} />
+        <hr className="border-glass mx-2" />
+        <NavSection items={competitionNavigation} label="Competencia" />
+        <hr className="border-glass mx-2" />
+        <NavSection items={communityNavigation} label="Social" />
+        <hr className="border-glass mx-2" />
+        <NavSection items={servicesNavigation} label="Servicios" />
+        {roleNavigation.length > 0 && (
+          <>
+            <hr className="border-glass mx-2" />
+            <NavSection items={roleNavigation} label="Gestion" />
+          </>
+        )}
+        <hr className="border-glass mx-2" />
+        <NavSection items={profileNavigation} />
       </nav>
 
       {/* Quick Actions */}

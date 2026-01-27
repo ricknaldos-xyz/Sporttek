@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { isBlocked } from '@/lib/blocks'
 import { z } from 'zod'
 import { containsBannedWords } from '@/lib/moderation'
 
@@ -37,6 +38,25 @@ export async function POST(request: NextRequest) {
 
     if (!profile) {
       return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
+    }
+
+    // Check if author is blocked by content owner
+    if (targetType === 'feed_item') {
+      const feedItem = await prisma.feedItem.findUnique({
+        where: { id: targetId },
+        select: { profileId: true },
+      })
+      if (feedItem && await isBlocked(profile.id, feedItem.profileId)) {
+        return NextResponse.json({ error: 'No puedes realizar esta accion' }, { status: 403 })
+      }
+    } else if (targetType === 'analysis') {
+      const analysis = await prisma.analysis.findUnique({
+        where: { id: targetId },
+        select: { user: { select: { playerProfile: { select: { id: true } } } } },
+      })
+      if (analysis?.user?.playerProfile && await isBlocked(profile.id, analysis.user.playerProfile.id)) {
+        return NextResponse.json({ error: 'No puedes realizar esta accion' }, { status: 403 })
+      }
     }
 
     if (containsBannedWords(content)) {

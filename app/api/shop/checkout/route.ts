@@ -70,17 +70,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate stock for each item
+    // Validate active status before transaction
     for (const item of cart.items) {
       if (!item.product.isActive) {
         return NextResponse.json(
           { error: `El producto "${item.product.name}" ya no esta disponible` },
-          { status: 400 }
-        )
-      }
-      if (item.quantity > item.product.stock) {
-        return NextResponse.json(
-          { error: `Stock insuficiente para "${item.product.name}"` },
           { status: 400 }
         )
       }
@@ -94,34 +88,53 @@ export async function POST(request: NextRequest) {
     const shippingCents = 1500
     const totalCents = subtotalCents + shippingCents
 
-    // Create order with retry for order number uniqueness
+    // Atomically check stock, decrement, and create order in a transaction
     let order
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        order = await prisma.shopOrder.create({
-          data: {
-            userId: session.user.id,
-            orderNumber: generateOrderNumber(),
-            subtotalCents,
-            shippingCents,
-            totalCents,
-            shippingName: parsed.data.shippingName,
-            shippingPhone: parsed.data.shippingPhone,
-            shippingAddress: parsed.data.shippingAddress,
-            shippingDistrict: parsed.data.shippingDistrict,
-            shippingCity: parsed.data.shippingCity,
-            shippingNotes: parsed.data.shippingNotes,
-            items: {
-              create: cart.items.map((item) => ({
-                productId: item.product.id,
-                quantity: item.quantity,
-                priceCents: item.product.priceCents,
-                productName: item.product.name,
-                productSlug: item.product.slug,
-              })),
+        order = await prisma.$transaction(async (tx) => {
+          // Atomically decrement stock for each item (fails if insufficient)
+          for (const item of cart.items) {
+            const updated = await tx.product.updateMany({
+              where: {
+                id: item.product.id,
+                stock: { gte: item.quantity },
+              },
+              data: {
+                stock: { decrement: item.quantity },
+              },
+            })
+            if (updated.count === 0) {
+              throw new Error(`Stock insuficiente para "${item.product.name}"`)
+            }
+          }
+
+          // Create the order inside the transaction
+          return tx.shopOrder.create({
+            data: {
+              userId: session.user.id,
+              orderNumber: generateOrderNumber(),
+              subtotalCents,
+              shippingCents,
+              totalCents,
+              shippingName: parsed.data.shippingName,
+              shippingPhone: parsed.data.shippingPhone,
+              shippingAddress: parsed.data.shippingAddress,
+              shippingDistrict: parsed.data.shippingDistrict,
+              shippingCity: parsed.data.shippingCity,
+              shippingNotes: parsed.data.shippingNotes,
+              items: {
+                create: cart.items.map((item) => ({
+                  productId: item.product.id,
+                  quantity: item.quantity,
+                  priceCents: item.product.priceCents,
+                  productName: item.product.name,
+                  productSlug: item.product.slug,
+                })),
+              },
             },
-          },
-          include: { items: true },
+            include: { items: true },
+          })
         })
         break
       } catch (e) {
@@ -131,6 +144,12 @@ export async function POST(request: NextRequest) {
           attempt < 2
         ) {
           continue
+        }
+        if (e instanceof Error && e.message.startsWith('Stock insuficiente')) {
+          return NextResponse.json(
+            { error: e.message },
+            { status: 400 }
+          )
         }
         throw e
       }

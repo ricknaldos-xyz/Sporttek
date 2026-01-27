@@ -78,9 +78,30 @@ export async function PATCH(
     }
 
     const { status } = parsed.data
+
+    // Validate state transition
+    const VALID_TRANSITIONS: Record<string, string[]> = {
+      PENDING_PAYMENT: ['PAID', 'CANCELLED'],
+      PAID: ['PROCESSING', 'CANCELLED'],
+      PROCESSING: ['SHIPPED', 'CANCELLED'],
+      SHIPPED: ['DELIVERED'],
+      DELIVERED: [],
+      CANCELLED: [],
+      REFUNDED: [],
+    }
+
+    if (!VALID_TRANSITIONS[existing.status]?.includes(status)) {
+      return NextResponse.json(
+        { error: `Transicion de estado no valida: ${existing.status} -> ${status}` },
+        { status: 400 }
+      )
+    }
+
     const timestamps: Record<string, unknown> = {}
 
-    if (status === 'SHIPPED') {
+    if (status === 'PAID') {
+      timestamps.paidAt = new Date()
+    } else if (status === 'SHIPPED') {
       timestamps.shippedAt = new Date()
     } else if (status === 'DELIVERED') {
       timestamps.deliveredAt = new Date()

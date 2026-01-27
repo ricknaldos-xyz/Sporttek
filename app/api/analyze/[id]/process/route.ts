@@ -49,6 +49,32 @@ export async function POST(
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
     }
 
+    // Check subscription tier for free users
+    const userRecord = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { subscription: true },
+    })
+
+    if (!userRecord || userRecord.subscription === 'FREE') {
+      const startOfMonth = new Date()
+      startOfMonth.setDate(1)
+      startOfMonth.setHours(0, 0, 0, 0)
+
+      const thisMonthCount = await prisma.analysis.count({
+        where: {
+          userId: session.user.id,
+          createdAt: { gte: startOfMonth },
+        },
+      })
+
+      if (thisMonthCount >= 3) {
+        return NextResponse.json(
+          { error: 'Has alcanzado el limite de analisis gratuitos este mes' },
+          { status: 403 }
+        )
+      }
+    }
+
     if (analysis.status === 'COMPLETED') {
       return NextResponse.json(
         { error: 'Este analisis ya fue procesado' },

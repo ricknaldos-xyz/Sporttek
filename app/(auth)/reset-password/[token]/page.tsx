@@ -34,8 +34,8 @@ export default function ResetPasswordPage() {
       return
     }
 
-    if (password.length < 6) {
-      toast.error('La contrasena debe tener al menos 6 caracteres')
+    if (password.length < 8) {
+      toast.error('La contrasena debe tener al menos 8 caracteres')
       setIsLoading(false)
       return
     }

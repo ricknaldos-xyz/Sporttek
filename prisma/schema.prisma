@@ -724,7 +724,7 @@ model Document {
   status       DocumentStatus  @default(UPLOADING)
   errorMessage String?
   uploadedById String
-  uploadedBy   User            @relation(fields: [uploadedById], references: [id])
+  uploadedBy   User            @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
   chunks       DocumentChunk[]
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
@@ -832,6 +832,13 @@ model PlayerProfile {
   coachStudents        CoachStudent[]
   organizedTournaments Tournament[]            @relation("TournamentOrganizer")
   tournamentEntries    TournamentParticipant[]
+  blocksSent           Block[]                 @relation("BlocksSent")
+  blocksReceived       Block[]                 @relation("BlocksReceived")
+  reportsSent          Report[]                @relation("ReportsSent")
+  reportsReceived      Report[]                @relation("ReportsReceived")
+  coachReviewsGiven    CoachReview[]           @relation("CoachReviewsGiven")
+  ratingsGiven         MatchRating[]           @relation("RatingsGiven")
+  ratingsReceived      MatchRating[]           @relation("RatingsReceived")
 
   @@index([country, compositeScore])
   @@index([country, effectiveScore])
@@ -909,9 +916,9 @@ model PlayerAvailability {
 model Challenge {
   id           String        @id @default(cuid())
   challengerId String
-  challenger   PlayerProfile @relation("ChallengesSent", fields: [challengerId], references: [id])
+  challenger   PlayerProfile @relation("ChallengesSent", fields: [challengerId], references: [id], onDelete: Cascade)
   challengedId String
-  challenged   PlayerProfile @relation("ChallengesReceived", fields: [challengedId], references: [id])
+  challenged   PlayerProfile @relation("ChallengesReceived", fields: [challengedId], references: [id], onDelete: Cascade)
 
   status          ChallengeStatus @default(PENDING)
   proposedDate    DateTime?
@@ -965,11 +972,13 @@ model Match {
 }
 
 model MatchRating {
-  id            String  @id @default(cuid())
+  id            String        @id @default(cuid())
   matchId       String
-  match         Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  match         Match         @relation(fields: [matchId], references: [id], onDelete: Cascade)
   raterId       String
+  rater         PlayerProfile @relation("RatingsGiven", fields: [raterId], references: [id], onDelete: Cascade)
   ratedId       String
+  rated         PlayerProfile @relation("RatingsReceived", fields: [ratedId], references: [id], onDelete: Cascade)
   sportsmanship Int
   punctuality   Int
   skillAccuracy Int
@@ -1048,24 +1057,28 @@ model Notification {
 }
 
 model Block {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   blockerId String
+  blocker   PlayerProfile @relation("BlocksSent", fields: [blockerId], references: [id], onDelete: Cascade)
   blockedId String
-  createdAt DateTime @default(now())
+  blocked   PlayerProfile @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
 
   @@unique([blockerId, blockedId])
   @@map("blocks")
 }
 
 model Report {
-  id          String       @id @default(cuid())
+  id          String        @id @default(cuid())
   reporterId  String
+  reporter    PlayerProfile @relation("ReportsSent", fields: [reporterId], references: [id], onDelete: Cascade)
   targetId    String
+  target      PlayerProfile @relation("ReportsReceived", fields: [targetId], references: [id], onDelete: Cascade)
   targetType  String
   reason      ReportReason
   description String?
-  resolved    Boolean      @default(false)
-  createdAt   DateTime     @default(now())
+  resolved    Boolean       @default(false)
+  createdAt   DateTime      @default(now())
 
   @@index([resolved])
   @@map("reports")
@@ -1079,8 +1092,8 @@ model Club {
   imageUrl    String?
   country     String?
   city        String?
-  ownerId     String
-  owner       PlayerProfile @relation("ClubOwner", fields: [ownerId], references: [id])
+  ownerId     String?
+  owner       PlayerProfile? @relation("ClubOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   members     ClubMember[]
   tournaments Tournament[]
   isPublic    Boolean       @default(true)
@@ -1260,13 +1273,14 @@ model CoachAssignedPlan {
 }
 
 model CoachReview {
-  id         String       @id @default(cuid())
+  id         String        @id @default(cuid())
   coachId    String
-  coach      CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coach      CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
   reviewerId String
+  reviewer   PlayerProfile @relation("CoachReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
   rating     Int
   comment    String?
-  createdAt  DateTime     @default(now())
+  createdAt  DateTime      @default(now())
 
   @@unique([coachId, reviewerId])
   @@map("coach_reviews")
@@ -1434,7 +1448,7 @@ model CartItem {
 model ShopOrder {
   id     String @id @default(cuid())
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   orderNumber String @unique // e.g., "ORD-20260127-XXXX"
 
@@ -1523,7 +1537,7 @@ model Workshop {
 model StringingOrder {
   id     String @id @default(cuid())
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   orderNumber String @unique // e.g., "STR-20260127-XXXX"
 

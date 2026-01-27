@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
+
+export const metadata: Metadata = {
+  title: 'Dashboard | SportTech',
+  description: 'Tu panel de entrenamiento deportivo. Revisa tus analisis, planes y progreso.',
+}
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Video, History, Dumbbell, TrendingUp, ArrowRight } from 'lucide-react'

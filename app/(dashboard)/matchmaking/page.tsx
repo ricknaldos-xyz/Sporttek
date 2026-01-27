@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
-import { Swords, MapPin, Loader2, Send } from 'lucide-react'
+import { Swords, MapPin, Loader2, Send, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useGeolocation } from '@/hooks/useGeolocation'
 import type { SkillTier } from '@prisma/client'
@@ -27,6 +27,7 @@ interface DiscoveredPlayer {
 export default function MatchmakingPage() {
   const [players, setPlayers] = useState<DiscoveredPlayer[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [sendingChallenge, setSendingChallenge] = useState<string | null>(null)
   const { latitude, longitude, requestLocation } = useGeolocation()
 
@@ -36,6 +37,7 @@ export default function MatchmakingPage() {
 
   async function fetchPlayers() {
     setLoading(true)
+    setError(false)
     try {
       const params = new URLSearchParams()
       if (latitude && longitude) {
@@ -44,12 +46,11 @@ export default function MatchmakingPage() {
       }
 
       const res = await fetch(`/api/matchmaking/discover?${params}`)
-      if (res.ok) {
-        const data = await res.json()
-        setPlayers(data)
-      }
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setPlayers(data)
     } catch {
-      console.error('Failed to fetch players')
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -90,7 +91,18 @@ export default function MatchmakingPage() {
         </GlassButton>
       </div>
 
-      {loading ? (
+      {error ? (
+        <div className="flex items-center justify-center py-16">
+          <GlassCard intensity="medium" padding="xl" className="max-w-md text-center">
+            <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive opacity-70" />
+            <h2 className="text-xl font-bold mb-2">Error al cargar</h2>
+            <p className="text-muted-foreground mb-6">No se pudo cargar la informacion.</p>
+            <GlassButton variant="solid" onClick={() => fetchPlayers()}>
+              Intentar de nuevo
+            </GlassButton>
+          </GlassCard>
+        </div>
+      ) : loading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>

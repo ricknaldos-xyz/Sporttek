@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, markTokenAsUsed } from '@/lib/tokens'
+import { verifyToken } from '@/lib/tokens'
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,19 +23,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update user emailVerified
-    await prisma.user.update({
-      where: { id: result.userId },
-      data: { emailVerified: new Date() },
-    })
+    // Atomically mark token as used + update user to prevent TOCTOU
+    await prisma.$transaction(async (tx) => {
+      // Mark token as used first -- a concurrent request will fail here
+      const updated = await tx.verificationToken.updateMany({
+        where: { token, usedAt: null },
+        data: { usedAt: new Date() },
+      })
+      if (updated.count === 0) {
+        throw new Error('TOKEN_ALREADY_USED')
+      }
 
-    // Mark token as used
-    await markTokenAsUsed(token)
+      // Update user emailVerified
+      await tx.user.update({
+        where: { id: result.userId },
+        data: { emailVerified: new Date() },
+      })
+    })
 
     return NextResponse.json({
       message: 'Email verificado exitosamente',
     })
   } catch (error) {
+    if (error instanceof Error && error.message === 'TOKEN_ALREADY_USED') {
+      return NextResponse.json(
+        { error: 'Este enlace ya ha sido utilizado' },
+        { status: 400 }
+      )
+    }
     console.error('Verify email error:', error)
     return NextResponse.json(
       { error: 'Error al verificar el email' },

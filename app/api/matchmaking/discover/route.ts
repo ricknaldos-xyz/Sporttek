@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getBlockedProfileIds } from '@/lib/blocks'
 import { boundingBox, haversineDistance } from '@/lib/geo'
-import { SkillTier } from '@prisma/client'
+import { Prisma, SkillTier } from '@prisma/client'
 
 // GET - Discover players nearby for matchmaking
 export async function GET(request: NextRequest) {
@@ -38,12 +39,15 @@ export async function GET(request: NextRequest) {
     const userLat = lat ?? myProfile.latitude
     const userLng = lng ?? myProfile.longitude
 
+    // Get blocked profile IDs to exclude
+    const blockedIds = await getBlockedProfileIds(myProfile.id)
+
     // Build query based on available location data
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {
+    const where: Prisma.PlayerProfileWhereInput = {
       userId: { not: session.user.id },
       visibility: 'PUBLIC',
       country: myProfile.country,
+      ...(blockedIds.length > 0 ? { id: { notIn: blockedIds } } : {}),
       ...(skillTier ? { skillTier } : {}),
       ...(ageGroup ? { ageGroup } : {}),
     }

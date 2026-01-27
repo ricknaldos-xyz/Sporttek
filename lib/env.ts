@@ -12,7 +12,7 @@ function requireEnv(name: string): string {
 // Validate on import (server-side only)
 export const env = {
   DATABASE_URL: requireEnv('DATABASE_URL'),
-  NEXTAUTH_SECRET: requireEnv('NEXTAUTH_SECRET'),
+  AUTH_SECRET: requireEnv('AUTH_SECRET'),
   STRIPE_SECRET_KEY: requireEnv('STRIPE_SECRET_KEY'),
   STRIPE_WEBHOOK_SECRET: requireEnv('STRIPE_WEBHOOK_SECRET'),
   NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',

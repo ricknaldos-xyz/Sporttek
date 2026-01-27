@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
+
+export const metadata: Metadata = {
+  title: 'Configuracion | SportTech',
+  description: 'Administra tus preferencias de cuenta, notificaciones y suscripcion.',
+}
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ArrowLeft, Bell, Shield, CreditCard } from 'lucide-react'
