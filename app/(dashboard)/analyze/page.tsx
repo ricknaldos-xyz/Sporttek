@@ -136,10 +136,17 @@ export default function AnalyzePage() {
     setUploading(true)
 
     try {
-      // Upload files
-      const uploadedUrls: { url: string; type: string; filename: string; size: number }[] = []
+      // Upload files to storage
+      const mediaItems: {
+        url: string
+        type: string
+        filename: string
+        size: number
+      }[] = []
 
       for (const file of files) {
+        const isVideo = file.type.startsWith('video/')
+
         const formData = new FormData()
         formData.append('file', file)
 
@@ -153,22 +160,23 @@ export default function AnalyzePage() {
         }
 
         const uploadData = await uploadRes.json()
-        uploadedUrls.push({
+
+        mediaItems.push({
           url: uploadData.url,
-          type: file.type.startsWith('video/') ? 'VIDEO' : 'IMAGE',
+          type: isVideo ? 'VIDEO' : 'IMAGE',
           filename: file.name,
           size: file.size,
         })
       }
 
-      // Create analysis
+      // Create analysis record
       const analysisRes = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           techniqueId: selectedTechnique.id,
           variantId: selectedVariant?.id,
-          mediaItems: uploadedUrls,
+          mediaItems,
         }),
       })
 
@@ -182,7 +190,7 @@ export default function AnalyzePage() {
       setProcessing(true)
       setStep('processing')
 
-      // Start processing
+      // Start AI processing (Gemini processes videos directly)
       const processRes = await fetch(`/api/analyze/${analysis.id}/process`, {
         method: 'POST',
       })

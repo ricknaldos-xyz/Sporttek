@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getOpenAIClient } from '@/lib/openai/client'
+import { getGeminiClient } from '@/lib/gemini/client'
 import { buildTennisPrompt } from '@/lib/openai/prompts/tennis'
 import { sendAnalysisCompleteEmail } from '@/lib/email'
+
+export const maxDuration = 300 // 5 minutes for video processing
 
 export async function POST(
   request: NextRequest,
@@ -77,42 +79,87 @@ export async function POST(
           analysis.technique.commonErrors
         )
       } else {
-        // Generic prompt for other sports (future)
-        prompt = `Analiza la tecnica deportiva en las imagenes y proporciona feedback detallado en formato JSON.`
+        prompt = `Analiza la tecnica deportiva en el video/imagenes y proporciona feedback detallado en formato JSON.`
       }
 
-      // Prepare images for OpenAI Vision
-      const imageUrls = analysis.mediaItems.map((item) => item.url)
+      const genAI = getGeminiClient()
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
 
-      // Call OpenAI Vision API
-      const response = await getOpenAIClient().chat.completions.create({
-        model: 'gpt-4o',
-        max_tokens: 4096,
-        response_format: { type: 'json_object' },
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              ...imageUrls.map((url) => ({
-                type: 'image_url' as const,
-                image_url: { url, detail: 'high' as const },
-              })),
-            ],
+      // Prepare content parts for Gemini
+      const contentParts: Array<{
+        inlineData: { mimeType: string; data: string }
+      } | { text: string }> = []
+
+      // Process each media item
+      for (const item of analysis.mediaItems) {
+        console.log(`Processing ${item.type}: ${item.filename}`)
+
+        // Download file from Vercel Blob
+        const response = await fetch(item.url)
+        if (!response.ok) {
+          console.error(`Failed to download file: ${item.url}`)
+          continue
+        }
+
+        const buffer = await response.arrayBuffer()
+        const base64 = Buffer.from(buffer).toString('base64')
+
+        // Determine mime type
+        let mimeType: string
+        if (item.type === 'VIDEO') {
+          mimeType = item.filename.endsWith('.mov')
+            ? 'video/quicktime'
+            : item.filename.endsWith('.webm')
+            ? 'video/webm'
+            : item.filename.endsWith('.avi')
+            ? 'video/x-msvideo'
+            : 'video/mp4'
+        } else {
+          mimeType = item.filename.endsWith('.png')
+            ? 'image/png'
+            : item.filename.endsWith('.webp')
+            ? 'image/webp'
+            : 'image/jpeg'
+        }
+
+        contentParts.push({
+          inlineData: {
+            mimeType,
+            data: base64,
           },
-        ],
-      })
+        })
+      }
 
-      const content = response.choices[0]?.message?.content
+      if (contentParts.length === 0) {
+        throw new Error('No se encontraron archivos para analizar')
+      }
+
+      // Add the text prompt
+      contentParts.push({ text: prompt })
+
+      console.log('Sending to Gemini for analysis...')
+
+      // Call Gemini API
+      const result = await model.generateContent(contentParts)
+      const response = result.response
+      const content = response.text()
+
       if (!content) {
-        throw new Error('Respuesta vacia de OpenAI')
+        throw new Error('Respuesta vacia de Gemini')
+      }
+
+      // Parse JSON from response (Gemini might wrap it in markdown code blocks)
+      let jsonContent = content
+      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/)
+      if (jsonMatch) {
+        jsonContent = jsonMatch[1].trim()
       }
 
       // Parse response
-      const result = JSON.parse(content)
+      const analysisResult = JSON.parse(jsonContent)
 
       // Validate result structure
-      if (typeof result.overallScore !== 'number' || !Array.isArray(result.issues)) {
+      if (typeof analysisResult.overallScore !== 'number' || !Array.isArray(analysisResult.issues)) {
         throw new Error('Formato de respuesta invalido')
       }
 
@@ -123,19 +170,19 @@ export async function POST(
           where: { id },
           data: {
             status: 'COMPLETED',
-            overallScore: result.overallScore,
-            aiResponse: result,
-            summary: result.summary || null,
-            strengths: result.strengths || [],
-            priorityFocus: result.priorityFocus || null,
+            overallScore: analysisResult.overallScore,
+            aiResponse: analysisResult,
+            summary: analysisResult.summary || null,
+            strengths: analysisResult.strengths || [],
+            priorityFocus: analysisResult.priorityFocus || null,
             processingMs: Date.now() - startTime,
           },
         })
 
         // Create issues
-        if (result.issues.length > 0) {
+        if (analysisResult.issues.length > 0) {
           await tx.issue.createMany({
-            data: result.issues.map((issue: {
+            data: analysisResult.issues.map((issue: {
               category: string
               title: string
               description: string
@@ -206,7 +253,6 @@ export async function POST(
           exerciseCount: 0,
         },
       }).then(() => {
-        // Update streak
         return prisma.userStreak.upsert({
           where: { userId: session.user.id },
           update: {
