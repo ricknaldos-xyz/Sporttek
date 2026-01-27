@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Target, Menu, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassNavbar } from '@/components/ui/glass-navbar'
 
 const navLinks = [
   { href: '#features', label: 'Caracteristicas' },
@@ -15,7 +16,10 @@ const navLinks = [
 export function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const scrollToSection = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
     e.preventDefault()
     const element = document.querySelector(href)
     if (element) {
@@ -25,23 +29,28 @@ export function LandingHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+    <GlassNavbar>
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <Target className="h-8 w-8 text-primary" />
+          <Link
+            href="/"
+            className="flex items-center gap-2 transition-opacity hover:opacity-80"
+          >
+            <div className="glass-primary border-glass rounded-xl p-2">
+              <Target className="h-6 w-6 text-primary" />
+            </div>
             <span className="text-xl font-bold">SportTech</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={(e) => scrollToSection(e, link.href)}
-                className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
+                className="px-4 py-2 text-muted-foreground hover:text-foreground transition-all duration-[var(--duration-normal)] text-sm font-medium rounded-xl hover:glass-ultralight"
               >
                 {link.label}
               </a>
@@ -49,60 +58,56 @@ export function LandingHeader() {
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
-            >
-              Iniciar sesion
-            </Link>
-            <Button asChild>
+          <div className="hidden md:flex items-center gap-3">
+            <GlassButton variant="ghost" size="sm" asChild>
+              <Link href="/login">Iniciar sesion</Link>
+            </GlassButton>
+            <GlassButton variant="solid" size="sm" asChild>
               <Link href="/register">Comenzar gratis</Link>
-            </Button>
+            </GlassButton>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
+          <GlassButton
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             ) : (
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             )}
-          </button>
+          </GlassButton>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden pt-4 pb-2 border-t border-border mt-4">
-            <div className="flex flex-col gap-4">
+          <div className="md:hidden pt-4 pb-2 border-t border-glass mt-4">
+            <div className="flex flex-col gap-2">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
                   onClick={(e) => scrollToSection(e, link.href)}
-                  className="text-muted-foreground hover:text-foreground transition-colors py-2"
+                  className="text-muted-foreground hover:text-foreground transition-all duration-[var(--duration-normal)] py-3 px-4 rounded-xl hover:glass-ultralight"
                 >
                   {link.label}
                 </a>
               ))}
-              <hr className="border-border" />
-              <Link
-                href="/login"
-                className="text-muted-foreground hover:text-foreground transition-colors py-2"
-              >
-                Iniciar sesion
-              </Link>
-              <Button asChild className="w-full">
+              <hr className="border-glass my-2" />
+              <GlassButton variant="ghost" asChild className="justify-start">
+                <Link href="/login">Iniciar sesion</Link>
+              </GlassButton>
+              <GlassButton variant="solid" asChild>
                 <Link href="/register">Comenzar gratis</Link>
-              </Button>
+              </GlassButton>
             </div>
           </div>
         )}
       </nav>
-    </header>
+    </GlassNavbar>
   )
 }

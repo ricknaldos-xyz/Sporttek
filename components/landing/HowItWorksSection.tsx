@@ -1,4 +1,8 @@
+'use client'
+
 import { Upload, Brain, TrendingUp } from 'lucide-react'
+import { GlassCard } from '@/components/ui/glass-card'
+import { GlassBadge } from '@/components/ui/glass-badge'
 
 const steps = [
   {
@@ -42,36 +46,43 @@ export function HowItWorksSection() {
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8 relative">
             {/* Connector line (desktop only) */}
-            <div className="hidden md:block absolute top-16 left-[16.67%] right-[16.67%] h-0.5 bg-border" />
+            <div className="hidden md:block absolute top-20 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
             {steps.map((step, index) => (
               <div key={step.number} className="relative">
                 {/* Step card */}
-                <div className="bg-card border border-border rounded-xl p-6 text-center relative z-10">
+                <GlassCard
+                  intensity="light"
+                  padding="lg"
+                  hover="lift"
+                  className="text-center relative z-10"
+                >
                   {/* Number badge */}
-                  <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-4">
+                  <div className="w-10 h-10 glass-primary border-glass shadow-glass-glow rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-4 text-primary">
                     {step.number}
                   </div>
 
                   {/* Icon */}
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 glass-primary border-glass rounded-2xl flex items-center justify-center mx-auto mb-5">
                     <step.icon className="h-8 w-8 text-primary" />
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground mb-4">{step.description}</p>
+                  <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
+                  <p className="text-muted-foreground mb-5 leading-relaxed">
+                    {step.description}
+                  </p>
 
                   {/* Time badge */}
-                  <span className="inline-block text-xs bg-muted px-3 py-1 rounded-full text-muted-foreground">
+                  <GlassBadge variant="default" size="sm">
                     {step.time}
-                  </span>
-                </div>
+                  </GlassBadge>
+                </GlassCard>
 
                 {/* Arrow (mobile only, except last) */}
                 {index < steps.length - 1 && (
                   <div className="md:hidden flex justify-center my-4">
-                    <div className="w-0.5 h-8 bg-border" />
+                    <div className="w-0.5 h-8 bg-gradient-to-b from-primary/30 to-transparent" />
                   </div>
                 )}
               </div>

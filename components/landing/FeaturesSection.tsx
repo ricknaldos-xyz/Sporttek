@@ -1,4 +1,7 @@
+'use client'
+
 import { Brain, Target, Dumbbell, TrendingUp, History, Zap } from 'lucide-react'
+import { GlassCard } from '@/components/ui/glass-card'
 
 const features = [
   {
@@ -41,7 +44,10 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-20 lg:py-32 bg-secondary/30">
+    <section id="features" className="py-20 lg:py-32 relative overflow-hidden">
+      {/* Subtle background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/20 to-transparent -z-10" />
+
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -54,17 +60,25 @@ export function FeaturesSection() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {features.map((feature) => (
-            <div
+          {features.map((feature, index) => (
+            <GlassCard
               key={feature.title}
-              className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors"
+              intensity="light"
+              padding="lg"
+              hover="glow"
+              className="group"
+              style={{
+                animationDelay: `${index * 100}ms`,
+              }}
             >
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <feature.icon className="h-6 w-6 text-primary" />
+              <div className="glass-primary border-glass rounded-xl w-14 h-14 flex items-center justify-center mb-5 group-hover:shadow-glass-glow transition-all duration-[var(--duration-normal)]">
+                <feature.icon className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
-            </div>
+              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {feature.description}
+              </p>
+            </GlassCard>
           ))}
         </div>
       </div>

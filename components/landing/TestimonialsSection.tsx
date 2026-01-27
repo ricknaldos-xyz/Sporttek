@@ -1,4 +1,7 @@
-import { Star } from 'lucide-react'
+'use client'
+
+import { Star, Quote } from 'lucide-react'
+import { GlassCard } from '@/components/ui/glass-card'
 
 const testimonials = [
   {
@@ -39,33 +42,38 @@ export function TestimonialsSection() {
 
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {testimonials.map((testimonial, index) => (
-            <div
+            <GlassCard
               key={index}
-              className="bg-card border border-border rounded-xl p-6 relative"
+              intensity="light"
+              padding="lg"
+              hover="lift"
+              className="relative"
             >
               {/* Quote decoration */}
-              <div className="absolute -top-3 left-6 text-6xl text-primary/20 font-serif">
-                "
+              <div className="absolute -top-2 left-4">
+                <div className="glass-primary border-glass rounded-full p-2">
+                  <Quote className="h-4 w-4 text-primary" />
+                </div>
               </div>
 
               {/* Rating */}
-              <div className="flex gap-1 mb-4">
+              <div className="flex gap-1 mb-4 mt-4">
                 {Array.from({ length: testimonial.rating }).map((_, i) => (
                   <Star
                     key={i}
-                    className="h-4 w-4 text-yellow-500 fill-yellow-500"
+                    className="h-4 w-4 text-warning fill-warning"
                   />
                 ))}
               </div>
 
               {/* Content */}
-              <p className="text-muted-foreground mb-6 relative z-10">
+              <p className="text-muted-foreground mb-6 relative z-10 leading-relaxed">
                 {testimonial.content}
               </p>
 
               {/* Author */}
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                <div className="w-10 h-10 rounded-full glass-primary border-glass flex items-center justify-center text-primary font-semibold">
                   {testimonial.name.charAt(0)}
                 </div>
                 <div>
@@ -75,7 +83,7 @@ export function TestimonialsSection() {
                   </p>
                 </div>
               </div>
-            </div>
+            </GlassCard>
           ))}
         </div>
       </div>

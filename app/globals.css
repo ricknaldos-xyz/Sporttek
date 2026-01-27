@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* === COLOR TOKENS === */
   --color-background: oklch(100% 0 0);
   --color-foreground: oklch(14.5% 0 0);
   --color-card: oklch(100% 0 0);
@@ -22,10 +23,55 @@
   --color-ring: oklch(51.3% 0.214 259);
   --color-success: oklch(72.3% 0.219 149.6);
   --color-warning: oklch(79.5% 0.184 86.0);
+
+  /* === RADIUS TOKENS === */
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+
+  /* === LIQUID GLASS TOKENS === */
+
+  /* Glass Opacity Levels */
+  --glass-opacity-ultralight: 0.03;
+  --glass-opacity-light: 0.08;
+  --glass-opacity-medium: 0.15;
+  --glass-opacity-heavy: 0.25;
+  --glass-opacity-solid: 0.40;
+
+  /* Blur Intensities */
+  --glass-blur-subtle: 8px;
+  --glass-blur-soft: 16px;
+  --glass-blur-medium: 24px;
+  --glass-blur-strong: 40px;
+  --glass-blur-intense: 64px;
+
+  /* Glass Border Colors (luminous edges) */
+  --glass-border-light: oklch(100% 0 0 / 0.2);
+  --glass-border-medium: oklch(100% 0 0 / 0.3);
+  --glass-border-strong: oklch(100% 0 0 / 0.5);
+
+  /* Shadow Depths (floating layers) */
+  --glass-shadow-sm: 0 2px 8px oklch(0% 0 0 / 0.04);
+  --glass-shadow-md: 0 4px 16px oklch(0% 0 0 / 0.06);
+  --glass-shadow-lg: 0 8px 32px oklch(0% 0 0 / 0.08);
+  --glass-shadow-xl: 0 16px 48px oklch(0% 0 0 / 0.12);
+  --glass-shadow-glow: 0 0 40px oklch(51.3% 0.214 259 / 0.15);
+
+  /* Animation Timing Functions (liquid ease) */
+  --ease-liquid: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* Animation Durations */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
 }
 
 @layer base {
@@ -42,5 +88,113 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* === LIQUID GLASS UTILITIES === */
+
+  /* Glass Backgrounds */
+  .glass-ultralight {
+    background: oklch(100% 0 0 / var(--glass-opacity-ultralight));
+    backdrop-filter: blur(var(--glass-blur-soft));
+    -webkit-backdrop-filter: blur(var(--glass-blur-soft));
+  }
+
+  .glass-light {
+    background: oklch(100% 0 0 / var(--glass-opacity-light));
+    backdrop-filter: blur(var(--glass-blur-medium));
+    -webkit-backdrop-filter: blur(var(--glass-blur-medium));
+  }
+
+  .glass-medium {
+    background: oklch(100% 0 0 / var(--glass-opacity-medium));
+    backdrop-filter: blur(var(--glass-blur-strong));
+    -webkit-backdrop-filter: blur(var(--glass-blur-strong));
+  }
+
+  .glass-heavy {
+    background: oklch(100% 0 0 / var(--glass-opacity-heavy));
+    backdrop-filter: blur(var(--glass-blur-intense));
+    -webkit-backdrop-filter: blur(var(--glass-blur-intense));
+  }
+
+  /* Glass with Primary Tint */
+  .glass-primary {
+    background: linear-gradient(
+      135deg,
+      oklch(51.3% 0.214 259 / 0.08),
+      oklch(51.3% 0.214 259 / 0.03)
+    );
+    backdrop-filter: blur(var(--glass-blur-medium));
+    -webkit-backdrop-filter: blur(var(--glass-blur-medium));
+  }
+
+  /* Luminous Borders */
+  .border-glass {
+    border: 1px solid var(--glass-border-light);
+  }
+
+  .border-glass-strong {
+    border: 1px solid var(--glass-border-medium);
+  }
+
+  /* Glass Shadows */
+  .shadow-glass {
+    box-shadow: var(--glass-shadow-md);
+  }
+
+  .shadow-glass-lg {
+    box-shadow: var(--glass-shadow-lg);
+  }
+
+  .shadow-glass-glow {
+    box-shadow: var(--glass-shadow-lg), var(--glass-shadow-glow);
+  }
+
+  /* Mesh Gradient Background */
+  .bg-mesh-gradient {
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 40%, oklch(51.3% 0.214 259 / 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 80% 20%, oklch(72.3% 0.219 149.6 / 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 60% at 60% 80%, oklch(79.5% 0.184 86.0 / 0.05) 0%, transparent 50%),
+      oklch(98% 0.005 260);
+  }
+}
+
+/* === PERFORMANCE OPTIMIZATIONS === */
+
+/* Reduce blur on mobile for better performance */
+@media (max-width: 768px) {
+  :root {
+    --glass-blur-medium: 12px;
+    --glass-blur-strong: 20px;
+    --glass-blur-intense: 32px;
+  }
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-ultralight,
+  .glass-light {
+    background: oklch(100% 0 0 / 0.85);
+  }
+
+  .glass-medium,
+  .glass-heavy {
+    background: oklch(100% 0 0 / 0.92);
+  }
+
+  .glass-primary {
+    background: oklch(51.3% 0.214 259 / 0.1);
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
