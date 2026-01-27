@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2, AlertTriangle, Dumbbell, Target } from 'lucide-react'
 import { GlassBadge } from '@/components/ui/glass-badge'
+import { MuscleDiagram } from '@/components/training/muscle-diagram'
 import type { StructuredExerciseData } from '@/lib/training/types'
 
 interface ExerciseDetailsProps {
@@ -53,36 +54,38 @@ export function ExerciseDetails({ data }: ExerciseDetailsProps) {
         </div>
       )}
 
-      {/* Equipment & Muscle Groups */}
-      <div className="flex flex-wrap gap-4">
-        {data.equipmentNeeded.length > 0 && data.equipmentNeeded[0] !== 'ninguno' && (
-          <div className="space-y-1.5">
-            <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Dumbbell className="h-3.5 w-3.5" />
-              Equipo
-            </h5>
-            <div className="flex flex-wrap gap-1.5">
-              {data.equipmentNeeded.map((eq, i) => (
-                <GlassBadge key={i} variant="default">{eq}</GlassBadge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {data.muscleGroups.length > 0 && (
-          <div className="space-y-1.5">
-            <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Target className="h-3.5 w-3.5" />
-              Grupos Musculares
-            </h5>
-            <div className="flex flex-wrap gap-1.5">
+      {/* Muscle Groups with Diagram */}
+      {data.muscleGroups.length > 0 && (
+        <div className="space-y-2">
+          <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Target className="h-3.5 w-3.5" />
+            Grupos Musculares
+          </h5>
+          <div className="flex items-start gap-4">
+            <MuscleDiagram muscleGroups={data.muscleGroups} />
+            <div className="flex flex-wrap gap-1.5 content-start pt-1">
               {data.muscleGroups.map((mg, i) => (
                 <GlassBadge key={i} variant="primary">{mg}</GlassBadge>
               ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Equipment */}
+      {data.equipmentNeeded.length > 0 && data.equipmentNeeded[0] !== 'ninguno' && (
+        <div className="space-y-1.5">
+          <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Dumbbell className="h-3.5 w-3.5" />
+            Equipo
+          </h5>
+          <div className="flex flex-wrap gap-1.5">
+            {data.equipmentNeeded.map((eq, i) => (
+              <GlassBadge key={i} variant="default">{eq}</GlassBadge>
+            ))}
+          </div>
+        </div>
+      )}
     </motion.div>
   )
 }

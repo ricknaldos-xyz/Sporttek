@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { CheckCircle, Circle, Loader2, ChevronDown } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -17,6 +18,7 @@ interface ExerciseItemProps {
     name: string
     description: string
     instructions: string | null
+    imageUrls: string[]
     sets: number | null
     reps: number | null
     durationMins: number | null
@@ -47,6 +49,7 @@ export function ExerciseItem({ exercise, trainingPlanId }: ExerciseItemProps) {
   const { toggleExercise, isLoading } = useProgress(trainingPlanId)
 
   const structured = parseExerciseInstructions(exercise.instructions)
+  const exerciseImage = exercise.imageUrls?.[0] || null
 
   function handleToggle() {
     const newCompleted = !isCompleted
@@ -152,6 +155,19 @@ export function ExerciseItem({ exercise, trainingPlanId }: ExerciseItemProps) {
                 : '2x semana'}
             </GlassBadge>
           </div>
+
+          {/* Exercise image */}
+          {exerciseImage && (
+            <div className="mt-3 rounded-xl overflow-hidden glass-ultralight border-glass">
+              <Image
+                src={exerciseImage}
+                alt={exercise.name}
+                width={400}
+                height={400}
+                className="w-full h-48 object-cover"
+              />
+            </div>
+          )}
 
           {/* Expanded structured content */}
           <AnimatePresence>

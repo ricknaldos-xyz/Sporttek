@@ -3,6 +3,7 @@ import { Severity } from '@prisma/client'
 import { retrieveRelevantChunks } from '@/lib/rag/retriever'
 import { getGeminiClient } from '@/lib/gemini/client'
 import { enrichExercisesWithStructuredContent } from '@/lib/training/enrichment'
+import { generateExerciseImages } from '@/lib/training/image-generator'
 import { buildPlanGenerationPrompt } from '@/lib/training/prompts/plan-generation'
 
 interface GeneratePlanOptions {
@@ -195,6 +196,20 @@ export async function generateTrainingPlan({
     )
   } catch (error) {
     console.warn('Exercise enrichment failed, falling back to basic instructions:', error)
+  }
+
+  // Generate exercise images
+  try {
+    await generateExerciseImages(
+      exercises.map((ex) => ({
+        id: ex.id,
+        name: ex.name,
+        description: ex.description,
+      })),
+      analysis.technique.sport.name
+    )
+  } catch (error) {
+    console.warn('Exercise image generation failed:', error)
   }
 
   // Create exercise-issue links
