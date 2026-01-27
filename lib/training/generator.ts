@@ -1,7 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { Severity } from '@prisma/client'
 import { retrieveRelevantChunks } from '@/lib/rag/retriever'
+import { getGeminiClient } from '@/lib/gemini/client'
 import { enrichExercisesWithStructuredContent } from '@/lib/training/enrichment'
+import { buildPlanGenerationPrompt } from '@/lib/training/prompts/plan-generation'
 
 interface GeneratePlanOptions {
   analysisId: string
@@ -26,7 +28,7 @@ interface ExerciseBlueprint {
   frequency: string
   videoUrl: string | null
   imageUrls: string[]
-  issueId: string
+  issueIds: string[]
 }
 
 export async function generateTrainingPlan({
@@ -67,17 +69,6 @@ export async function generateTrainingPlan({
     (a, b) => SEVERITY_WEIGHTS[b.severity] - SEVERITY_WEIGHTS[a.severity]
   )
 
-  // Get relevant exercise templates
-  const exerciseTemplates = await prisma.exerciseTemplate.findMany({
-    where: {
-      isActive: true,
-      OR: [
-        { sportSlugs: { has: analysis.technique.sport.slug } },
-        { sportSlugs: { isEmpty: true } },
-      ],
-    },
-  })
-
   // Calculate plan parameters
   const durationDays = durationWeeks * 7
   const difficulty = calculateDifficulty(sortedIssues)
@@ -97,110 +88,14 @@ export async function generateTrainingPlan({
     },
   })
 
-  // --- Phase A: Build exercise pool from RAG + AI drills + template supplements ---
-  const exercisePool: ExerciseBlueprint[] = []
-
-  // RAG: Retrieve real exercises from knowledge base for each issue
-  for (const issue of sortedIssues) {
-    try {
-      const ragChunks = await retrieveRelevantChunks(
-        `${issue.title} ${issue.category} ejercicio drill corrección ${analysis.technique.name}`,
-        {
-          sportSlug: analysis.technique.sport.slug,
-          category: ['EXERCISE', 'TRAINING_PLAN'],
-          technique: analysis.technique.slug,
-          limit: 2,
-          threshold: 0.35,
-        }
-      )
-
-      for (const chunk of ragChunks) {
-        exercisePool.push({
-          name: extractExerciseName(chunk.content),
-          description: chunk.content.substring(0, 300),
-          instructions: chunk.content,
-          sets: extractNumber(chunk.content, /(\d+)\s*series/i) ?? 3,
-          reps: extractNumber(chunk.content, /(\d+)\s*repet/i) ?? 15,
-          durationMins: extractNumber(chunk.content, /(\d+)\s*min/i),
-          frequency: calculateFrequency(issue.severity),
-          videoUrl: null,
-          imageUrls: [],
-          issueId: issue.id,
-        })
-      }
-    } catch (error) {
-      console.warn('RAG exercise retrieval skipped for issue:', issue.id, error)
-    }
-  }
-
-  for (const issue of sortedIssues) {
-    // Skip AI drills if RAG already found exercises for this issue
-    const hasRagExercise = exercisePool.some((e) => e.issueId === issue.id)
-
-    // AI-generated drills (SECONDARY source if no RAG exercises)
-    for (const drill of hasRagExercise ? [] : issue.drills.slice(0, 2)) {
-      // Extract drill name (before the colon if present)
-      const drillName = drill.includes(':') ? drill.split(':')[0].trim() : drill
-      const drillInstructions = drill.includes(':')
-        ? drill.split(':').slice(1).join(':').trim()
-        : issue.correction
-
-      exercisePool.push({
-        name: drillName,
-        description: `Ejercicio para mejorar: ${issue.title}`,
-        instructions: drillInstructions,
-        sets: 3,
-        reps: 15,
-        durationMins: null,
-        frequency: calculateFrequency(issue.severity),
-        videoUrl: null,
-        imageUrls: [],
-        issueId: issue.id,
-      })
-    }
-
-    // Template supplements (SECONDARY - max 1 per issue)
-    const matchingTemplates = findMatchingTemplates(exerciseTemplates, issue)
-    const template = matchingTemplates[0]
-    if (template) {
-      // Skip if we already have an AI drill with a similar name
-      const alreadyHasSimilar = exercisePool.some(
-        (e) =>
-          e.issueId === issue.id &&
-          e.name.toLowerCase().includes(template.name.toLowerCase())
-      )
-      if (!alreadyHasSimilar) {
-        exercisePool.push({
-          name: template.name,
-          description: `${template.description}\n\nPara corregir: ${issue.title}`,
-          instructions: template.instructions,
-          sets: template.defaultSets,
-          reps: template.defaultReps,
-          durationMins: template.defaultDurationMins,
-          frequency: calculateFrequency(issue.severity),
-          videoUrl: template.videoUrl,
-          imageUrls: template.imageUrls,
-          issueId: issue.id,
-        })
-      }
-    }
-
-    // Fallback: if no AI drills and no templates, create from correction
-    if (!exercisePool.some((e) => e.issueId === issue.id)) {
-      exercisePool.push({
-        name: `Correccion: ${issue.title}`,
-        description: issue.description,
-        instructions: issue.correction,
-        sets: 3,
-        reps: 15,
-        durationMins: null,
-        frequency: calculateFrequency(issue.severity),
-        videoUrl: null,
-        imageUrls: [],
-        issueId: issue.id,
-      })
-    }
-  }
+  // --- Phase A: Generate exercise pool via Gemini ---
+  const exercisePool = await buildExercisePool(
+    sortedIssues,
+    analysis.technique.sport.slug,
+    analysis.technique.sport.name,
+    analysis.technique.slug,
+    analysis.technique.name
+  )
 
   // --- Phase B: Distribute exercises across all training days with progression ---
   const trainingDaysPerWeek = Math.min(6, Math.max(3, difficulty + 1))
@@ -225,7 +120,7 @@ export async function generateTrainingPlan({
     frequency: string
     videoUrl: string | null
     imageUrls: string[]
-    issueId?: string
+    issueIds: string[]
   }[] = []
 
   for (let week = 1; week <= durationWeeks; week++) {
@@ -270,7 +165,7 @@ export async function generateTrainingPlan({
           frequency: blueprint.frequency,
           videoUrl: blueprint.videoUrl,
           imageUrls: blueprint.imageUrls,
-          issueId: blueprint.issueId,
+          issueIds: blueprint.issueIds,
         })
       }
     }
@@ -279,7 +174,7 @@ export async function generateTrainingPlan({
   // Create exercises in batch
   const exercises = await Promise.all(
     exercisesToCreate.map((data) => {
-      const { issueId, ...exerciseData } = data
+      const { issueIds, ...exerciseData } = data
       return prisma.exercise.create({
         data: exerciseData,
       })
@@ -303,16 +198,16 @@ export async function generateTrainingPlan({
   }
 
   // Create exercise-issue links
-  const exerciseIssueLinks = exercisesToCreate
-    .map((data, index) => ({
+  const exerciseIssueLinks = exercisesToCreate.flatMap((data, index) =>
+    data.issueIds.map((issueId) => ({
       exerciseId: exercises[index].id,
-      issueId: data.issueId,
+      issueId,
     }))
-    .filter((link) => link.issueId)
+  )
 
   if (exerciseIssueLinks.length > 0) {
     await prisma.exerciseIssue.createMany({
-      data: exerciseIssueLinks as { exerciseId: string; issueId: string }[],
+      data: exerciseIssueLinks,
     })
   }
 
@@ -337,41 +232,212 @@ export async function generateTrainingPlan({
   })
 }
 
-function findMatchingTemplates(
-  templates: {
-    name: string
-    targetAreas: string[]
+// --- Phase A: Build exercise pool using Gemini ---
+
+async function buildExercisePool(
+  issues: Array<{
+    id: string
+    title: string
     category: string
+    severity: Severity
     description: string
-    instructions: string
-    defaultSets: number | null
-    defaultReps: number | null
-    defaultDurationMins: number | null
-    videoUrl: string | null
-    imageUrls: string[]
-  }[],
-  issue: { category: string; drills: string[] }
-) {
-  const category = issue.category.toLowerCase()
+    correction: string
+    drills: string[]
+  }>,
+  sportSlug: string,
+  sportName: string,
+  techniqueSlug: string,
+  techniqueName: string
+): Promise<ExerciseBlueprint[]> {
+  // 1. Gather RAG context as reference material
+  const ragContext = await gatherRagContext(issues, sportSlug, techniqueSlug, techniqueName)
 
-  // Strict match: template targetArea must exactly equal the issue category
-  const strictMatches = templates.filter((t) =>
-    t.targetAreas.some((area) => area.toLowerCase() === category)
+  // 2. Call Gemini to generate exercises
+  const prompt = buildPlanGenerationPrompt(
+    sportName,
+    techniqueName,
+    issues.map((i) => ({
+      id: i.id,
+      title: i.title,
+      category: i.category,
+      severity: i.severity,
+      description: i.description,
+      correction: i.correction,
+      drills: i.drills,
+    })),
+    ragContext
   )
 
-  if (strictMatches.length > 0) return strictMatches
+  const validIssueIds = new Set(issues.map((i) => i.id))
 
-  // Secondary match: drill name contains template name or vice versa
-  const drillNameMatches = templates.filter((t) =>
-    issue.drills.some(
-      (drill) =>
-        drill.toLowerCase().includes(t.name.toLowerCase()) ||
-        t.name.toLowerCase().includes(drill.toLowerCase())
-    )
-  )
+  try {
+    const genAI = getGeminiClient()
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const result = await model.generateContent(prompt)
+    const content = result.response.text()
 
-  return drillNameMatches
+    // Parse JSON (handle markdown code blocks)
+    let jsonContent = content
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/)
+    if (jsonMatch) {
+      jsonContent = jsonMatch[1].trim()
+    }
+
+    const parsed = JSON.parse(jsonContent) as Array<{
+      name: string
+      description: string
+      instructions: string
+      targetIssueIds: string[]
+      sets: number | null
+      reps: number | null
+      durationMins: number | null
+      frequency: string
+      category: string
+    }>
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      throw new Error('Gemini returned empty or invalid array')
+    }
+
+    const pool: ExerciseBlueprint[] = parsed.map((item) => ({
+      name: (item.name || 'Ejercicio').substring(0, 60),
+      description: item.description || '',
+      instructions: item.instructions || item.description || '',
+      sets: typeof item.sets === 'number' ? item.sets : 3,
+      reps: typeof item.reps === 'number' ? item.reps : null,
+      durationMins: typeof item.durationMins === 'number' ? item.durationMins : null,
+      frequency: ['daily', '3x_week', '2x_week'].includes(item.frequency)
+        ? item.frequency
+        : 'daily',
+      videoUrl: null,
+      imageUrls: [],
+      issueIds: (item.targetIssueIds || []).filter((id) => validIssueIds.has(id)),
+    }))
+
+    // Validate: ensure every issue has at least 1 exercise
+    const coveredIssueIds = new Set(pool.flatMap((e) => e.issueIds))
+    for (const issue of issues) {
+      if (!coveredIssueIds.has(issue.id)) {
+        pool.push(buildFallbackExercise(issue))
+      }
+    }
+
+    console.log(`Gemini generated ${pool.length} exercises for ${issues.length} issues`)
+    return pool
+  } catch (error) {
+    console.error('Gemini exercise generation failed, using fallback:', error)
+    return buildFallbackPool(issues)
+  }
 }
+
+async function gatherRagContext(
+  issues: Array<{ title: string; category: string }>,
+  sportSlug: string,
+  techniqueSlug: string,
+  techniqueName: string
+): Promise<string> {
+  const chunks: string[] = []
+
+  for (const issue of issues) {
+    try {
+      const ragChunks = await retrieveRelevantChunks(
+        `${issue.title} ${issue.category} ejercicio drill corrección ${techniqueName}`,
+        {
+          sportSlug,
+          category: ['EXERCISE', 'TRAINING_PLAN'],
+          technique: techniqueSlug,
+          limit: 2,
+          threshold: 0.35,
+        }
+      )
+
+      for (const chunk of ragChunks) {
+        chunks.push(
+          `--- Referencia (relevancia: ${chunk.similarity.toFixed(2)}) ---\n${chunk.content.substring(0, 500)}`
+        )
+      }
+    } catch {
+      // RAG retrieval failed for this issue, continue
+    }
+  }
+
+  // Deduplicate by content prefix
+  const seen = new Set<string>()
+  const unique = chunks.filter((c) => {
+    const key = c.substring(0, 100)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+
+  return unique.join('\n\n')
+}
+
+function buildFallbackExercise(issue: {
+  id: string
+  title: string
+  description: string
+  correction: string
+  severity: Severity
+}): ExerciseBlueprint {
+  return {
+    name: `Corrección: ${issue.title}`.substring(0, 60),
+    description: issue.description,
+    instructions: issue.correction,
+    sets: 3,
+    reps: 15,
+    durationMins: null,
+    frequency: calculateFrequency(issue.severity),
+    videoUrl: null,
+    imageUrls: [],
+    issueIds: [issue.id],
+  }
+}
+
+function buildFallbackPool(
+  issues: Array<{
+    id: string
+    title: string
+    description: string
+    correction: string
+    severity: Severity
+    drills: string[]
+  }>
+): ExerciseBlueprint[] {
+  const pool: ExerciseBlueprint[] = []
+
+  for (const issue of issues) {
+    // Use drills if available
+    for (const drill of issue.drills.slice(0, 2)) {
+      const drillName = drill.includes(':') ? drill.split(':')[0].trim() : drill
+      const drillInstructions = drill.includes(':')
+        ? drill.split(':').slice(1).join(':').trim()
+        : issue.correction
+
+      pool.push({
+        name: drillName.substring(0, 60),
+        description: `Ejercicio para mejorar: ${issue.title}`,
+        instructions: drillInstructions,
+        sets: 3,
+        reps: 15,
+        durationMins: null,
+        frequency: calculateFrequency(issue.severity),
+        videoUrl: null,
+        imageUrls: [],
+        issueIds: [issue.id],
+      })
+    }
+
+    // Always add a correction exercise if no drills
+    if (issue.drills.length === 0) {
+      pool.push(buildFallbackExercise(issue))
+    }
+  }
+
+  return pool
+}
+
+// --- Helpers ---
 
 function applyProgression(
   base: { sets: number | null; reps: number | null; durationMins: number | null },
@@ -405,24 +471,4 @@ function calculateFrequency(severity: Severity): string {
     case 'LOW':
       return '2x_week'
   }
-}
-
-function extractExerciseName(text: string): string {
-  // Try to extract a title-like first line
-  const firstLine = text.split('\n')[0].trim()
-  // Remove numbering like "1.", "1)", "- "
-  const cleaned = firstLine.replace(/^[\d]+[.)]\s*/, '').replace(/^[-•]\s*/, '')
-  // Cap at 60 chars
-  if (cleaned.length > 0 && cleaned.length <= 60) return cleaned
-  if (cleaned.length > 60) return cleaned.substring(0, 57) + '...'
-  return 'Ejercicio de referencia'
-}
-
-function extractNumber(text: string, pattern: RegExp): number | null {
-  const match = text.match(pattern)
-  if (match) {
-    const num = parseInt(match[1], 10)
-    if (!isNaN(num) && num > 0 && num < 1000) return num
-  }
-  return null
 }
