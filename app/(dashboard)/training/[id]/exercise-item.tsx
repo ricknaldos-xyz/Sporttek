@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { CheckCircle, Circle, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useProgress } from '@/hooks/useProgress'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassBadge } from '@/components/ui/glass-badge'
 
 interface ExerciseItemProps {
   exercise: {
@@ -41,12 +42,12 @@ export function ExerciseItem({ exercise, trainingPlanId }: ExerciseItemProps) {
   return (
     <div
       className={cn(
-        'p-5 transition-colors',
-        isCompleted && 'bg-green-50/50 dark:bg-green-950/20'
+        'p-5 transition-all duration-[var(--duration-normal)]',
+        isCompleted && 'bg-success/5'
       )}
     >
       <div className="flex items-start gap-4">
-        <Button
+        <GlassButton
           variant="ghost"
           size="icon"
           onClick={handleToggle}
@@ -54,8 +55,8 @@ export function ExerciseItem({ exercise, trainingPlanId }: ExerciseItemProps) {
           className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5',
             isCompleted
-              ? 'bg-green-100 text-green-600 hover:bg-green-200'
-              : 'bg-muted hover:bg-muted/80'
+              ? 'bg-success/20 text-success hover:bg-success/30'
+              : 'glass-ultralight border-glass hover:glass-light'
           )}
         >
           {isLoading ? (
@@ -65,7 +66,7 @@ export function ExerciseItem({ exercise, trainingPlanId }: ExerciseItemProps) {
           ) : (
             <Circle className="h-5 w-5 text-muted-foreground" />
           )}
-        </Button>
+        </GlassButton>
         <div className="flex-1">
           <h4 className={cn('font-medium', isCompleted && 'line-through text-muted-foreground')}>
             {exercise.name}
@@ -74,33 +75,33 @@ export function ExerciseItem({ exercise, trainingPlanId }: ExerciseItemProps) {
             {exercise.description}
           </p>
 
-          <div className="flex flex-wrap gap-3 mt-3 text-sm">
+          <div className="flex flex-wrap gap-2 mt-3 text-sm">
             {exercise.sets && (
-              <span className="bg-muted px-2 py-1 rounded">
+              <GlassBadge variant="default">
                 {exercise.sets} series
-              </span>
+              </GlassBadge>
             )}
             {exercise.reps && (
-              <span className="bg-muted px-2 py-1 rounded">
+              <GlassBadge variant="default">
                 {exercise.reps} repeticiones
-              </span>
+              </GlassBadge>
             )}
             {exercise.durationMins && (
-              <span className="bg-muted px-2 py-1 rounded">
+              <GlassBadge variant="default">
                 {exercise.durationMins} minutos
-              </span>
+              </GlassBadge>
             )}
-            <span className="bg-primary/10 text-primary px-2 py-1 rounded">
+            <GlassBadge variant="primary">
               {exercise.frequency === 'daily'
                 ? 'Diario'
                 : exercise.frequency === '3x_week'
                 ? '3x semana'
                 : '2x semana'}
-            </span>
+            </GlassBadge>
           </div>
 
           {exercise.instructions && (
-            <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+            <div className="mt-3 p-3 glass-ultralight border-glass rounded-xl">
               <p className="text-sm">{exercise.instructions}</p>
             </div>
           )}

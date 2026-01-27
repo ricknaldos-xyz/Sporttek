@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassCard } from '@/components/ui/glass-card'
 import { toast } from 'sonner'
 import { Loader2, Dumbbell, ArrowLeft, Check } from 'lucide-react'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 export function GeneratePlanForm() {
   const router = useRouter()
@@ -53,11 +55,11 @@ export function GeneratePlanForm() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" size="icon" asChild>
+        <GlassButton variant="ghost" size="icon" asChild>
           <Link href={`/analyses/${analysisId}`}>
             <ArrowLeft className="h-5 w-5" />
           </Link>
-        </Button>
+        </GlassButton>
         <div>
           <h1 className="text-2xl font-bold">Generar Plan de Entrenamiento</h1>
           <p className="text-muted-foreground">
@@ -66,9 +68,11 @@ export function GeneratePlanForm() {
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-6 space-y-6">
-        <div className="flex items-center gap-4 p-4 bg-primary/5 rounded-lg">
-          <Dumbbell className="h-10 w-10 text-primary" />
+      <GlassCard intensity="medium" padding="lg" className="space-y-6">
+        <div className="flex items-center gap-4 p-4 glass-primary border-glass rounded-xl">
+          <div className="glass-light border-glass rounded-xl p-2">
+            <Dumbbell className="h-8 w-8 text-primary" />
+          </div>
           <div>
             <h3 className="font-semibold">Plan Personalizado</h3>
             <p className="text-sm text-muted-foreground">
@@ -87,11 +91,12 @@ export function GeneratePlanForm() {
               <button
                 key={w}
                 onClick={() => setWeeks(w)}
-                className={`p-3 rounded-lg border-2 text-center transition-colors ${
+                className={cn(
+                  'p-3 rounded-xl text-center transition-all duration-[var(--duration-normal)]',
                   weeks === w
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'border-border hover:border-primary/50'
-                }`}
+                    ? 'glass-primary border-glass shadow-glass-glow text-primary'
+                    : 'glass-ultralight border-glass hover:glass-light'
+                )}
               >
                 <span className="text-lg font-semibold">{w}</span>
                 <span className="block text-xs text-muted-foreground">
@@ -113,16 +118,19 @@ export function GeneratePlanForm() {
               'Seguimiento de progreso dia a dia',
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-2 text-sm">
-                <Check className="h-4 w-4 text-green-600" />
+                <div className="bg-success/20 rounded-full p-0.5">
+                  <Check className="h-3 w-3 text-success" />
+                </div>
                 {item}
               </li>
             ))}
           </ul>
         </div>
 
-        <Button
+        <GlassButton
           onClick={handleGenerate}
           disabled={generating}
+          variant="solid"
           className="w-full"
           size="lg"
         >
@@ -137,8 +145,8 @@ export function GeneratePlanForm() {
               Generar Plan de {weeks} Semanas
             </>
           )}
-        </Button>
-      </div>
+        </GlassButton>
+      </GlassCard>
     </div>
   )
 }

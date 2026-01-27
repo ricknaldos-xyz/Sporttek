@@ -2,7 +2,8 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassCard } from '@/components/ui/glass-card'
 import {
   ArrowLeft,
   Calendar,
@@ -69,11 +70,11 @@ export default async function TrainingPlanDetailPage({
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <GlassButton variant="ghost" size="icon" asChild>
           <Link href="/training">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-        </Button>
+        </GlassButton>
         <div className="flex-1">
           <h1 className="text-2xl font-bold">{plan.title}</h1>
           <p className="text-muted-foreground">
@@ -84,39 +85,47 @@ export default async function TrainingPlanDetailPage({
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-card border border-border rounded-xl p-4">
-          <Calendar className="h-5 w-5 text-muted-foreground mb-2" />
+        <GlassCard intensity="light" padding="md">
+          <div className="glass-ultralight border-glass rounded-lg p-1.5 w-fit mb-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </div>
           <div className="text-2xl font-bold">{plan.durationDays}</div>
           <div className="text-sm text-muted-foreground">Dias</div>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <Dumbbell className="h-5 w-5 text-muted-foreground mb-2" />
+        </GlassCard>
+        <GlassCard intensity="light" padding="md">
+          <div className="glass-ultralight border-glass rounded-lg p-1.5 w-fit mb-2">
+            <Dumbbell className="h-4 w-4 text-muted-foreground" />
+          </div>
           <div className="text-2xl font-bold">{totalExercises}</div>
           <div className="text-sm text-muted-foreground">Ejercicios</div>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <CheckCircle className="h-5 w-5 text-green-600 mb-2" />
+        </GlassCard>
+        <GlassCard intensity="light" padding="md">
+          <div className="bg-success/20 border border-success/30 rounded-lg p-1.5 w-fit mb-2">
+            <CheckCircle className="h-4 w-4 text-success" />
+          </div>
           <div className="text-2xl font-bold">{completedExercises}</div>
           <div className="text-sm text-muted-foreground">Completados</div>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <Clock className="h-5 w-5 text-muted-foreground mb-2" />
+        </GlassCard>
+        <GlassCard intensity="light" padding="md">
+          <div className="glass-ultralight border-glass rounded-lg p-1.5 w-fit mb-2">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </div>
           <div className="text-2xl font-bold">
             {Math.round((completedExercises / totalExercises) * 100)}%
           </div>
           <div className="text-sm text-muted-foreground">Progreso</div>
-        </div>
+        </GlassCard>
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-card border border-border rounded-xl p-4">
+      <GlassCard intensity="light" padding="md">
         <div className="flex justify-between text-sm mb-2">
           <span className="font-medium">Progreso General</span>
           <span className="text-muted-foreground">
             {completedExercises} de {totalExercises} ejercicios
           </span>
         </div>
-        <div className="h-3 bg-muted rounded-full overflow-hidden">
+        <div className="h-3 glass-ultralight border-glass rounded-full overflow-hidden">
           <div
             className="h-full bg-primary rounded-full transition-all"
             style={{
@@ -124,14 +133,14 @@ export default async function TrainingPlanDetailPage({
             }}
           />
         </div>
-      </div>
+      </GlassCard>
 
       {/* Description */}
       {plan.description && (
-        <div className="bg-card border border-border rounded-xl p-5">
+        <GlassCard intensity="light" padding="lg">
           <h2 className="font-semibold mb-2">Descripcion del Plan</h2>
           <p className="text-muted-foreground">{plan.description}</p>
-        </div>
+        </GlassCard>
       )}
 
       {/* Exercises by Day */}
@@ -139,14 +148,16 @@ export default async function TrainingPlanDetailPage({
         <h2 className="text-lg font-semibold">Ejercicios por Dia</h2>
 
         {Object.entries(exercisesByDay).map(([day, exercises]) => (
-          <div
+          <GlassCard
             key={day}
-            className="bg-card border border-border rounded-xl overflow-hidden"
+            intensity="light"
+            padding="none"
+            className="overflow-hidden"
           >
-            <div className="bg-muted/50 px-5 py-3 border-b border-border">
+            <div className="glass-primary px-5 py-3 border-b border-glass">
               <h3 className="font-semibold">Dia {day}</h3>
             </div>
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-glass-border-light">
               {exercises.map((exercise) => (
                 <ExerciseItem
                   key={exercise.id}
@@ -155,19 +166,19 @@ export default async function TrainingPlanDetailPage({
                 />
               ))}
             </div>
-          </div>
+          </GlassCard>
         ))}
       </div>
 
       {/* Link to Analysis */}
-      <div className="bg-muted/50 rounded-xl p-5 text-center">
+      <GlassCard intensity="ultralight" padding="lg" className="text-center">
         <p className="text-muted-foreground mb-3">
           Este plan fue generado basado en tu analisis de tecnica
         </p>
-        <Button variant="outline" asChild>
+        <GlassButton variant="outline" asChild>
           <Link href={`/analyses/${plan.analysisId}`}>Ver Analisis Original</Link>
-        </Button>
-      </div>
+        </GlassButton>
+      </GlassCard>
     </div>
   )
 }

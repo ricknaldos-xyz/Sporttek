@@ -2,7 +2,9 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Dumbbell, Calendar, CheckCircle, ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassCard } from '@/components/ui/glass-card'
+import { GlassBadge } from '@/components/ui/glass-badge'
 import { formatDate } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
@@ -25,11 +27,11 @@ async function getTrainingPlans(userId: string) {
   })
 }
 
-const statusColors = {
-  ACTIVE: 'bg-green-100 text-green-700',
-  PAUSED: 'bg-yellow-100 text-yellow-700',
-  COMPLETED: 'bg-blue-100 text-blue-700',
-  ABANDONED: 'bg-gray-100 text-gray-700',
+const statusVariants = {
+  ACTIVE: 'success' as const,
+  PAUSED: 'warning' as const,
+  COMPLETED: 'primary' as const,
+  ABANDONED: 'default' as const,
 }
 
 const statusLabels = {
@@ -68,63 +70,63 @@ export default async function TrainingPage() {
           </h2>
           <div className="grid gap-4 md:grid-cols-2">
             {activePlans.map((plan) => (
-              <Link
+              <GlassCard
                 key={plan.id}
-                href={`/training/${plan.id}`}
-                className="bg-card border-2 border-primary/20 rounded-xl p-5 hover:border-primary/50 transition-colors"
+                intensity="primary"
+                padding="lg"
+                hover="glow"
+                className="cursor-pointer"
+                asChild
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-semibold">{plan.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {plan.analysis.technique.name} -{' '}
-                      {plan.analysis.technique.sport.name}
-                    </p>
+                <Link href={`/training/${plan.id}`}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold">{plan.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {plan.analysis.technique.name} -{' '}
+                        {plan.analysis.technique.sport.name}
+                      </p>
+                    </div>
+                    <GlassBadge variant={statusVariants[plan.status]}>
+                      {statusLabels[plan.status]}
+                    </GlassBadge>
                   </div>
-                  <span
-                    className={cn(
-                      'px-2 py-1 rounded-md text-xs font-medium',
-                      statusColors[plan.status]
-                    )}
-                  >
-                    {statusLabels[plan.status]}
-                  </span>
-                </div>
 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {plan.durationDays} dias
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Dumbbell className="h-4 w-4" />
-                    {plan._count.exercises} ejercicios
-                  </span>
-                </div>
-
-                {/* Progress bar */}
-                <div className="mt-3">
-                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>Progreso</span>
-                    <span>
-                      {plan._count.progressLogs} / {plan._count.exercises * plan.durationDays}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      {plan.durationDays} dias
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Dumbbell className="h-4 w-4" />
+                      {plan._count.exercises} ejercicios
                     </span>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          (plan._count.progressLogs /
-                            (plan._count.exercises * plan.durationDays)) *
-                            100
-                        )}%`,
-                      }}
-                    />
+
+                  {/* Progress bar */}
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                      <span>Progreso</span>
+                      <span>
+                        {plan._count.progressLogs} / {plan._count.exercises * plan.durationDays}
+                      </span>
+                    </div>
+                    <div className="h-2 glass-ultralight border-glass rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            (plan._count.progressLogs /
+                              (plan._count.exercises * plan.durationDays)) *
+                              100
+                          )}%`,
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </GlassCard>
             ))}
           </div>
         </div>
@@ -134,25 +136,30 @@ export default async function TrainingPage() {
       {completedPlans.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-600" />
+            <CheckCircle className="h-5 w-5 text-success" />
             Planes Completados
           </h2>
           <div className="grid gap-4">
             {completedPlans.map((plan) => (
-              <Link
+              <GlassCard
                 key={plan.id}
-                href={`/training/${plan.id}`}
-                className="bg-card border border-border rounded-xl p-4 hover:border-primary/50 transition-colors flex items-center gap-4"
+                intensity="light"
+                padding="md"
+                hover="lift"
+                className="flex items-center gap-4 cursor-pointer"
+                asChild
               >
-                <div className="flex-1">
-                  <h3 className="font-medium">{plan.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {plan.analysis.technique.name} • Completado el{' '}
-                    {plan.completedAt ? formatDate(plan.completedAt) : 'N/A'}
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-muted-foreground" />
-              </Link>
+                <Link href={`/training/${plan.id}`}>
+                  <div className="flex-1">
+                    <h3 className="font-medium">{plan.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {plan.analysis.technique.name} • Completado el{' '}
+                      {plan.completedAt ? formatDate(plan.completedAt) : 'N/A'}
+                    </p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                </Link>
+              </GlassCard>
             ))}
           </div>
         </div>
@@ -164,29 +171,29 @@ export default async function TrainingPage() {
           <h2 className="text-lg font-semibold mb-4">Otros Planes</h2>
           <div className="grid gap-4">
             {otherPlans.map((plan) => (
-              <Link
+              <GlassCard
                 key={plan.id}
-                href={`/training/${plan.id}`}
-                className="bg-card border border-border rounded-xl p-4 hover:border-primary/50 transition-colors flex items-center gap-4"
+                intensity="ultralight"
+                padding="md"
+                hover="lift"
+                className="flex items-center gap-4 cursor-pointer"
+                asChild
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium">{plan.title}</h3>
-                    <span
-                      className={cn(
-                        'px-2 py-0.5 rounded-md text-xs font-medium',
-                        statusColors[plan.status]
-                      )}
-                    >
-                      {statusLabels[plan.status]}
-                    </span>
+                <Link href={`/training/${plan.id}`}>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium">{plan.title}</h3>
+                      <GlassBadge variant={statusVariants[plan.status]}>
+                        {statusLabels[plan.status]}
+                      </GlassBadge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {plan.analysis.technique.name}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {plan.analysis.technique.name}
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-muted-foreground" />
-              </Link>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                </Link>
+              </GlassCard>
             ))}
           </div>
         </div>
@@ -194,8 +201,10 @@ export default async function TrainingPage() {
 
       {/* Empty State */}
       {plans.length === 0 && (
-        <div className="bg-card border border-border rounded-xl p-12 text-center">
-          <Dumbbell className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+        <GlassCard intensity="light" padding="xl" className="text-center">
+          <div className="glass-ultralight border-glass rounded-2xl p-4 w-fit mx-auto mb-4">
+            <Dumbbell className="h-12 w-12 text-muted-foreground" />
+          </div>
           <h3 className="text-lg font-medium mb-2">
             No tienes planes de entrenamiento
           </h3>
@@ -203,10 +212,10 @@ export default async function TrainingPage() {
             Primero realiza un analisis de tu tecnica, y luego podras generar un
             plan de entrenamiento personalizado
           </p>
-          <Button asChild>
+          <GlassButton variant="solid" asChild>
             <Link href="/analyze">Crear Analisis</Link>
-          </Button>
-        </div>
+          </GlassButton>
+        </GlassCard>
       )}
     </div>
   )
