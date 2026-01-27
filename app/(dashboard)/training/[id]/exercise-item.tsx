@@ -1,11 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, Circle, Loader2 } from 'lucide-react'
+import { CheckCircle, Circle, Loader2, ChevronDown } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useProgress } from '@/hooks/useProgress'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
+import { parseExerciseInstructions } from '@/lib/training/parse-instructions'
+import { ExerciseSteps } from './exercise-steps'
+import { ExerciseDetails } from './exercise-details'
 
 interface ExerciseItemProps {
   exercise: {
@@ -25,9 +29,24 @@ interface ExerciseItemProps {
   trainingPlanId: string
 }
 
+const DIFFICULTY_COLORS = {
+  principiante: 'bg-success/15 text-success border-success/30',
+  intermedio: 'bg-warning/15 text-warning border-warning/30',
+  avanzado: 'bg-destructive/15 text-destructive border-destructive/30',
+} as const
+
+const DIFFICULTY_LABELS = {
+  principiante: 'Principiante',
+  intermedio: 'Intermedio',
+  avanzado: 'Avanzado',
+} as const
+
 export function ExerciseItem({ exercise, trainingPlanId }: ExerciseItemProps) {
   const [isCompleted, setIsCompleted] = useState(exercise.progressLogs.length > 0)
+  const [isExpanded, setIsExpanded] = useState(false)
   const { toggleExercise, isLoading } = useProgress(trainingPlanId)
+
+  const structured = parseExerciseInstructions(exercise.instructions)
 
   function handleToggle() {
     const newCompleted = !isCompleted
@@ -67,15 +86,49 @@ export function ExerciseItem({ exercise, trainingPlanId }: ExerciseItemProps) {
             <Circle className="h-5 w-5 text-muted-foreground" />
           )}
         </GlassButton>
-        <div className="flex-1">
-          <h4 className={cn('font-medium', isCompleted && 'line-through text-muted-foreground')}>
-            {exercise.name}
-          </h4>
-          <p className="text-sm text-muted-foreground mt-1">
-            {exercise.description}
-          </p>
 
+        <div className="flex-1 min-w-0">
+          {/* Header row */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <h4 className={cn('font-medium', isCompleted && 'line-through text-muted-foreground')}>
+                {exercise.name}
+              </h4>
+              {structured ? (
+                <p className="text-sm text-muted-foreground mt-1">{structured.summary}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-1">{exercise.description}</p>
+              )}
+            </div>
+
+            {/* Expand button (only if structured data exists) */}
+            {structured && (
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex-shrink-0 p-1.5 rounded-lg hover:bg-foreground/5 transition-colors"
+              >
+                <ChevronDown
+                  className={cn(
+                    'h-4 w-4 text-muted-foreground transition-transform duration-200',
+                    isExpanded && 'rotate-180'
+                  )}
+                />
+              </button>
+            )}
+          </div>
+
+          {/* Badges row */}
           <div className="flex flex-wrap gap-2 mt-3 text-sm">
+            {structured && (
+              <span
+                className={cn(
+                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border',
+                  DIFFICULTY_COLORS[structured.difficulty]
+                )}
+              >
+                {DIFFICULTY_LABELS[structured.difficulty]}
+              </span>
+            )}
             {exercise.sets && (
               <GlassBadge variant="default">
                 {exercise.sets} series
@@ -100,7 +153,36 @@ export function ExerciseItem({ exercise, trainingPlanId }: ExerciseItemProps) {
             </GlassBadge>
           </div>
 
-          {exercise.instructions && (
+          {/* Expanded structured content */}
+          <AnimatePresence>
+            {isExpanded && structured && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="mt-4 space-y-5 pb-1">
+                  {/* Steps timeline */}
+                  <div className="p-4 glass-ultralight border-glass rounded-xl">
+                    <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                      Pasos
+                    </h5>
+                    <ExerciseSteps steps={structured.steps} />
+                  </div>
+
+                  {/* Details: key points, mistakes, equipment, muscles */}
+                  <div className="p-4 glass-ultralight border-glass rounded-xl">
+                    <ExerciseDetails data={structured} />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Fallback: plain text instructions for old plans */}
+          {!structured && exercise.instructions && (
             <div className="mt-3 p-3 glass-ultralight border-glass rounded-xl">
               <p className="text-sm">{exercise.instructions}</p>
             </div>

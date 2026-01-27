@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Severity } from '@prisma/client'
 import { retrieveRelevantChunks } from '@/lib/rag/retriever'
+import { enrichExercisesWithStructuredContent } from '@/lib/training/enrichment'
 
 interface GeneratePlanOptions {
   analysisId: string
@@ -284,6 +285,22 @@ export async function generateTrainingPlan({
       })
     })
   )
+
+  // Enrich exercises with structured step-by-step content
+  try {
+    await enrichExercisesWithStructuredContent(
+      exercises.map((ex) => ({
+        id: ex.id,
+        name: ex.name,
+        description: ex.description,
+        instructions: ex.instructions,
+      })),
+      analysis.technique.sport.name,
+      analysis.technique.name
+    )
+  } catch (error) {
+    console.warn('Exercise enrichment failed, falling back to basic instructions:', error)
+  }
 
   // Create exercise-issue links
   const exerciseIssueLinks = exercisesToCreate
