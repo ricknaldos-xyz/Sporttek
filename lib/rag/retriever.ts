@@ -56,7 +56,7 @@ export async function retrieveRelevantChunks(
 
   if (category) {
     const categories = Array.isArray(category) ? category : [category]
-    const placeholders = categories.map((_, i) => `$${paramIdx + i}`).join(', ')
+    const placeholders = categories.map((_, i) => `$${paramIdx + i}::"ChunkCategory"`).join(', ')
     conditions.push(`dc.category IN (${placeholders})`)
     params.push(...categories)
     paramIdx += categories.length
