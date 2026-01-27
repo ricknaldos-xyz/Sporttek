@@ -18,26 +18,31 @@ const navigation = [
     name: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
+    tourId: 'dashboard',
   },
   {
     name: 'Nuevo Analisis',
     href: '/analyze',
     icon: Video,
+    tourId: 'new-analysis',
   },
   {
     name: 'Mis Analisis',
     href: '/analyses',
     icon: History,
+    tourId: 'analyses',
   },
   {
     name: 'Entrenamiento',
     href: '/training',
     icon: Dumbbell,
+    tourId: 'training',
   },
   {
     name: 'Perfil',
     href: '/profile',
     icon: User,
+    tourId: 'profile',
   },
 ]
 
@@ -60,6 +65,7 @@ export function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
+              data-tour={item.tourId}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 isActive

@@ -50,6 +50,22 @@ enum MediaType {
   IMAGE
 }
 
+enum TokenType {
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+}
+
+enum BadgeType {
+  FIRST_ANALYSIS
+  WEEK_PERFECT
+  PLAN_COMPLETED
+  IMPROVEMENT
+  DEDICATION_30
+  STREAK_7
+  STREAK_30
+  STREAK_100
+}
+
 // ============================================
 // USER & AUTH
 // ============================================
@@ -62,6 +78,12 @@ model User {
   image         String?
   role          UserRole         @default(USER)
   subscription  SubscriptionTier @default(FREE)
+
+  // Email verification
+  emailVerified DateTime?
+
+  // Onboarding
+  onboardingCompleted Boolean @default(false)
 
   // Stripe fields
   stripeCustomerId       String?   @unique
@@ -78,6 +100,14 @@ model User {
   analyses        Analysis[]
   trainingPlans   TrainingPlan[]
   progressLogs    ProgressLog[]
+
+  // Gamification
+  streak          UserStreak?
+  badges          UserBadge[]
+  activityLogs    ActivityLog[]
+
+  // Auth tokens
+  verificationTokens VerificationToken[]
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -181,9 +211,11 @@ model Analysis {
 
   mediaItems    MediaItem[]
 
-  status        AnalysisStatus @default(PENDING)
-  errorMessage  String?
-  processingMs  Int?
+  status              AnalysisStatus @default(PENDING)
+  errorMessage        String?
+  processingMs        Int?
+  processingStartedAt DateTime?
+  retryCount          Int            @default(0)
 
   overallScore  Float?
   aiResponse    Json?
@@ -378,4 +410,72 @@ model ExerciseTemplate {
   updatedAt   DateTime @updatedAt
 
   @@map("exercise_templates")
+}
+
+// ============================================
+// AUTH & VERIFICATION
+// ============================================
+
+model VerificationToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  type      TokenType
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@map("verification_tokens")
+}
+
+// ============================================
+// GAMIFICATION
+// ============================================
+
+model UserStreak {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak    Int       @default(0)
+  longestStreak    Int       @default(0)
+  lastActivityAt   DateTime?
+  freezesAvailable Int       @default(1)
+  freezeUsedAt     DateTime?
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("user_streaks")
+}
+
+model UserBadge {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeType BadgeType
+  earnedAt  DateTime  @default(now())
+
+  @@unique([userId, badgeType])
+  @@index([userId])
+  @@map("user_badges")
+}
+
+model ActivityLog {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          DateTime @db.Date
+  analysisCount Int      @default(0)
+  exerciseCount Int      @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("activity_logs")
 }

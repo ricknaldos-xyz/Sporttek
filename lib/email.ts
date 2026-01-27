@@ -221,6 +221,143 @@ export function getTrainingReminderEmailHtml(
 `
 }
 
+export function getPasswordResetEmailHtml(name: string, resetUrl: string) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restablecer contrasena</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f4f5;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    <div style="background-color: white; border-radius: 16px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #18181b; font-size: 24px; margin: 0;">Restablecer Contrasena</h1>
+      </div>
+
+      <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
+        Hola ${name},
+      </p>
+
+      <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
+        Recibimos una solicitud para restablecer la contrasena de tu cuenta. Haz clic en el boton de abajo para crear una nueva contrasena.
+      </p>
+
+      <div style="text-align: center; margin-bottom: 32px;">
+        <a href="${resetUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+          Restablecer Contrasena
+        </a>
+      </div>
+
+      <p style="color: #71717a; font-size: 14px; margin-bottom: 16px;">
+        Este enlace expirara en 1 hora por seguridad.
+      </p>
+
+      <p style="color: #71717a; font-size: 14px;">
+        Si no solicitaste restablecer tu contrasena, puedes ignorar este email. Tu contrasena permanecera sin cambios.
+      </p>
+    </div>
+
+    <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
+      ${new Date().getFullYear()} SportTech. Todos los derechos reservados.
+    </p>
+  </div>
+</body>
+</html>
+`
+}
+
+export function getEmailVerificationHtml(name: string, verifyUrl: string) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifica tu email</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f4f5;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    <div style="background-color: white; border-radius: 16px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #18181b; font-size: 24px; margin: 0;">Verifica tu Email</h1>
+      </div>
+
+      <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
+        Hola ${name},
+      </p>
+
+      <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
+        Gracias por registrarte en SportTech. Por favor verifica tu direccion de email haciendo clic en el boton de abajo.
+      </p>
+
+      <div style="text-align: center; margin-bottom: 32px;">
+        <a href="${verifyUrl}" style="display: inline-block; background-color: #22c55e; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+          Verificar Email
+        </a>
+      </div>
+
+      <p style="color: #71717a; font-size: 14px;">
+        Este enlace expirara en 24 horas. Si no creaste una cuenta en SportTech, puedes ignorar este email.
+      </p>
+    </div>
+
+    <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
+      ${new Date().getFullYear()} SportTech. Todos los derechos reservados.
+    </p>
+  </div>
+</body>
+</html>
+`
+}
+
+export function getStreakAtRiskEmailHtml(name: string, currentStreak: number) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tu racha esta en riesgo</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f4f5;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    <div style="background-color: white; border-radius: 16px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="font-size: 64px; margin-bottom: 16px;">🔥</div>
+        <h1 style="color: #18181b; font-size: 24px; margin: 0;">Tu Racha Esta en Riesgo</h1>
+      </div>
+
+      <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
+        Hola ${name},
+      </p>
+
+      <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
+        Tu racha de <strong style="color: #f97316;">${currentStreak} dias</strong> esta a punto de perderse. No dejes que todo tu progreso desaparezca.
+      </p>
+
+      <div style="text-align: center; margin-bottom: 32px;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="display: inline-block; background-color: #f97316; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+          Mantener Mi Racha
+        </a>
+      </div>
+
+      <p style="color: #71717a; font-size: 14px; text-align: center;">
+        Solo necesitas completar un ejercicio o analisis para mantener tu racha.
+      </p>
+    </div>
+
+    <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
+      ${new Date().getFullYear()} SportTech. Todos los derechos reservados.
+    </p>
+  </div>
+</body>
+</html>
+`
+}
+
 // Helper functions to send specific emails
 
 export async function sendWelcomeEmail(email: string, name: string) {
@@ -263,5 +400,43 @@ export async function sendTrainingReminderEmail(
       completedCount,
       trainingPlanId
     ),
+  })
+}
+
+export async function sendPasswordResetEmail(
+  email: string,
+  name: string,
+  token: string
+) {
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password/${token}`
+  return sendEmail({
+    to: email,
+    subject: 'Restablecer tu contrasena - SportTech',
+    html: getPasswordResetEmailHtml(name, resetUrl),
+  })
+}
+
+export async function sendEmailVerification(
+  email: string,
+  name: string,
+  token: string
+) {
+  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email/${token}`
+  return sendEmail({
+    to: email,
+    subject: 'Verifica tu email - SportTech',
+    html: getEmailVerificationHtml(name, verifyUrl),
+  })
+}
+
+export async function sendStreakAtRiskEmail(
+  email: string,
+  name: string,
+  currentStreak: number
+) {
+  return sendEmail({
+    to: email,
+    subject: `Tu racha de ${currentStreak} dias esta en riesgo`,
+    html: getStreakAtRiskEmailHtml(name, currentStreak),
   })
 }

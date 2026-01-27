@@ -27,6 +27,17 @@ async function createProgress(data: ProgressData) {
     throw new Error(error.error || 'Error al guardar progreso')
   }
 
+  // Log activity for streaks when exercise is completed
+  if (data.completed) {
+    fetch('/api/gamification/activity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'exercise' }),
+    }).catch(() => {
+      // Non-blocking - don't fail the main operation
+    })
+  }
+
   return response.json()
 }
 

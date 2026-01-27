@@ -5,9 +5,14 @@ import { Video, History, Dumbbell, TrendingUp, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatRelativeTime } from '@/lib/utils'
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts'
+import { EmailVerificationBanner } from '@/components/banners/EmailVerificationBanner'
+import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist'
+import { StreakWidget } from '@/components/gamification/StreakWidget'
+import { RecentBadgesCard } from '@/components/dashboard/RecentBadgesCard'
+import { ActivityHeatmap } from '@/components/gamification/ActivityHeatmap'
 
 async function getStats(userId: string) {
-  const [analysesCount, plansCount, completedPlans, recentAnalyses] =
+  const [analysesCount, plansCount, completedPlans, recentAnalyses, user] =
     await Promise.all([
       prisma.analysis.count({ where: { userId } }),
       prisma.trainingPlan.count({ where: { userId } }),
@@ -22,9 +27,13 @@ async function getStats(userId: string) {
           },
         },
       }),
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { emailVerified: true, email: true },
+      }),
     ])
 
-  return { analysesCount, plansCount, completedPlans, recentAnalyses }
+  return { analysesCount, plansCount, completedPlans, recentAnalyses, user }
 }
 
 export default async function DashboardPage() {
@@ -44,6 +53,20 @@ export default async function DashboardPage() {
           Bienvenido a tu panel de entrenamiento
         </p>
       </div>
+
+      {/* Email Verification Banner */}
+      {stats.user && !stats.user.emailVerified && (
+        <EmailVerificationBanner userEmail={stats.user.email} />
+      )}
+
+      {/* Onboarding Checklist */}
+      <OnboardingChecklist
+        analysisCount={stats.analysesCount}
+        trainingPlanCount={stats.plansCount}
+      />
+
+      {/* Streak Widget */}
+      <StreakWidget />
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -79,6 +102,12 @@ export default async function DashboardPage() {
 
       {/* Charts */}
       <DashboardCharts />
+
+      {/* Activity Heatmap */}
+      <ActivityHeatmap />
+
+      {/* Recent Badges */}
+      <RecentBadgesCard />
 
       {/* Recent Analyses */}
       <div>

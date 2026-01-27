@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -51,7 +52,22 @@ export default function RegisterPage() {
       }
 
       toast.success('Cuenta creada exitosamente!')
-      router.push('/login')
+
+      // Auto-login after successful registration
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        // If auto-login fails, redirect to login page
+        router.push('/login')
+        return
+      }
+
+      // Redirect to dashboard on successful login
+      router.push('/dashboard')
     } catch {
       toast.error('Algo salio mal')
       setIsLoading(false)

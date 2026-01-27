@@ -12,6 +12,9 @@ import {
   Play,
 } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
+import { RetryAnalysisButton } from '@/components/analysis/RetryAnalysisButton'
+import { ScoreContext } from '@/components/analysis/ScoreContext'
+import { SeverityExplainer } from '@/components/analysis/SeverityExplainer'
 
 async function getAnalysis(id: string, userId: string) {
   return prisma.analysis.findFirst({
@@ -26,6 +29,9 @@ async function getAnalysis(id: string, userId: string) {
         orderBy: { severity: 'desc' },
       },
       trainingPlan: true,
+      previousAnalysis: {
+        select: { overallScore: true },
+      },
     },
   })
 }
@@ -103,11 +109,17 @@ export default async function AnalysisDetailPage({
       )}
 
       {analysis.status === 'FAILED' && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-          <AlertTriangle className="h-5 w-5 text-red-500" />
-          <div>
-            <p className="text-red-700 font-medium">Error al procesar</p>
-            <p className="text-red-600 text-sm">{analysis.errorMessage}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-red-700 font-medium">Error al procesar</p>
+              <p className="text-red-600 text-sm mb-3">{analysis.errorMessage}</p>
+              <RetryAnalysisButton
+                analysisId={analysis.id}
+                retryCount={analysis.retryCount}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -147,6 +159,14 @@ export default async function AnalysisDetailPage({
 
       {analysis.status === 'COMPLETED' && (
         <>
+          {/* Score Context */}
+          {analysis.overallScore && (
+            <ScoreContext
+              score={analysis.overallScore}
+              previousScore={analysis.previousAnalysis?.overallScore ?? undefined}
+            />
+          )}
+
           {/* Summary */}
           {analysis.summary && (
             <div className="bg-card border border-border rounded-xl p-5">
@@ -187,9 +207,12 @@ export default async function AnalysisDetailPage({
           {/* Issues */}
           {analysis.issues.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">
-                Problemas Detectados ({analysis.issues.length})
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">
+                  Problemas Detectados ({analysis.issues.length})
+                </h2>
+                <SeverityExplainer />
+              </div>
               {analysis.issues.map((issue) => (
                 <div
                   key={issue.id}

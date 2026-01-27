@@ -1,9 +1,11 @@
 'use client'
 
-import { SessionProvider } from 'next-auth/react'
+import { SessionProvider, useSession } from 'next-auth/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
+import { OnboardingProvider } from '@/components/onboarding/OnboardingProvider'
+import { CelebrationOverlay } from '@/components/gamification/CelebrationOverlay'
 import { useState } from 'react'
 import { X, Target } from 'lucide-react'
 import Link from 'next/link'
@@ -20,11 +22,11 @@ import {
 const queryClient = new QueryClient()
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Nuevo Analisis', href: '/analyze', icon: Video },
-  { name: 'Mis Analisis', href: '/analyses', icon: History },
-  { name: 'Entrenamiento', href: '/training', icon: Dumbbell },
-  { name: 'Perfil', href: '/profile', icon: User },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard' },
+  { name: 'Nuevo Analisis', href: '/analyze', icon: Video, tourId: 'new-analysis' },
+  { name: 'Mis Analisis', href: '/analyses', icon: History, tourId: 'analyses' },
+  { name: 'Entrenamiento', href: '/training', icon: Dumbbell, tourId: 'training' },
+  { name: 'Perfil', href: '/profile', icon: User, tourId: 'profile' },
 ]
 
 export default function DashboardLayout({
@@ -91,8 +93,15 @@ export default function DashboardLayout({
           {/* Main content */}
           <div className="lg:pl-64">
             <Header onMenuClick={() => setMobileMenuOpen(true)} />
-            <main className="p-4 lg:p-6">{children}</main>
+            <main className="p-4 lg:p-6">
+              <OnboardingProvider isNewUser={true}>
+                {children}
+              </OnboardingProvider>
+            </main>
           </div>
+
+          {/* Celebration Overlay */}
+          <CelebrationOverlay />
         </div>
       </SessionProvider>
     </QueryClientProvider>

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { sendWelcomeEmail } from '@/lib/email'
+import { sendWelcomeEmail, sendEmailVerification } from '@/lib/email'
+import { generateToken } from '@/lib/tokens'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -58,6 +59,13 @@ export async function POST(request: NextRequest) {
     sendWelcomeEmail(email, name).catch((error) => {
       console.error('Failed to send welcome email:', error)
     })
+
+    // Send verification email (non-blocking)
+    generateToken(user.id, 'EMAIL_VERIFICATION')
+      .then((token) => sendEmailVerification(email, name, token))
+      .catch((error) => {
+        console.error('Failed to send verification email:', error)
+      })
 
     return NextResponse.json(
       { message: 'Usuario creado exitosamente', user },

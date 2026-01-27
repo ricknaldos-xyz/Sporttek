@@ -13,6 +13,8 @@ import {
   Check,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { VideoGuidelines } from '@/components/upload/VideoGuidelines'
+import { VideoRequirements } from '@/components/upload/VideoRequirements'
 
 interface Sport {
   id: string
@@ -472,7 +474,10 @@ export default function AnalyzePage() {
               para un mejor analisis
             </p>
 
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+            <VideoRequirements />
+            <VideoGuidelines />
+
+            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors mt-4">
               <input
                 type="file"
                 id="file-upload"

@@ -49,10 +49,20 @@ export async function POST(
       )
     }
 
+    if (analysis.status === 'PROCESSING') {
+      return NextResponse.json(
+        { error: 'Este analisis ya esta siendo procesado' },
+        { status: 400 }
+      )
+    }
+
     // Update status to processing
     await prisma.analysis.update({
       where: { id },
-      data: { status: 'PROCESSING' },
+      data: {
+        status: 'PROCESSING',
+        processingStartedAt: new Date(),
+      },
     })
 
     try {
@@ -175,6 +185,43 @@ export async function POST(
           console.error('Failed to send analysis complete email:', error)
         })
       }
+
+      // Log activity for streaks (non-blocking)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      prisma.activityLog.upsert({
+        where: {
+          userId_date: {
+            userId: session.user.id,
+            date: today,
+          },
+        },
+        update: {
+          analysisCount: { increment: 1 },
+        },
+        create: {
+          userId: session.user.id,
+          date: today,
+          analysisCount: 1,
+          exerciseCount: 0,
+        },
+      }).then(() => {
+        // Update streak
+        return prisma.userStreak.upsert({
+          where: { userId: session.user.id },
+          update: {
+            lastActivityAt: new Date(),
+          },
+          create: {
+            userId: session.user.id,
+            currentStreak: 1,
+            longestStreak: 1,
+            lastActivityAt: new Date(),
+          },
+        })
+      }).catch((error) => {
+        console.error('Failed to log activity:', error)
+      })
 
       return NextResponse.json(updatedAnalysis)
     } catch (error) {
