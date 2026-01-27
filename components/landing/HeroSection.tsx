@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Users, BarChart3, Star, Sparkles } from 'lucide-react'
+import { ArrowRight, Users, BarChart3, Star, Swords, Trophy } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
@@ -14,45 +14,47 @@ export function HeroSection() {
           {/* Trust Badges */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
             <GlassBadge variant="primary" size="lg">
-              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-              +1,000 deportistas activos
+              <Trophy className="h-3.5 w-3.5 mr-1.5" />
+              Rankings nacionales en vivo
             </GlassBadge>
             <GlassBadge variant="primary" size="lg">
-              <Star className="h-3.5 w-3.5 mr-1.5 fill-primary" />
-              4.9/5 satisfaccion
+              <Swords className="h-3.5 w-3.5 mr-1.5" />
+              Encuentra rivales de tu nivel
             </GlassBadge>
           </div>
 
           {/* Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            Perfecciona tu tecnica deportiva con{' '}
+            Compite. Mejora.{' '}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary to-primary/60">
-              Inteligencia Artificial
+              Domina.
             </span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            Sube un video de tu tecnica, obtiene un analisis detallado de
-            errores y recibe un plan de entrenamiento personalizado para
-            mejorar.
+            La plataforma de ranking, competencia y comunidad para tenistas amateur en Peru.
+            Sube videos, recibe tu skill score con IA, sube en el ranking nacional y encuentra rivales de tu nivel.
           </p>
 
-          {/* CTAs */}
+          {/* Dual CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <GlassButton variant="solid" size="xl" asChild>
-              <Link href="/register">
-                Comenzar gratis
+              <Link href="/register?type=player">
+                Soy Jugador
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </GlassButton>
             <GlassButton variant="outline" size="xl" asChild>
-              <Link href="#how-it-works">Ver como funciona</Link>
+              <Link href="/register?type=coach">
+                Soy Entrenador
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </GlassButton>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
             <GlassCard intensity="light" padding="md" hover="lift">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -60,7 +62,7 @@ export function HeroSection() {
                   <span className="text-2xl sm:text-3xl font-bold">+1,500</span>
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Usuarios activos
+                  Jugadores
                 </p>
               </div>
             </GlassCard>
@@ -71,7 +73,18 @@ export function HeroSection() {
                   <span className="text-2xl sm:text-3xl font-bold">+10,000</span>
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Analisis realizados
+                  Analisis IA
+                </p>
+              </div>
+            </GlassCard>
+            <GlassCard intensity="light" padding="md" hover="lift">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Swords className="h-5 w-5 text-primary" />
+                  <span className="text-2xl sm:text-3xl font-bold">+500</span>
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Partidos jugados
                 </p>
               </div>
             </GlassCard>
@@ -79,10 +92,10 @@ export function HeroSection() {
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Star className="h-5 w-5 text-primary fill-primary" />
-                  <span className="text-2xl sm:text-3xl font-bold">98%</span>
+                  <span className="text-2xl sm:text-3xl font-bold">+50</span>
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  Satisfaccion
+                  Entrenadores
                 </p>
               </div>
             </GlassCard>
@@ -90,7 +103,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Background decoration - animated blobs */}
+      {/* Background decoration */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/2 -right-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div

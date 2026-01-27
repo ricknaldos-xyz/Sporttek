@@ -1,0 +1,153 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { z } from 'zod'
+
+const createChallengeSchema = z.object({
+  challengedUserId: z.string(),
+  proposedDate: z.string().optional(),
+  proposedTime: z.string().optional(),
+  proposedVenue: z.string().optional(),
+  message: z.string().max(500).optional(),
+})
+
+// POST - Send a challenge
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const validated = createChallengeSchema.safeParse(body)
+
+    if (!validated.success) {
+      return NextResponse.json(
+        { error: validated.error.issues[0].message },
+        { status: 400 }
+      )
+    }
+
+    const { challengedUserId, proposedDate, proposedTime, proposedVenue, message } = validated.data
+
+    // Get both profiles
+    const [challengerProfile, challengedProfile] = await Promise.all([
+      prisma.playerProfile.findUnique({ where: { userId: session.user.id }, select: { id: true } }),
+      prisma.playerProfile.findUnique({ where: { userId: challengedUserId }, select: { id: true } }),
+    ])
+
+    if (!challengerProfile) {
+      return NextResponse.json({ error: 'Completa tu perfil primero' }, { status: 400 })
+    }
+    if (!challengedProfile) {
+      return NextResponse.json({ error: 'Jugador no encontrado' }, { status: 404 })
+    }
+    if (challengerProfile.id === challengedProfile.id) {
+      return NextResponse.json({ error: 'No puedes desafiarte a ti mismo' }, { status: 400 })
+    }
+
+    // Check for existing pending challenge
+    const existing = await prisma.challenge.findFirst({
+      where: {
+        challengerId: challengerProfile.id,
+        challengedId: challengedProfile.id,
+        status: 'PENDING',
+      },
+    })
+
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Ya tienes un desafio pendiente con este jugador' },
+        { status: 400 }
+      )
+    }
+
+    const expiresAt = new Date()
+    expiresAt.setHours(expiresAt.getHours() + 72)
+
+    const challenge = await prisma.challenge.create({
+      data: {
+        challengerId: challengerProfile.id,
+        challengedId: challengedProfile.id,
+        proposedDate: proposedDate ? new Date(proposedDate) : null,
+        proposedTime,
+        proposedVenue,
+        message,
+        expiresAt,
+      },
+    })
+
+    return NextResponse.json(challenge, { status: 201 })
+  } catch (error) {
+    console.error('Create challenge error:', error)
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+  }
+}
+
+// GET - List challenges (sent and received)
+export async function GET(request: NextRequest) {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const type = searchParams.get('type') || 'all' // 'sent', 'received', 'all'
+
+    const profile = await prisma.playerProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    })
+
+    if (!profile) {
+      return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {}
+    if (type === 'sent') {
+      where.challengerId = profile.id
+    } else if (type === 'received') {
+      where.challengedId = profile.id
+    } else {
+      where.OR = [
+        { challengerId: profile.id },
+        { challengedId: profile.id },
+      ]
+    }
+
+    const challenges = await prisma.challenge.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        challenger: {
+          select: {
+            userId: true,
+            displayName: true,
+            avatarUrl: true,
+            skillTier: true,
+            compositeScore: true,
+            user: { select: { name: true, image: true } },
+          },
+        },
+        challenged: {
+          select: {
+            userId: true,
+            displayName: true,
+            avatarUrl: true,
+            skillTier: true,
+            compositeScore: true,
+            user: { select: { name: true, image: true } },
+          },
+        },
+      },
+    })
+
+    return NextResponse.json(challenges)
+  } catch (error) {
+    console.error('List challenges error:', error)
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+  }
+}

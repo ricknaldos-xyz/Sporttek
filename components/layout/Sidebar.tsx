@@ -12,6 +12,10 @@ import {
   Dumbbell,
   User,
   ChevronRight,
+  Trophy,
+  Swords,
+  Flag,
+  Users,
 } from 'lucide-react'
 
 const navigation = [
@@ -40,7 +44,31 @@ const navigation = [
     tourId: 'training',
   },
   {
-    name: 'Perfil',
+    name: 'Rankings',
+    href: '/rankings',
+    icon: Trophy,
+    tourId: 'rankings',
+  },
+  {
+    name: 'Matchmaking',
+    href: '/matchmaking',
+    icon: Swords,
+    tourId: 'matchmaking',
+  },
+  {
+    name: 'Desafios',
+    href: '/challenges',
+    icon: Flag,
+    tourId: 'challenges',
+  },
+  {
+    name: 'Comunidad',
+    href: '/community',
+    icon: Users,
+    tourId: 'community',
+  },
+  {
+    name: 'Mi Perfil',
     href: '/profile',
     icon: User,
     tourId: 'profile',

@@ -27,6 +27,13 @@ interface OnboardingState {
 
 const defaultSteps: OnboardingStep[] = [
   {
+    id: 'player-profile',
+    title: 'Completa tu perfil de jugador',
+    description: 'Agrega tu ubicacion, estilo de juego y mas',
+    completed: false,
+    href: '/profile/player/edit',
+  },
+  {
     id: 'profile',
     title: 'Completa tu perfil',
     description: 'Agrega tu nombre y preferencias de notificacion',

@@ -7,12 +7,18 @@ declare module 'next-auth' {
       id: string
       role: string
       subscription: string
+      accountType: string
+      hasPlayerProfile: boolean
+      hasCoachProfile: boolean
     } & DefaultSession['user']
   }
 
   interface User extends DefaultUser {
     role: string
     subscription: string
+    accountType: string
+    hasPlayerProfile: boolean
+    hasCoachProfile: boolean
   }
 }
 
@@ -21,5 +27,8 @@ declare module 'next-auth/jwt' {
     id: string
     role: string
     subscription: string
+    accountType: string
+    hasPlayerProfile: boolean
+    hasCoachProfile: boolean
   }
 }

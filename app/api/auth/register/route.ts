@@ -9,6 +9,7 @@ const registerSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   email: z.string().email('Email invalido'),
   password: z.string().min(6, 'La contrasena debe tener al menos 6 caracteres'),
+  accountType: z.enum(['PLAYER', 'COACH']).optional().default('PLAYER'),
 })
 
 export async function POST(request: NextRequest) {
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { name, email, password } = validated.data
+    const { name, email, password, accountType } = validated.data
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -40,17 +41,30 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create user
+    // Create user with profile based on account type
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
+        accountType,
+        playerProfile: accountType === 'PLAYER' ? {
+          create: {
+            displayName: name,
+            country: 'PE',
+          },
+        } : undefined,
+        coachProfile: accountType === 'COACH' ? {
+          create: {
+            country: 'PE',
+          },
+        } : undefined,
       },
       select: {
         id: true,
         name: true,
         email: true,
+        accountType: true,
         createdAt: true,
       },
     })

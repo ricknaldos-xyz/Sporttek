@@ -6,15 +6,15 @@ export default auth((req) => {
   const { pathname } = req.nextUrl
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/pricing']
+  const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/pricing', '/rankings']
   const isPublicRoute = publicRoutes.includes(pathname)
 
   // Pattern-based public routes (dynamic segments)
-  const publicPatterns = ['/reset-password/', '/verify-email/']
+  const publicPatterns = ['/reset-password/', '/verify-email/', '/player/', '/rankings/', '/marketplace']
   const isPublicPattern = publicPatterns.some((pattern) => pathname.startsWith(pattern))
 
   // API routes that don't require authentication
-  const publicApiRoutes = ['/api/auth']
+  const publicApiRoutes = ['/api/auth', '/api/public']
   const isPublicApiRoute = publicApiRoutes.some((route) => pathname.startsWith(route))
 
   // If user is logged in and trying to access auth pages, redirect to dashboard

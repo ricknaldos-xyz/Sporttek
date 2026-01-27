@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { getGeminiClient } from '@/lib/gemini/client'
 import { buildTennisPrompt } from '@/lib/openai/prompts/tennis'
 import { sendAnalysisCompleteEmail } from '@/lib/email'
+import { recalculateSkillScore } from '@/lib/skill-score'
 import { retrieveRelevantChunks } from '@/lib/rag/retriever'
 import { buildRagContext } from '@/lib/rag/context-builder'
 import { readFile } from 'fs/promises'
@@ -262,6 +263,11 @@ export async function POST(
           console.error('Failed to send analysis complete email:', error)
         })
       }
+
+      // Recalculate skill score (non-blocking)
+      recalculateSkillScore(session.user.id).catch((error) => {
+        console.error('Failed to recalculate skill score:', error)
+      })
 
       // Log activity for streaks (non-blocking)
       const today = new Date()

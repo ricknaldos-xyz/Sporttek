@@ -9,11 +9,12 @@ import { GlassInput } from '@/components/ui/glass-input'
 import { GlassCard } from '@/components/ui/glass-card'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, User, GraduationCap } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [accountType, setAccountType] = useState<'PLAYER' | 'COACH'>('PLAYER')
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -41,7 +42,7 @@ export default function RegisterPage() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, accountType }),
       })
 
       const data = await response.json()
@@ -84,6 +85,39 @@ export default function RegisterPage() {
         </p>
 
         <form onSubmit={onSubmit} className="space-y-4">
+          {/* Account Type Selector */}
+          <div className="space-y-2">
+            <Label>Tipo de cuenta</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setAccountType('PLAYER')}
+                disabled={isLoading}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                  accountType === 'PLAYER'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-glass bg-glass-light text-muted-foreground hover:border-primary/50'
+                }`}
+              >
+                <User className="h-6 w-6" />
+                <span className="text-sm font-medium">Jugador</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAccountType('COACH')}
+                disabled={isLoading}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                  accountType === 'COACH'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-glass bg-glass-light text-muted-foreground hover:border-primary/50'
+                }`}
+              >
+                <GraduationCap className="h-6 w-6" />
+                <span className="text-sm font-medium">Entrenador</span>
+              </button>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="name">Nombre</Label>
             <GlassInput

@@ -1,5 +1,6 @@
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { HeroSection } from '@/components/landing/HeroSection'
+import { RankingPreview } from '@/components/landing/RankingPreview'
 import { FeaturesSection } from '@/components/landing/FeaturesSection'
 import { HowItWorksSection } from '@/components/landing/HowItWorksSection'
 import { PricingSection } from '@/components/landing/PricingSection'
@@ -14,6 +15,7 @@ export default function Home() {
       <LandingHeader />
       <main>
         <HeroSection />
+        <RankingPreview />
         <FeaturesSection />
         <HowItWorksSection />
         <PricingSection />

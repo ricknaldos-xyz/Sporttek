@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/check-stale-analyses",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/compute-rankings",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/expire-challenges",
+      "schedule": "0 * * * *"
     }
   ]
 }

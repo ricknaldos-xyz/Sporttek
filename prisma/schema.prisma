@@ -64,6 +64,152 @@ enum BadgeType {
   STREAK_7
   STREAK_30
   STREAK_100
+  // Competition & Community badges
+  FIRST_CHALLENGE
+  FIRST_MATCH
+  TEN_MATCHES
+  FIFTY_MATCHES
+  TIER_BRONCE
+  TIER_PLATA
+  TIER_ORO
+  TIER_PLATINO
+  TIER_DIAMANTE
+  TOP_100_COUNTRY
+  TOP_10_COUNTRY
+  NUMBER_ONE_COUNTRY
+  FIRST_FOLLOWER
+  CLUB_FOUNDER
+  COACH_CERTIFIED
+  TOURNAMENT_WINNER
+  TOURNAMENT_FINALIST
+  FIRST_TOURNAMENT
+}
+
+// ============================================
+// COMPETITION & COMMUNITY ENUMS
+// ============================================
+
+enum AccountType {
+  PLAYER
+  COACH
+}
+
+enum SkillTier {
+  UNRANKED
+  BRONCE
+  PLATA
+  ORO
+  PLATINO
+  DIAMANTE
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  FRIENDS_ONLY
+  PRIVATE
+}
+
+enum RankingPeriod {
+  WEEKLY
+  MONTHLY
+  ALL_TIME
+}
+
+enum RankingCategory {
+  GLOBAL
+  COUNTRY
+  SKILL_TIER
+  AGE_GROUP
+}
+
+enum ChallengeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  COMPLETED
+  EXPIRED
+}
+
+enum MatchResultType {
+  WIN
+  LOSS
+  NO_SHOW
+}
+
+enum AvailabilityDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum NotificationType {
+  CHALLENGE_RECEIVED
+  CHALLENGE_ACCEPTED
+  CHALLENGE_DECLINED
+  MATCH_RESULT_PENDING
+  MATCH_CONFIRMED
+  NEW_FOLLOWER
+  COMMENT_ON_ANALYSIS
+  RANKING_CHANGE
+  BADGE_EARNED
+  COACH_INVITATION
+  TIER_PROMOTION
+}
+
+enum FeedItemType {
+  ANALYSIS_COMPLETED
+  BADGE_EARNED
+  TIER_PROMOTION
+  MATCH_PLAYED
+  STREAK_MILESTONE
+  RANKING_MILESTONE
+}
+
+enum ReportReason {
+  SPAM
+  INAPPROPRIATE
+  HARASSMENT
+  FAKE_PROFILE
+  OTHER
+}
+
+enum TournamentStatus {
+  REGISTRATION
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TournamentFormat {
+  SINGLE_ELIMINATION
+  DOUBLE_ELIMINATION
+  ROUND_ROBIN
+}
+
+enum CoachVerificationStatus {
+  PENDING_VERIFICATION
+  VERIFIED
+  REJECTED
+}
+
+enum CoachStudentStatus {
+  PENDING_INVITE
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING_REVIEW
+  VERIFIED
+  FLAGGED
+  REJECTED_VERIFICATION
 }
 
 enum DocumentStatus {
@@ -85,13 +231,14 @@ enum ChunkCategory {
 // ============================================
 
 model User {
-  id            String           @id @default(cuid())
-  email         String           @unique
-  name          String?
-  password      String
-  image         String?
-  role          UserRole         @default(USER)
-  subscription  SubscriptionTier @default(FREE)
+  id           String           @id @default(cuid())
+  email        String           @unique
+  name         String?
+  password     String
+  image        String?
+  role         UserRole         @default(USER)
+  accountType  AccountType      @default(PLAYER)
+  subscription SubscriptionTier @default(FREE)
 
   // Email verification
   emailVerified DateTime?
@@ -109,26 +256,31 @@ model User {
   reminderTime       String? // HH:mm format for daily reminders
 
   favoriteSports  UserSport[]
-  preferredAngles String[]       @default([])
+  preferredAngles String[]    @default([])
 
-  analyses        Analysis[]
-  trainingPlans   TrainingPlan[]
-  progressLogs    ProgressLog[]
+  analyses      Analysis[]
+  trainingPlans TrainingPlan[]
+  progressLogs  ProgressLog[]
 
   // Gamification
-  streak          UserStreak?
-  badges          UserBadge[]
-  activityLogs    ActivityLog[]
+  streak       UserStreak?
+  badges       UserBadge[]
+  activityLogs ActivityLog[]
 
   // Auth tokens
   verificationTokens VerificationToken[]
 
   // RAG documents
-  documents       Document[]
+  documents Document[]
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  lastLoginAt     DateTime?
+  // Competition & Community
+  playerProfile PlayerProfile?
+  coachProfile  CoachProfile?
+  notifications Notification[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
 
   @@map("users")
 }
@@ -152,61 +304,62 @@ model UserSport {
 // ============================================
 
 model Sport {
-  id          String      @id @default(cuid())
-  slug        String      @unique
-  name        String      @unique
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String  @unique
   description String?
   icon        String?
-  isActive    Boolean     @default(true)
-  order       Int         @default(0)
+  isActive    Boolean @default(true)
+  order       Int     @default(0)
 
-  techniques  Technique[]
-  users       UserSport[]
+  techniques Technique[]
+  users      UserSport[]
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("sports")
 }
 
 model Technique {
-  id           String    @id @default(cuid())
-  sportId      String
-  sport        Sport     @relation(fields: [sportId], references: [id], onDelete: Cascade)
-  slug         String
-  name         String
-  description  String?
-  difficulty   Int       @default(1)
+  id          String  @id @default(cuid())
+  sportId     String
+  sport       Sport   @relation(fields: [sportId], references: [id], onDelete: Cascade)
+  slug        String
+  name        String
+  description String?
+  difficulty  Int     @default(1)
 
   correctForm  Json?
   commonErrors Json?
   keyPoints    String[]
 
-  variants     Variant[]
-  analyses     Analysis[]
+  variants        Variant[]
+  analyses        Analysis[]
+  techniqueScores TechniqueScore[]
 
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([sportId, slug])
   @@map("techniques")
 }
 
 model Variant {
-  id             String    @id @default(cuid())
-  techniqueId    String
-  technique      Technique @relation(fields: [techniqueId], references: [id], onDelete: Cascade)
-  slug           String
-  name           String
-  description    String?
+  id          String    @id @default(cuid())
+  techniqueId String
+  technique   Technique @relation(fields: [techniqueId], references: [id], onDelete: Cascade)
+  slug        String
+  name        String
+  description String?
 
   correctForm    Json?
   keyDifferences String[]
 
-  analyses       Analysis[]
+  analyses Analysis[]
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([techniqueId, slug])
   @@map("variants")
@@ -217,16 +370,16 @@ model Variant {
 // ============================================
 
 model Analysis {
-  id            String         @id @default(cuid())
-  userId        String
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  techniqueId   String
-  technique     Technique      @relation(fields: [techniqueId], references: [id])
-  variantId     String?
-  variant       Variant?       @relation(fields: [variantId], references: [id])
+  techniqueId String
+  technique   Technique @relation(fields: [techniqueId], references: [id])
+  variantId   String?
+  variant     Variant?  @relation(fields: [variantId], references: [id])
 
-  mediaItems    MediaItem[]
+  mediaItems MediaItem[]
 
   status              AnalysisStatus @default(PENDING)
   errorMessage        String?
@@ -237,19 +390,20 @@ model Analysis {
   overallScore  Float?
   aiResponse    Json?
   summary       String?
-  strengths     String[]       @default([])
+  strengths     String[] @default([])
   priorityFocus String?
 
-  issues        Issue[]
+  issues Issue[]
 
-  trainingPlan  TrainingPlan?
+  trainingPlan TrainingPlan?
+  verification AnalysisVerification?
 
   previousAnalysisId String?   @unique
   previousAnalysis   Analysis? @relation("ProgressComparison", fields: [previousAnalysisId], references: [id])
   nextAnalysis       Analysis? @relation("ProgressComparison")
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, createdAt])
   @@index([techniqueId])
@@ -257,9 +411,9 @@ model Analysis {
 }
 
 model MediaItem {
-  id           String    @id @default(cuid())
-  analysisId   String
-  analysis     Analysis  @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   type         MediaType
   url          String
@@ -269,32 +423,32 @@ model MediaItem {
   duration     Int?
   angle        String?
 
-  frameUrls    String[]  @default([])
+  frameUrls String[] @default([])
 
-  createdAt    DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@map("media_items")
 }
 
 model Issue {
-  id          String     @id @default(cuid())
-  analysisId  String
-  analysis    Analysis   @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   category    String
   title       String
   description String
   severity    Severity
 
-  correction  String
-  drills      String[]
+  correction String
+  drills     String[]
 
-  timestamp   Float?
-  frameUrl    String?
+  timestamp Float?
+  frameUrl  String?
 
-  exercises   ExerciseIssue[]
+  exercises ExerciseIssue[]
 
-  createdAt   DateTime   @default(now())
+  createdAt DateTime @default(now())
 
   @@index([analysisId])
   @@map("issues")
@@ -305,94 +459,98 @@ model Issue {
 // ============================================
 
 model TrainingPlan {
-  id            String       @id @default(cuid())
-  userId        String
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  analysisId    String       @unique
-  analysis      Analysis     @relation(fields: [analysisId], references: [id])
+  analysisId String   @unique
+  analysis   Analysis @relation(fields: [analysisId], references: [id])
 
-  title         String
-  description   String?
-  durationDays  Int
-  difficulty    Int          @default(1)
+  title        String
+  description  String?
+  durationDays Int
+  difficulty   Int     @default(1)
 
-  status        PlanStatus   @default(ACTIVE)
+  status PlanStatus @default(ACTIVE)
 
-  exercises     Exercise[]
-  progressLogs  ProgressLog[]
+  exercises    Exercise[]
+  progressLogs ProgressLog[]
 
-  startedAt     DateTime?
-  completedAt   DateTime?
+  // Coach assignment
+  coachAssignment   CoachAssignedPlan?
+  assignedByCoachId String?
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, status])
   @@map("training_plans")
 }
 
 model Exercise {
-  id              String          @id @default(cuid())
-  trainingPlanId  String
-  trainingPlan    TrainingPlan    @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  trainingPlanId String
+  trainingPlan   TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
 
-  name            String
-  description     String
-  instructions    String
+  name         String
+  description  String
+  instructions String
 
-  dayNumber       Int
-  orderInDay      Int
+  dayNumber  Int
+  orderInDay Int
 
-  sets            Int?
-  reps            Int?
-  durationMins    Int?
-  restSeconds     Int?
+  sets         Int?
+  reps         Int?
+  durationMins Int?
+  restSeconds  Int?
 
-  videoUrl        String?
-  imageUrls       String[]        @default([])
+  videoUrl  String?
+  imageUrls String[] @default([])
 
-  frequency       String
+  frequency String
 
-  targetIssues    ExerciseIssue[]
-  progressLogs    ProgressLog[]
+  targetIssues ExerciseIssue[]
+  progressLogs ProgressLog[]
 
-  createdAt       DateTime        @default(now())
+  createdAt DateTime @default(now())
 
   @@index([trainingPlanId, dayNumber])
   @@map("exercises")
 }
 
 model ExerciseIssue {
-  id          String   @id @default(cuid())
-  exerciseId  String
-  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  issueId     String
-  issue       Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  issueId    String
+  issue      Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
   @@unique([exerciseId, issueId])
   @@map("exercise_issues")
 }
 
 model ProgressLog {
-  id              String       @id @default(cuid())
-  userId          String
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trainingPlanId  String
-  trainingPlan    TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
-  exerciseId      String?
-  exercise        Exercise?    @relation(fields: [exerciseId], references: [id])
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingPlanId String
+  trainingPlan   TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+  exerciseId     String?
+  exercise       Exercise?    @relation(fields: [exerciseId], references: [id])
 
-  date            DateTime     @db.Date
-  completed       Boolean      @default(false)
-  setsCompleted   Int?
-  repsCompleted   Int?
-  durationMins    Int?
+  date          DateTime @db.Date
+  completed     Boolean  @default(false)
+  setsCompleted Int?
+  repsCompleted Int?
+  durationMins  Int?
 
-  difficulty      Int?
-  notes           String?
+  difficulty Int?
+  notes      String?
 
-  createdAt       DateTime     @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([trainingPlanId, exerciseId, date])
   @@index([userId, date])
@@ -404,27 +562,27 @@ model ProgressLog {
 // ============================================
 
 model ExerciseTemplate {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  description String
+  id           String @id @default(cuid())
+  slug         String @unique
+  name         String
+  description  String
   instructions String
 
   category    String
   targetAreas String[]
   sportSlugs  String[]
 
-  defaultSets Int?
-  defaultReps Int?
+  defaultSets         Int?
+  defaultReps         Int?
   defaultDurationMins Int?
 
-  videoUrl    String?
-  imageUrls   String[] @default([])
+  videoUrl  String?
+  imageUrls String[] @default([])
 
-  isActive    Boolean  @default(true)
+  isActive Boolean @default(true)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("exercise_templates")
 }
@@ -442,7 +600,7 @@ model VerificationToken {
   expiresAt DateTime
   usedAt    DateTime?
 
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([token])
@@ -463,8 +621,8 @@ model UserStreak {
   freezesAvailable Int       @default(1)
   freezeUsedAt     DateTime?
 
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("user_streaks")
 }
@@ -489,8 +647,8 @@ model ActivityLog {
   analysisCount Int      @default(0)
   exerciseCount Int      @default(0)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, date])
   @@index([userId, date])
@@ -502,21 +660,21 @@ model ActivityLog {
 // ============================================
 
 model Document {
-  id           String         @id @default(cuid())
+  id           String          @id @default(cuid())
   filename     String
   originalName String
   fileUrl      String
   fileSize     Int
   pageCount    Int?
   sportSlug    String?
-  language     String         @default("es")
-  status       DocumentStatus @default(UPLOADING)
+  language     String          @default("es")
+  status       DocumentStatus  @default(UPLOADING)
   errorMessage String?
   uploadedById String
-  uploadedBy   User           @relation(fields: [uploadedById], references: [id])
+  uploadedBy   User            @relation(fields: [uploadedById], references: [id])
   chunks       DocumentChunk[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
   @@map("documents")
 }
@@ -542,4 +700,568 @@ model DocumentChunk {
   @@index([category])
   @@index([technique])
   @@map("document_chunks")
+}
+
+// ============================================
+// PLAYER PROFILES & SKILL SCORES
+// ============================================
+
+model PlayerProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Display
+  displayName String?
+  bio         String?
+  avatarUrl   String?
+
+  // Location (Peru first)
+  country   String  @default("PE")
+  region    String?
+  city      String?
+  latitude  Float?
+  longitude Float?
+
+  // Tennis profile
+  playStyle    String?
+  dominantHand String?
+  backhandType String?
+  yearsPlaying Int?
+  ageGroup     String?
+
+  // Composite score
+  compositeScore Float?
+  skillTier      SkillTier @default(UNRANKED)
+  effectiveScore Float?
+
+  // Privacy
+  visibility   ProfileVisibility @default(PUBLIC)
+  showRealName Boolean           @default(true)
+  showLocation Boolean           @default(true)
+
+  // Denormalized stats
+  totalAnalyses   Int  @default(0)
+  totalTechniques Int  @default(0)
+  globalRank      Int?
+  countryRank     Int?
+
+  // Matchmaking
+  matchElo            Int    @default(1200)
+  matchesPlayed       Int    @default(0)
+  matchesWon          Int    @default(0)
+  maxTravelKm         Int    @default(25)
+  sportsmanshipRating Float?
+  totalRatings        Int    @default(0)
+
+  // Social
+  followersCount Int @default(0)
+  followingCount Int @default(0)
+
+  lastScoreUpdate DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  techniqueScores      TechniqueScore[]
+  rankings             Ranking[]
+  availabilities       PlayerAvailability[]
+  challengesSent       Challenge[]             @relation("ChallengesSent")
+  challengesReceived   Challenge[]             @relation("ChallengesReceived")
+  matchesAsP1          Match[]                 @relation("MatchP1")
+  matchesAsP2          Match[]                 @relation("MatchP2")
+  following            Follow[]                @relation("Following")
+  followers            Follow[]                @relation("Followers")
+  feedItems            FeedItem[]
+  comments             Comment[]
+  ownedClubs           Club[]                  @relation("ClubOwner")
+  clubMemberships      ClubMember[]
+  coachStudents        CoachStudent[]
+  organizedTournaments Tournament[]            @relation("TournamentOrganizer")
+  tournamentEntries    TournamentParticipant[]
+
+  @@index([country, compositeScore])
+  @@index([country, effectiveScore])
+  @@index([skillTier])
+  @@map("player_profiles")
+}
+
+model TechniqueScore {
+  id          String        @id @default(cuid())
+  profileId   String
+  profile     PlayerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  techniqueId String
+  technique   Technique     @relation(fields: [techniqueId], references: [id])
+
+  bestScore      Float
+  averageScore   Float
+  analysisCount  Int       @default(0)
+  lastAnalysisId String?
+  lastAnalyzedAt DateTime?
+  scoreHistory   Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([profileId, techniqueId])
+  @@map("technique_scores")
+}
+
+// ============================================
+// RANKINGS & LEADERBOARDS
+// ============================================
+
+model Ranking {
+  id        String        @id @default(cuid())
+  profileId String
+  profile   PlayerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  category  RankingCategory
+  period    RankingPeriod
+  country   String?
+  skillTier SkillTier?
+  ageGroup  String?
+
+  rank           Int
+  previousRank   Int?
+  effectiveScore Float
+
+  periodStart DateTime
+  periodEnd   DateTime?
+
+  computedAt DateTime @default(now())
+
+  @@unique([profileId, category, period, country, skillTier, ageGroup, periodStart])
+  @@index([category, period, country, rank])
+  @@index([profileId])
+  @@map("rankings")
+}
+
+// ============================================
+// MATCHMAKING & CHALLENGES
+// ============================================
+
+model PlayerAvailability {
+  id        String          @id @default(cuid())
+  profileId String
+  profile   PlayerProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  day       AvailabilityDay
+  startTime String
+  endTime   String
+
+  @@unique([profileId, day, startTime])
+  @@map("player_availabilities")
+}
+
+model Challenge {
+  id           String        @id @default(cuid())
+  challengerId String
+  challenger   PlayerProfile @relation("ChallengesSent", fields: [challengerId], references: [id])
+  challengedId String
+  challenged   PlayerProfile @relation("ChallengesReceived", fields: [challengedId], references: [id])
+
+  status          ChallengeStatus @default(PENDING)
+  proposedDate    DateTime?
+  proposedTime    String?
+  proposedVenue   String?
+  message         String?
+  responseMessage String?
+  respondedAt     DateTime?
+  match           Match?
+  expiresAt       DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([challengerId, status])
+  @@index([challengedId, status])
+  @@map("challenges")
+}
+
+model Match {
+  id          String     @id @default(cuid())
+  challengeId String?    @unique
+  challenge   Challenge? @relation(fields: [challengeId], references: [id])
+
+  player1Id String
+  player1   PlayerProfile @relation("MatchP1", fields: [player1Id], references: [id])
+  player2Id String
+  player2   PlayerProfile @relation("MatchP2", fields: [player2Id], references: [id])
+
+  player1Result MatchResultType?
+  player2Result MatchResultType?
+  score         String?
+  sets          Json?
+
+  player1Confirmed Boolean @default(false)
+  player2Confirmed Boolean @default(false)
+  player1EloChange Int?
+  player2EloChange Int?
+
+  venue    String?
+  playedAt DateTime?
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  ratings           MatchRating[]
+  tournamentBracket TournamentBracket?
+
+  @@index([player1Id])
+  @@index([player2Id])
+  @@map("matches")
+}
+
+model MatchRating {
+  id            String  @id @default(cuid())
+  matchId       String
+  match         Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  raterId       String
+  ratedId       String
+  sportsmanship Int
+  punctuality   Int
+  skillAccuracy Int
+  comment       String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([matchId, raterId])
+  @@map("match_ratings")
+}
+
+// ============================================
+// COMMUNITY & SOCIAL
+// ============================================
+
+model Follow {
+  id          String        @id @default(cuid())
+  followerId  String
+  follower    PlayerProfile @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   PlayerProfile @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+model FeedItem {
+  id            String        @id @default(cuid())
+  profileId     String
+  profile       PlayerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  type          FeedItemType
+  title         String
+  description   String?
+  referenceId   String?
+  referenceType String?
+  metadata      Json?
+  createdAt     DateTime      @default(now())
+
+  @@index([profileId, createdAt])
+  @@index([createdAt])
+  @@map("feed_items")
+}
+
+model Comment {
+  id          String        @id @default(cuid())
+  authorId    String
+  author      PlayerProfile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  targetId    String
+  targetType  String
+  content     String
+  isHidden    Boolean       @default(false)
+  reportCount Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([targetId, targetType, createdAt])
+  @@map("comments")
+}
+
+model Notification {
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          NotificationType
+  title         String
+  body          String?
+  referenceId   String?
+  referenceType String?
+  read          Boolean          @default(false)
+  readAt        DateTime?
+  createdAt     DateTime         @default(now())
+
+  @@index([userId, read, createdAt])
+  @@map("notifications")
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@map("blocks")
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  reporterId  String
+  targetId    String
+  targetType  String
+  reason      ReportReason
+  description String?
+  resolved    Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+
+  @@index([resolved])
+  @@map("reports")
+}
+
+model Club {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  imageUrl    String?
+  country     String?
+  city        String?
+  ownerId     String
+  owner       PlayerProfile @relation("ClubOwner", fields: [ownerId], references: [id])
+  members     ClubMember[]
+  tournaments Tournament[]
+  isPublic    Boolean       @default(true)
+  maxMembers  Int           @default(50)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("clubs")
+}
+
+model ClubMember {
+  id        String        @id @default(cuid())
+  clubId    String
+  club      Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  profileId String
+  profile   PlayerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  role      String        @default("member")
+  joinedAt  DateTime      @default(now())
+
+  @@unique([clubId, profileId])
+  @@map("club_members")
+}
+
+// ============================================
+// TOURNAMENTS
+// ============================================
+
+model Tournament {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  imageUrl    String?
+
+  organizerId String
+  organizer   PlayerProfile @relation("TournamentOrganizer", fields: [organizerId], references: [id])
+  clubId      String?
+  club        Club?         @relation(fields: [clubId], references: [id])
+
+  format     TournamentFormat @default(SINGLE_ELIMINATION)
+  maxPlayers Int              @default(16)
+  status     TournamentStatus @default(REGISTRATION)
+
+  minTier  SkillTier?
+  maxTier  SkillTier?
+  ageGroup String?
+  country  String?
+
+  registrationEnd DateTime
+  startDate       DateTime
+  endDate         DateTime?
+
+  venue String?
+  city  String?
+
+  participants TournamentParticipant[]
+  brackets     TournamentBracket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, country])
+  @@index([clubId])
+  @@map("tournaments")
+}
+
+model TournamentParticipant {
+  id           String        @id @default(cuid())
+  tournamentId String
+  tournament   Tournament    @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  profileId    String
+  profile      PlayerProfile @relation(fields: [profileId], references: [id])
+
+  seed          Int?
+  eliminated    Boolean @default(false)
+  finalPosition Int?
+
+  registeredAt DateTime @default(now())
+
+  @@unique([tournamentId, profileId])
+  @@map("tournament_participants")
+}
+
+model TournamentBracket {
+  id           String     @id @default(cuid())
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  round    Int
+  position Int
+  matchId  String? @unique
+  match    Match?  @relation(fields: [matchId], references: [id])
+
+  player1Id String?
+  player2Id String?
+  winnerId  String?
+
+  scheduledAt DateTime?
+
+  @@unique([tournamentId, round, position])
+  @@map("tournament_brackets")
+}
+
+// ============================================
+// COACH PROFILES
+// ============================================
+
+model CoachProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  headline        String?
+  bio             String?
+  certifications  String[] @default([])
+  yearsExperience Int?
+  specialties     String[] @default([])
+
+  verificationStatus CoachVerificationStatus @default(PENDING_VERIFICATION)
+  verificationDocUrl String?
+  verifiedAt         DateTime?
+
+  country String?
+  city    String?
+
+  hourlyRate  Float?
+  currency    String  @default("PEN")
+  isAvailable Boolean @default(true)
+
+  averageRating Float?
+  totalReviews  Int    @default(0)
+
+  students      CoachStudent[]
+  reviews       CoachReview[]
+  assignedPlans CoachAssignedPlan[]
+
+  stripeConnectId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([country, isAvailable])
+  @@map("coach_profiles")
+}
+
+model CoachStudent {
+  id        String        @id @default(cuid())
+  coachId   String
+  coach     CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  studentId String
+  student   PlayerProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  status          CoachStudentStatus @default(PENDING_INVITE)
+  canViewAnalyses Boolean            @default(true)
+  canAssignPlans  Boolean            @default(true)
+
+  startedAt DateTime?
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([coachId, studentId])
+  @@map("coach_students")
+}
+
+model CoachAssignedPlan {
+  id             String       @id @default(cuid())
+  coachId        String
+  coach          CoachProfile @relation(fields: [coachId], references: [id])
+  studentId      String
+  trainingPlanId String       @unique
+  trainingPlan   TrainingPlan @relation(fields: [trainingPlanId], references: [id])
+  notes          String?
+  assignedAt     DateTime     @default(now())
+
+  @@map("coach_assigned_plans")
+}
+
+model CoachReview {
+  id         String       @id @default(cuid())
+  coachId    String
+  coach      CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  reviewerId String
+  rating     Int
+  comment    String?
+  createdAt  DateTime     @default(now())
+
+  @@unique([coachId, reviewerId])
+  @@map("coach_reviews")
+}
+
+// ============================================
+// VIDEO VERIFICATION
+// ============================================
+
+model AnalysisVerification {
+  id         String   @id @default(cuid())
+  analysisId String   @unique
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  status            VerificationStatus @default(UNVERIFIED)
+  verificationScore Float?
+
+  hasMetadata Boolean   @default(false)
+  recordedAt  DateTime?
+  deviceInfo  String?
+
+  videoFingerprint String?
+  isDuplicate      Boolean @default(false)
+
+  peerReviewCount Int @default(0)
+  peerApprovals   Int @default(0)
+  peerRejections  Int @default(0)
+
+  reviewedAt  DateTime?
+  reviewNotes String?
+
+  peerReviews PeerReview[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("analysis_verifications")
+}
+
+model PeerReview {
+  id             String               @id @default(cuid())
+  verificationId String
+  verification   AnalysisVerification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+  reviewerId     String
+  approved       Boolean
+  comment        String?
+  createdAt      DateTime             @default(now())
+
+  @@unique([verificationId, reviewerId])
+  @@map("peer_reviews")
 }

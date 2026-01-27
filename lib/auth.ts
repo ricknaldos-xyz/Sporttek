@@ -34,6 +34,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const user = await prisma.user.findUnique({
           where: { email },
+          include: {
+            playerProfile: { select: { id: true } },
+            coachProfile: { select: { id: true } },
+          },
         })
 
         if (!user || !user.password) {
@@ -58,6 +62,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           image: user.image,
           role: user.role,
           subscription: user.subscription,
+          accountType: user.accountType,
+          hasPlayerProfile: !!user.playerProfile,
+          hasCoachProfile: !!user.coachProfile,
         }
       },
     }),
@@ -68,6 +75,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id as string
         token.role = (user as { role: string }).role
         token.subscription = (user as { subscription: string }).subscription
+        token.accountType = (user as { accountType: string }).accountType
+        token.hasPlayerProfile = (user as { hasPlayerProfile: boolean }).hasPlayerProfile
+        token.hasCoachProfile = (user as { hasCoachProfile: boolean }).hasCoachProfile
       }
       return token
     },
@@ -76,6 +86,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string
         session.user.role = token.role as string
         session.user.subscription = token.subscription as string
+        session.user.accountType = token.accountType as string
+        session.user.hasPlayerProfile = token.hasPlayerProfile as boolean
+        session.user.hasCoachProfile = token.hasCoachProfile as boolean
       }
       return session
     },
