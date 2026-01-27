@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateToken } from '@/lib/tokens'
 import { sendPasswordResetEmail } from '@/lib/email'
+import { forgotPasswordLimiter } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
+    const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
+    const { success } = await forgotPasswordLimiter.check(identifier)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Intenta de nuevo mas tarde.' },
+        { status: 429 }
+      )
+    }
+
     const { email } = await request.json()
 
     if (!email) {

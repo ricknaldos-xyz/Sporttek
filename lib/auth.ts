@@ -5,6 +5,7 @@ import type { Adapter } from 'next-auth/adapters'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { authLimiter } from '@/lib/rate-limit'
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -32,6 +33,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const { password } = validated.data
         const email = validated.data.email.toLowerCase()
+
+        const { success } = await authLimiter.check(email)
+        if (!success) {
+          throw new Error('Demasiados intentos de inicio de sesion')
+        }
 
         const user = await prisma.user.findUnique({
           where: { email },
@@ -73,12 +79,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        // Initial sign-in: set all fields
         token.id = user.id as string
         token.role = user.role
         token.subscription = user.subscription
         token.accountType = user.accountType
         token.hasPlayerProfile = user.hasPlayerProfile
         token.hasCoachProfile = user.hasCoachProfile
+        token.lastRefresh = Date.now()
+      } else if (!token.lastRefresh || Date.now() - token.lastRefresh > 5 * 60 * 1000) {
+        // Re-fetch every 5 minutes to pick up role/subscription changes
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: {
+              role: true,
+              subscription: true,
+              accountType: true,
+              playerProfile: { select: { id: true } },
+              coachProfile: { select: { id: true } },
+            },
+          })
+          if (dbUser) {
+            token.role = dbUser.role
+            token.subscription = dbUser.subscription
+            token.accountType = dbUser.accountType
+            token.hasPlayerProfile = !!dbUser.playerProfile
+            token.hasCoachProfile = !!dbUser.coachProfile
+            token.lastRefresh = Date.now()
+          }
+        } catch {
+          // If DB is down, keep existing token values
+        }
       }
       return token
     },

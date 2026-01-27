@@ -9,6 +9,7 @@ import { retrieveRelevantChunks } from '@/lib/rag/retriever'
 import { buildRagContext } from '@/lib/rag/context-builder'
 import { readFile } from 'fs/promises'
 import path from 'path'
+import { analyzeLimiter } from '@/lib/rate-limit'
 
 export const maxDuration = 300 // 5 minutes for video processing
 
@@ -22,6 +23,14 @@ export async function POST(
     const session = await auth()
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { success } = await analyzeLimiter.check(session.user.id)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Intenta de nuevo mas tarde.' },
+        { status: 429 }
+      )
     }
 
     const { id } = await params

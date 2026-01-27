@@ -30,5 +30,6 @@ declare module 'next-auth/jwt' {
     accountType: string
     hasPlayerProfile: boolean
     hasCoachProfile: boolean
+    lastRefresh: number
   }
 }

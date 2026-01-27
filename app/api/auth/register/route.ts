@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { sendWelcomeEmail, sendEmailVerification } from '@/lib/email'
 import { generateToken } from '@/lib/tokens'
+import { registerLimiter } from '@/lib/rate-limit'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -14,6 +15,15 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
+    const { success } = await registerLimiter.check(identifier)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Intenta de nuevo mas tarde.' },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const validated = registerSchema.safeParse(body)
 
