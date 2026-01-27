@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Lock } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassInput } from '@/components/ui/glass-input'
+import { GlassCard } from '@/components/ui/glass-card'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -62,11 +63,11 @@ export default function ChangePasswordPage() {
     <div className="max-w-md mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <GlassButton variant="ghost" size="icon" asChild>
           <Link href="/profile/settings">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-        </Button>
+        </GlassButton>
         <div>
           <h1 className="text-2xl font-bold">Cambiar Contrasena</h1>
           <p className="text-muted-foreground">
@@ -76,16 +77,18 @@ export default function ChangePasswordPage() {
       </div>
 
       {/* Form */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <GlassCard intensity="medium" padding="lg">
         <div className="flex items-center gap-3 mb-6">
-          <Lock className="h-5 w-5 text-primary" />
+          <div className="glass-primary border-glass rounded-lg p-1.5">
+            <Lock className="h-4 w-4 text-primary" />
+          </div>
           <h2 className="font-semibold">Nueva contrasena</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="currentPassword">Contrasena actual</Label>
-            <Input
+            <GlassInput
               id="currentPassword"
               type="password"
               value={formData.currentPassword}
@@ -98,7 +101,7 @@ export default function ChangePasswordPage() {
 
           <div className="space-y-2">
             <Label htmlFor="newPassword">Nueva contrasena</Label>
-            <Input
+            <GlassInput
               id="newPassword"
               type="password"
               value={formData.newPassword}
@@ -115,7 +118,7 @@ export default function ChangePasswordPage() {
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirmar contrasena</Label>
-            <Input
+            <GlassInput
               id="confirmPassword"
               type="password"
               value={formData.confirmPassword}
@@ -127,15 +130,15 @@ export default function ChangePasswordPage() {
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" asChild>
+            <GlassButton type="button" variant="outline" asChild>
               <Link href="/profile/settings">Cancelar</Link>
-            </Button>
-            <Button type="submit" disabled={isLoading}>
+            </GlassButton>
+            <GlassButton variant="solid" type="submit" disabled={isLoading}>
               {isLoading ? 'Guardando...' : 'Actualizar Contrasena'}
-            </Button>
+            </GlassButton>
           </div>
         </form>
-      </div>
+      </GlassCard>
     </div>
   )
 }

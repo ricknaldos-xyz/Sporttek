@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
 import { useOnboardingStore } from '@/stores/onboardingStore'
 import { Video, Target, Dumbbell, TrendingUp, X } from 'lucide-react'
 
@@ -62,17 +62,17 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative bg-card border border-border rounded-2xl shadow-xl max-w-lg w-full mx-4 overflow-hidden">
+      <div className="relative glass-heavy border-glass-strong rounded-2xl shadow-glass-xl max-w-lg w-full mx-4 overflow-hidden">
         {/* Close button */}
         <button
           onClick={handleSkip}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10 transition-colors"
         >
           <X className="h-5 w-5" />
         </button>
 
         {/* Header */}
-        <div className="bg-gradient-to-br from-primary/10 to-primary/5 px-6 py-8 text-center">
+        <div className="glass-primary px-6 py-8 text-center">
           <div className="text-5xl mb-4">🎾</div>
           <h2 className="text-2xl font-bold mb-2">
             Bienvenido{userName ? `, ${userName}` : ''}!
@@ -88,7 +88,7 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
+                className="flex items-start gap-3 p-3 rounded-xl glass-ultralight border-glass"
               >
                 <feature.icon className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <div>
@@ -102,12 +102,12 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
           </div>
 
           <div className="space-y-3">
-            <Button onClick={handleStartTour} className="w-full">
+            <GlassButton onClick={handleStartTour} variant="solid" className="w-full">
               Comenzar tour guiado
-            </Button>
-            <Button onClick={handleSkip} variant="ghost" className="w-full">
+            </GlassButton>
+            <GlassButton onClick={handleSkip} variant="ghost" className="w-full">
               Explorar por mi cuenta
-            </Button>
+            </GlassButton>
           </div>
         </div>
       </div>

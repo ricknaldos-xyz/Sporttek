@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassInput } from '@/components/ui/glass-input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 
@@ -68,7 +68,7 @@ export function SettingsForm({ userId, initialData }: SettingsFormProps) {
             onChange={(e) => setEmailNotifications(e.target.checked)}
             className="sr-only peer"
           />
-          <div className="w-11 h-6 bg-muted rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" />
+          <div className="w-11 h-6 glass-ultralight border-glass rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all duration-[var(--duration-normal)]" />
         </label>
       </div>
 
@@ -77,7 +77,7 @@ export function SettingsForm({ userId, initialData }: SettingsFormProps) {
         <p className="text-sm text-muted-foreground">
           Te enviaremos un recordatorio para entrenar a esta hora
         </p>
-        <Input
+        <GlassInput
           id="reminderTime"
           type="time"
           value={reminderTime}
@@ -87,9 +87,9 @@ export function SettingsForm({ userId, initialData }: SettingsFormProps) {
         />
       </div>
 
-      <Button type="submit" disabled={isLoading}>
+      <GlassButton variant="solid" type="submit" disabled={isLoading}>
         {isLoading ? 'Guardando...' : 'Guardar cambios'}
-      </Button>
+      </GlassButton>
     </form>
   )
 }

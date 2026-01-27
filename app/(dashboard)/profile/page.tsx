@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { User, Mail, Calendar, Trophy } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { GlassCard } from '@/components/ui/glass-card'
+import { GlassBadge } from '@/components/ui/glass-badge'
 
 async function getUserStats(userId: string) {
   const [user, analysesCount, plansCount, completedPlans] = await Promise.all([
@@ -37,9 +39,9 @@ export default async function ProfilePage() {
       <h1 className="text-2xl font-bold">Mi Perfil</h1>
 
       {/* User Info */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <GlassCard intensity="light" padding="lg">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+          <div className="w-16 h-16 glass-primary border-glass rounded-full flex items-center justify-center">
             <User className="h-8 w-8 text-primary" />
           </div>
           <div>
@@ -62,50 +64,45 @@ export default async function ProfilePage() {
           <div className="flex items-center gap-3 text-sm">
             <Trophy className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Plan:</span>
-            <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-medium">
-              {user.subscription}
-            </span>
+            <GlassBadge variant="primary">{user.subscription}</GlassBadge>
           </div>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Stats */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <GlassCard intensity="light" padding="lg">
         <h3 className="font-semibold mb-4">Estadisticas</h3>
         <div className="grid grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-muted/50 rounded-lg">
+          <div className="text-center p-4 glass-ultralight border-glass rounded-xl">
             <div className="text-2xl font-bold text-primary">{analysesCount}</div>
             <div className="text-sm text-muted-foreground">Analisis</div>
           </div>
-          <div className="text-center p-4 bg-muted/50 rounded-lg">
+          <div className="text-center p-4 glass-ultralight border-glass rounded-xl">
             <div className="text-2xl font-bold text-primary">{plansCount}</div>
             <div className="text-sm text-muted-foreground">Planes</div>
           </div>
-          <div className="text-center p-4 bg-muted/50 rounded-lg">
+          <div className="text-center p-4 glass-ultralight border-glass rounded-xl">
             <div className="text-2xl font-bold text-primary">{completedPlans}</div>
             <div className="text-sm text-muted-foreground">Completados</div>
           </div>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Favorite Sports */}
       {user.favoriteSports.length > 0 && (
-        <div className="bg-card border border-border rounded-xl p-6">
+        <GlassCard intensity="light" padding="lg">
           <h3 className="font-semibold mb-4">Deportes Favoritos</h3>
           <div className="flex flex-wrap gap-2">
             {user.favoriteSports.map((fs) => (
-              <span
-                key={fs.id}
-                className="bg-muted px-3 py-1.5 rounded-full text-sm"
-              >
+              <GlassBadge key={fs.id} variant="default">
                 {fs.sport.name}
                 {fs.level && (
                   <span className="text-muted-foreground ml-1">({fs.level})</span>
                 )}
-              </span>
+              </GlassBadge>
             ))}
           </div>
-        </div>
+        </GlassCard>
       )}
     </div>
   )

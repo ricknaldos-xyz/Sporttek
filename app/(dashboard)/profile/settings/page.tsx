@@ -2,7 +2,9 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ArrowLeft, Bell, Shield, CreditCard } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassCard } from '@/components/ui/glass-card'
+import { GlassBadge } from '@/components/ui/glass-badge'
 import Link from 'next/link'
 import { SettingsForm } from './settings-form'
 
@@ -34,11 +36,11 @@ export default async function SettingsPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <GlassButton variant="ghost" size="icon" asChild>
           <Link href="/profile">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-        </Button>
+        </GlassButton>
         <div>
           <h1 className="text-2xl font-bold">Configuracion</h1>
           <p className="text-muted-foreground">
@@ -48,9 +50,11 @@ export default async function SettingsPage() {
       </div>
 
       {/* Notifications */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <GlassCard intensity="light" padding="lg">
         <div className="flex items-center gap-3 mb-4">
-          <Bell className="h-5 w-5 text-primary" />
+          <div className="glass-primary border-glass rounded-lg p-1.5">
+            <Bell className="h-4 w-4 text-primary" />
+          </div>
           <h2 className="font-semibold">Notificaciones</h2>
         </div>
         <SettingsForm
@@ -60,12 +64,14 @@ export default async function SettingsPage() {
             reminderTime: user.reminderTime,
           }}
         />
-      </div>
+      </GlassCard>
 
       {/* Security */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <GlassCard intensity="light" padding="lg">
         <div className="flex items-center gap-3 mb-4">
-          <Shield className="h-5 w-5 text-primary" />
+          <div className="glass-primary border-glass rounded-lg p-1.5">
+            <Shield className="h-4 w-4 text-primary" />
+          </div>
           <h2 className="font-semibold">Seguridad</h2>
         </div>
         <div className="space-y-4">
@@ -76,17 +82,19 @@ export default async function SettingsPage() {
                 Actualiza tu contrasena de acceso
               </p>
             </div>
-            <Button variant="outline" asChild>
+            <GlassButton variant="outline" asChild>
               <Link href="/profile/settings/password">Cambiar</Link>
-            </Button>
+            </GlassButton>
           </div>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Subscription */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <GlassCard intensity="light" padding="lg">
         <div className="flex items-center gap-3 mb-4">
-          <CreditCard className="h-5 w-5 text-primary" />
+          <div className="glass-primary border-glass rounded-lg p-1.5">
+            <CreditCard className="h-4 w-4 text-primary" />
+          </div>
           <h2 className="font-semibold">Suscripcion</h2>
         </div>
         <div className="space-y-4">
@@ -99,9 +107,7 @@ export default async function SettingsPage() {
                 {user.subscription === 'ELITE' && 'Plan Elite con todas las funciones'}
               </p>
             </div>
-            <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-              {user.subscription}
-            </span>
+            <GlassBadge variant="primary">{user.subscription}</GlassBadge>
           </div>
           {user.stripeCurrentPeriodEnd && (
             <p className="text-sm text-muted-foreground">
@@ -115,20 +121,20 @@ export default async function SettingsPage() {
           )}
           <div className="flex gap-2">
             {user.subscription === 'FREE' ? (
-              <Button asChild>
+              <GlassButton variant="solid" asChild>
                 <Link href="/pricing">Mejorar Plan</Link>
-              </Button>
+              </GlassButton>
             ) : (
-              <Button variant="outline" asChild>
+              <GlassButton variant="outline" asChild>
                 <Link href="/api/stripe/portal">Gestionar Suscripcion</Link>
-              </Button>
+              </GlassButton>
             )}
           </div>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Danger Zone */}
-      <div className="bg-card border border-destructive/50 rounded-xl p-6">
+      <GlassCard intensity="light" padding="lg" className="border-destructive/30">
         <h2 className="font-semibold text-destructive mb-4">Zona de Peligro</h2>
         <div className="flex items-center justify-between">
           <div>
@@ -137,11 +143,11 @@ export default async function SettingsPage() {
               Esta accion es irreversible y eliminara todos tus datos
             </p>
           </div>
-          <Button variant="destructive" disabled>
+          <GlassButton variant="outline" disabled className="border-destructive/50 text-destructive hover:bg-destructive/10">
             Eliminar
-          </Button>
+          </GlassButton>
         </div>
-      </div>
+      </GlassCard>
     </div>
   )
 }

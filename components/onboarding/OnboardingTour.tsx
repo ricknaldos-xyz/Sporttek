@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
 import { useOnboardingStore } from '@/stores/onboardingStore'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -100,25 +100,25 @@ export function OnboardingTour() {
       <div className="absolute inset-0 bg-black/50" onClick={endTour}>
         {/* Spotlight hole */}
         <div
-          className="absolute bg-transparent ring-4 ring-primary rounded-lg"
+          className="absolute bg-transparent ring-4 ring-primary rounded-lg shadow-glass-glow"
           style={{
             top: targetRect.top - 4,
             left: targetRect.left - 4,
             width: targetRect.width + 8,
             height: targetRect.height + 8,
-            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5), var(--glass-shadow-glow)',
           }}
         />
       </div>
 
       {/* Tooltip */}
       <div
-        className="absolute bg-card border border-border rounded-xl shadow-xl p-4 z-10"
+        className="absolute glass-heavy border-glass-strong rounded-xl shadow-glass-xl p-4 z-10"
         style={{ ...tooltipStyle, width: tooltipWidth }}
       >
         <button
           onClick={endTour}
-          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
@@ -133,22 +133,22 @@ export function OnboardingTour() {
             {tourSteps.map((_, i) => (
               <div
                 key={i}
-                className={`w-2 h-2 rounded-full ${
-                  i === tourStep ? 'bg-primary' : 'bg-muted'
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  i === tourStep ? 'bg-primary' : 'glass-ultralight border-glass'
                 }`}
               />
             ))}
           </div>
           <div className="flex gap-2">
             {!isFirst && (
-              <Button variant="ghost" size="sm" onClick={previousTourStep}>
+              <GlassButton variant="ghost" size="sm" onClick={previousTourStep}>
                 <ChevronLeft className="h-4 w-4" />
-              </Button>
+              </GlassButton>
             )}
-            <Button size="sm" onClick={isLast ? endTour : nextTourStep}>
+            <GlassButton variant="solid" size="sm" onClick={isLast ? endTour : nextTourStep}>
               {isLast ? 'Finalizar' : 'Siguiente'}
               {!isLast && <ChevronRight className="h-4 w-4 ml-1" />}
-            </Button>
+            </GlassButton>
           </div>
         </div>
       </div>

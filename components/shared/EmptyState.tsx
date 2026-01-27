@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassCard } from '@/components/ui/glass-card'
 import { LucideIcon } from 'lucide-react'
 
 interface EmptyStateProps {
@@ -24,8 +25,8 @@ export function EmptyState({
   secondaryAction,
 }: EmptyStateProps) {
   return (
-    <div className="bg-card border border-border rounded-xl p-8 text-center">
-      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+    <GlassCard intensity="light" padding="xl" className="text-center">
+      <div className="w-16 h-16 glass-ultralight border-glass rounded-2xl flex items-center justify-center mx-auto mb-4">
         <Icon className="h-8 w-8 text-muted-foreground" />
       </div>
       <h3 className="font-semibold text-lg mb-2">{title}</h3>
@@ -34,16 +35,16 @@ export function EmptyState({
       </p>
       <div className="flex items-center justify-center gap-3">
         {action && (
-          <Button asChild>
+          <GlassButton variant="solid" asChild>
             <Link href={action.href}>{action.label}</Link>
-          </Button>
+          </GlassButton>
         )}
         {secondaryAction && (
-          <Button variant="outline" asChild>
+          <GlassButton variant="outline" asChild>
             <Link href={secondaryAction.href}>{secondaryAction.label}</Link>
-          </Button>
+          </GlassButton>
         )}
       </div>
-    </div>
+    </GlassCard>
   )
 }

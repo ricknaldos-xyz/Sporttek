@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { Check, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { GlassButton } from '@/components/ui/glass-button'
+import { GlassCard } from '@/components/ui/glass-card'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -100,17 +101,19 @@ export default function PricingPage() {
             (currentPlan === 'PRO' && plan.id === 'ELITE')
 
           return (
-            <div
+            <GlassCard
               key={plan.id}
+              intensity={plan.popular ? 'medium' : 'light'}
+              padding="lg"
               className={cn(
-                'relative bg-card border rounded-2xl p-6 flex flex-col',
-                plan.popular && 'border-primary shadow-lg',
+                'relative flex flex-col',
+                plan.popular && 'shadow-glass-glow border-primary/30',
                 isCurrentPlan && 'ring-2 ring-primary'
               )}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
+                  <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full shadow-glass-glow">
                     Popular
                   </span>
                 </div>
@@ -118,7 +121,7 @@ export default function PricingPage() {
 
               {isCurrentPlan && (
                 <div className="absolute -top-3 right-4">
-                  <span className="bg-green-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                  <span className="bg-success text-white text-xs font-medium px-3 py-1 rounded-full">
                     Plan actual
                   </span>
                 </div>
@@ -141,16 +144,18 @@ export default function PricingPage() {
               <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2 text-sm">
-                    <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="bg-success/20 rounded-full p-0.5 mt-0.5 flex-shrink-0">
+                      <Check className="h-3 w-3 text-success" />
+                    </div>
                     <span>{feature}</span>
                   </li>
                 ))}
               </ul>
 
-              <Button
+              <GlassButton
                 onClick={() => handleSubscribe(plan.id)}
                 disabled={isCurrentPlan || loading !== null || plan.id === 'FREE'}
-                variant={plan.popular ? 'default' : 'outline'}
+                variant={plan.popular ? 'solid' : 'outline'}
                 className="w-full"
               >
                 {loading === plan.id ? (
@@ -167,8 +172,8 @@ export default function PricingPage() {
                 ) : (
                   'Seleccionar'
                 )}
-              </Button>
-            </div>
+              </GlassButton>
+            </GlassCard>
           )
         })}
       </div>
