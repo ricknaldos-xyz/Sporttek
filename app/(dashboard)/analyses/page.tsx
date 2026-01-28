@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Mis Analisis | SportTech',
@@ -31,7 +32,7 @@ async function getAnalyses(userId: string) {
 
 export default async function AnalysesPage() {
   const session = await auth()
-  if (!session?.user) return null
+  if (!session?.user) redirect('/login')
 
   const analyses = await getAnalyses(session.user.id)
 

@@ -65,13 +65,18 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Also update streak
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/gamification/streak`, {
-      method: 'POST',
-      headers: {
-        Cookie: request.headers.get('cookie') || '',
-      },
-    })
+    // Also update streak (best-effort, don't crash if it fails)
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'
+      await fetch(`${baseUrl}/api/gamification/streak`, {
+        method: 'POST',
+        headers: {
+          Cookie: request.headers.get('cookie') || '',
+        },
+      })
+    } catch (streakError) {
+      console.error('Failed to update streak:', streakError)
+    }
 
     return NextResponse.json(activity)
   } catch (error) {

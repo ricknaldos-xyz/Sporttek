@@ -36,7 +36,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const { success } = await authLimiter.check(email)
         if (!success) {
-          throw new Error('Demasiados intentos de inicio de sesion')
+          console.warn('Rate limited login attempt for:', email)
+          return null
         }
 
         const user = await prisma.user.findUnique({
