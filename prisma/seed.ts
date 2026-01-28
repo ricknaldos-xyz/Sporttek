@@ -39,6 +39,37 @@ async function main() {
 
   console.log('Created test user:', testUser.email)
 
+  // Create test coach
+  const testCoach = await prisma.user.upsert({
+    where: { email: 'coach@sporttech.pe' },
+    update: {},
+    create: {
+      email: 'coach@sporttech.pe',
+      name: 'Test Coach',
+      password: hashedPassword,
+      role: 'COACH',
+      accountType: 'COACH',
+      subscription: 'PRO',
+      onboardingCompleted: true,
+      emailVerified: new Date(),
+      coachProfile: {
+        create: {
+          headline: 'Entrenador certificado con 10 años de experiencia',
+          bio: 'Ex jugador profesional, especializado en técnica de saque y estrategia de juego.',
+          certifications: ['ITF Nivel 1', 'RPT Profesional'],
+          yearsExperience: 10,
+          specialties: ['Saque', 'Estrategia', 'Preparación física'],
+          hourlyRate: 80,
+          currency: 'PEN',
+          isAvailable: true,
+          country: 'PE',
+        },
+      },
+    },
+  })
+
+  console.log('Created test coach:', testCoach.email)
+
   // Create Tennis sport
   const tennis = await prisma.sport.upsert({
     where: { slug: 'tennis' },
