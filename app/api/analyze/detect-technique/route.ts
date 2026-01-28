@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getGeminiClient, SPORTS_SAFETY_SETTINGS, uploadToGemini } from '@/lib/gemini/client'
+import { getGeminiClient, SPORTS_SAFETY_SETTINGS } from '@/lib/gemini/client'
 import { buildDetectionPrompt } from '@/lib/openai/prompts/detection'
 import { readFile } from 'fs/promises'
 import path from 'path'
@@ -63,7 +63,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const urls: Array<{ url: string; type: string; filename: string }> = JSON.parse(fileUrls)
+    let urls: Array<{ url: string; type: string; filename: string }>
+    try {
+      urls = JSON.parse(fileUrls)
+    } catch {
+      console.error('Failed to parse fileUrls:', fileUrls)
+      return NextResponse.json(
+        { error: 'fileUrls tiene formato invalido' },
+        { status: 400 }
+      )
+    }
 
     if (urls.length === 0) {
       return NextResponse.json(
@@ -71,6 +80,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    console.log('[detect] Starting detection for sport:', sportId, 'files:', urls.length)
 
     // Load techniques for this sport
     const sport = await prisma.sport.findUnique({
@@ -90,6 +101,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('[detect] Sport found:', sport.slug, 'techniques:', sport.techniques.length)
+
     // Build detection prompt
     const prompt = buildDetectionPrompt(
       sport.slug,
@@ -101,33 +114,36 @@ export async function POST(request: NextRequest) {
       }))
     )
 
-    // Upload files to Gemini File API and prepare content parts
+    // Prepare content parts with inline base64 data
     const contentParts: Array<
-      | { fileData: { mimeType: string; fileUri: string } }
       | { inlineData: { mimeType: string; data: string } }
       | { text: string }
     > = []
 
     for (const item of urls) {
       const mimeType = getMimeType(item)
-      let buffer: Buffer
+      console.log('[detect] Processing file:', item.filename, 'type:', item.type, 'mime:', mimeType, 'url:', item.url.substring(0, 80))
 
-      if (item.url.startsWith('/uploads/')) {
-        buffer = await readFile(path.join(process.cwd(), 'public', item.url))
-      } else {
-        const response = await fetch(item.url)
-        if (!response.ok) continue
-        buffer = Buffer.from(await response.arrayBuffer())
-      }
+      try {
+        let buffer: Buffer
 
-      // Use File API for videos (too large for inline data), inline for images
-      if (item.type === 'VIDEO') {
-        console.log(`Uploading video to Gemini File API: ${item.filename}`)
-        const fileData = await uploadToGemini(buffer, mimeType, item.filename)
-        contentParts.push({ fileData })
-      } else {
+        if (item.url.startsWith('/uploads/')) {
+          buffer = await readFile(path.join(process.cwd(), 'public', item.url))
+        } else {
+          const response = await fetch(item.url)
+          if (!response.ok) {
+            console.error('[detect] Failed to fetch file:', item.url, 'status:', response.status)
+            continue
+          }
+          buffer = Buffer.from(await response.arrayBuffer())
+        }
+
+        console.log('[detect] File loaded, size:', buffer.length, 'bytes')
         const base64 = buffer.toString('base64')
         contentParts.push({ inlineData: { mimeType, data: base64 } })
+      } catch (fileError) {
+        console.error('[detect] Error loading file:', item.filename, fileError)
+        continue
       }
     }
 
@@ -141,18 +157,19 @@ export async function POST(request: NextRequest) {
     contentParts.push({ text: prompt })
 
     // Call Gemini for detection
+    console.log('[detect] Calling Gemini gemini-2.5-flash with', contentParts.length, 'parts')
     const genAI = getGeminiClient()
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
       safetySettings: SPORTS_SAFETY_SETTINGS,
     })
-    console.log('Sending to Gemini for technique detection...')
+
     const result = await model.generateContent(contentParts)
 
     // Check if response was blocked by safety filters
     const blockReason = result.response.promptFeedback?.blockReason
     if (blockReason) {
-      console.error('Gemini blocked detection response:', blockReason)
+      console.error('[detect] Gemini blocked response:', blockReason)
       return NextResponse.json(
         { error: 'El contenido del video fue bloqueado por filtros de seguridad. Intenta con otro video.' },
         { status: 422 }
@@ -160,9 +177,10 @@ export async function POST(request: NextRequest) {
     }
 
     const content = result.response.text()
+    console.log('[detect] Gemini response length:', content.length)
 
     if (!content || content.trim().length === 0) {
-      console.error('Gemini returned empty detection response')
+      console.error('[detect] Gemini returned empty response')
       return NextResponse.json(
         { error: 'El modelo no pudo analizar el video. Intenta con otro video o formato.' },
         { status: 422 }
@@ -180,12 +198,14 @@ export async function POST(request: NextRequest) {
     try {
       detection = JSON.parse(jsonContent)
     } catch {
-      console.error('Failed to parse Gemini detection response:', content.substring(0, 500))
+      console.error('[detect] Failed to parse JSON:', content.substring(0, 500))
       return NextResponse.json(
         { error: 'No se pudo interpretar la respuesta del modelo' },
         { status: 500 }
       )
     }
+
+    console.log('[detect] Detection result:', detection.technique, 'confidence:', detection.confidence)
 
     // Validate detected technique exists in DB
     const detectedTechnique = sport.techniques.find(
@@ -245,7 +265,8 @@ export async function POST(request: NextRequest) {
       alternatives,
     })
   } catch (error) {
-    console.error('Detection error:', error)
+    console.error('[detect] UNCAUGHT ERROR:', error instanceof Error ? error.message : error)
+    console.error('[detect] Stack:', error instanceof Error ? error.stack : 'N/A')
     return NextResponse.json(
       { error: 'Error al detectar la técnica' },
       { status: 500 }

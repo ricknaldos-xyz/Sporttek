@@ -228,7 +228,10 @@ export default function AnalyzePage() {
       })
 
       if (!detRes.ok) {
-        throw new Error('Error al detectar la tecnica')
+        const errBody = await detRes.json().catch(() => null)
+        const msg = errBody?.error || `Error ${detRes.status}`
+        console.error('detect-technique failed:', detRes.status, msg)
+        throw new Error(msg)
       }
 
       const detection: DetectionResponse = await detRes.json()
@@ -243,7 +246,8 @@ export default function AnalyzePage() {
 
       setStep('detection-confirm')
     } catch (error) {
-      toast.error('Error al detectar la tecnica')
+      const msg = error instanceof Error ? error.message : 'Error al detectar la tecnica'
+      toast.error(msg)
       setUploading(false)
       setAutoDetectMode(false)
       setStep('technique')

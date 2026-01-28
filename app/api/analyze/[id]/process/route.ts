@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getGeminiClient, SPORTS_SAFETY_SETTINGS, uploadToGemini } from '@/lib/gemini/client'
+import { getGeminiClient, SPORTS_SAFETY_SETTINGS } from '@/lib/gemini/client'
 import { buildTennisPrompt } from '@/lib/openai/prompts/tennis'
 import { sendAnalysisCompleteEmail } from '@/lib/email'
 import { recalculateSkillScore } from '@/lib/skill-score'
@@ -144,57 +144,56 @@ export async function POST(
         safetySettings: SPORTS_SAFETY_SETTINGS,
       })
 
-      // Prepare content parts for Gemini
+      // Prepare content parts for Gemini (inline base64)
       const contentParts: Array<
-        | { fileData: { mimeType: string; fileUri: string } }
         | { inlineData: { mimeType: string; data: string } }
         | { text: string }
       > = []
 
       // Process each media item
       for (const item of analysis.mediaItems) {
-        console.log(`Processing ${item.type}: ${item.filename}`)
+        console.log(`[process] Processing ${item.type}: ${item.filename}, url: ${item.url.substring(0, 80)}`)
 
-        let buffer: Buffer
+        try {
+          let buffer: Buffer
 
-        // Check if it's a local file or remote URL
-        if (item.url.startsWith('/uploads/')) {
-          buffer = await readFile(path.join(process.cwd(), 'public', item.url))
-        } else {
-          const response = await fetch(item.url)
-          if (!response.ok) {
-            console.error(`Failed to download file: ${item.url}`)
-            continue
+          // Check if it's a local file or remote URL
+          if (item.url.startsWith('/uploads/')) {
+            buffer = await readFile(path.join(process.cwd(), 'public', item.url))
+          } else {
+            const response = await fetch(item.url)
+            if (!response.ok) {
+              console.error(`[process] Failed to download file: ${item.url}, status: ${response.status}`)
+              continue
+            }
+            buffer = Buffer.from(await response.arrayBuffer())
           }
-          buffer = Buffer.from(await response.arrayBuffer())
-        }
 
-        // Determine mime type
-        let mimeType: string
-        if (item.type === 'VIDEO') {
-          mimeType = item.filename.endsWith('.mov')
-            ? 'video/quicktime'
-            : item.filename.endsWith('.webm')
-            ? 'video/webm'
-            : item.filename.endsWith('.avi')
-            ? 'video/x-msvideo'
-            : 'video/mp4'
-        } else {
-          mimeType = item.filename.endsWith('.png')
-            ? 'image/png'
-            : item.filename.endsWith('.webp')
-            ? 'image/webp'
-            : 'image/jpeg'
-        }
+          console.log(`[process] File loaded, size: ${buffer.length} bytes`)
 
-        // Use File API for videos (too large for inline data), inline for images
-        if (item.type === 'VIDEO') {
-          console.log(`Uploading video to Gemini File API: ${item.filename}`)
-          const fileData = await uploadToGemini(buffer, mimeType, item.filename)
-          contentParts.push({ fileData })
-        } else {
+          // Determine mime type
+          let mimeType: string
+          if (item.type === 'VIDEO') {
+            mimeType = item.filename.endsWith('.mov')
+              ? 'video/quicktime'
+              : item.filename.endsWith('.webm')
+              ? 'video/webm'
+              : item.filename.endsWith('.avi')
+              ? 'video/x-msvideo'
+              : 'video/mp4'
+          } else {
+            mimeType = item.filename.endsWith('.png')
+              ? 'image/png'
+              : item.filename.endsWith('.webp')
+              ? 'image/webp'
+              : 'image/jpeg'
+          }
+
           const base64 = buffer.toString('base64')
           contentParts.push({ inlineData: { mimeType, data: base64 } })
+        } catch (fileError) {
+          console.error(`[process] Error loading file: ${item.filename}`, fileError)
+          continue
         }
       }
 
