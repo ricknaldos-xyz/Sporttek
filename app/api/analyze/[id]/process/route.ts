@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getGeminiClient } from '@/lib/gemini/client'
+import { getGeminiClient, SPORTS_SAFETY_SETTINGS } from '@/lib/gemini/client'
 import { buildTennisPrompt } from '@/lib/openai/prompts/tennis'
 import { sendAnalysisCompleteEmail } from '@/lib/email'
 import { recalculateSkillScore } from '@/lib/skill-score'
@@ -139,7 +139,10 @@ export async function POST(
       }
 
       const genAI = getGeminiClient()
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        safetySettings: SPORTS_SAFETY_SETTINGS,
+      })
 
       // Prepare content parts for Gemini
       const contentParts: Array<{
@@ -207,10 +210,18 @@ export async function POST(
 
       // Call Gemini API
       const result = await model.generateContent(contentParts)
-      const response = result.response
-      const content = response.text()
 
-      if (!content) {
+      // Check if response was blocked by safety filters
+      const blockReason = result.response.promptFeedback?.blockReason
+      if (blockReason) {
+        console.error('Gemini blocked analysis response:', blockReason)
+        throw new Error(`Video bloqueado por filtros de seguridad: ${blockReason}`)
+      }
+
+      const content = result.response.text()
+
+      if (!content || content.trim().length === 0) {
+        console.error('Gemini returned empty analysis response')
         throw new Error('Respuesta vacia de Gemini')
       }
 
@@ -222,7 +233,13 @@ export async function POST(
       }
 
       // Parse response
-      const analysisResult = JSON.parse(jsonContent)
+      let analysisResult
+      try {
+        analysisResult = JSON.parse(jsonContent)
+      } catch {
+        console.error('Failed to parse Gemini analysis response:', content.substring(0, 500))
+        throw new Error('Formato de respuesta invalido de Gemini')
+      }
 
       // Validate result structure
       if (typeof analysisResult.overallScore !== 'number' || !Array.isArray(analysisResult.issues)) {

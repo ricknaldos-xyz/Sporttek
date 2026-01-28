@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getGeminiClient } from '@/lib/gemini/client'
+import { getGeminiClient, SPORTS_SAFETY_SETTINGS } from '@/lib/gemini/client'
 import { buildDetectionPrompt } from '@/lib/openai/prompts/detection'
 import { readFile } from 'fs/promises'
 import path from 'path'
@@ -147,9 +147,31 @@ export async function POST(request: NextRequest) {
 
     // Call Gemini for detection
     const genAI = getGeminiClient()
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      safetySettings: SPORTS_SAFETY_SETTINGS,
+    })
     const result = await model.generateContent(contentParts)
+
+    // Check if response was blocked by safety filters
+    const blockReason = result.response.promptFeedback?.blockReason
+    if (blockReason) {
+      console.error('Gemini blocked detection response:', blockReason)
+      return NextResponse.json(
+        { error: 'El contenido del video fue bloqueado por filtros de seguridad. Intenta con otro video.' },
+        { status: 422 }
+      )
+    }
+
     const content = result.response.text()
+
+    if (!content || content.trim().length === 0) {
+      console.error('Gemini returned empty detection response')
+      return NextResponse.json(
+        { error: 'El modelo no pudo analizar el video. Intenta con otro video o formato.' },
+        { status: 422 }
+      )
+    }
 
     // Parse JSON response
     let jsonContent = content
@@ -162,6 +184,7 @@ export async function POST(request: NextRequest) {
     try {
       detection = JSON.parse(jsonContent)
     } catch {
+      console.error('Failed to parse Gemini detection response:', content.substring(0, 500))
       return NextResponse.json(
         { error: 'No se pudo interpretar la respuesta del modelo' },
         { status: 500 }
