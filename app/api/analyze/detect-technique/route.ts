@@ -156,15 +156,37 @@ export async function POST(request: NextRequest) {
 
     contentParts.push({ text: prompt })
 
-    // Call Gemini for detection
-    console.log('[detect] Calling Gemini gemini-2.5-flash with', contentParts.length, 'parts')
+    // Call Gemini for detection with retry on 429
+    console.log('[detect] Calling Gemini gemini-2.0-flash with', contentParts.length, 'parts')
     const genAI = getGeminiClient()
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash',
       safetySettings: SPORTS_SAFETY_SETTINGS,
     })
 
-    const result = await model.generateContent(contentParts)
+    let result
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        result = await model.generateContent(contentParts)
+        break
+      } catch (err) {
+        const is429 = err instanceof Error && err.message.includes('429')
+        if (is429 && attempt < 2) {
+          const waitSec = (attempt + 1) * 15
+          console.log(`[detect] Rate limited, retrying in ${waitSec}s (attempt ${attempt + 1}/3)`)
+          await new Promise((r) => setTimeout(r, waitSec * 1000))
+        } else {
+          throw err
+        }
+      }
+    }
+
+    if (!result) {
+      return NextResponse.json(
+        { error: 'No se pudo obtener respuesta del modelo de IA' },
+        { status: 503 }
+      )
+    }
 
     // Check if response was blocked by safety filters
     const blockReason = result.response.promptFeedback?.blockReason

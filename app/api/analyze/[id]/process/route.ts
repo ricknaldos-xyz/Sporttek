@@ -204,10 +204,29 @@ export async function POST(
       // Add the text prompt
       contentParts.push({ text: prompt })
 
-      console.log('Sending to Gemini for analysis...')
+      console.log('[process] Sending to Gemini for analysis...')
 
-      // Call Gemini API
-      const result = await model.generateContent(contentParts)
+      // Call Gemini API with retry on 429
+      let result
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          result = await model.generateContent(contentParts)
+          break
+        } catch (err) {
+          const is429 = err instanceof Error && err.message.includes('429')
+          if (is429 && attempt < 2) {
+            const waitSec = (attempt + 1) * 15
+            console.log(`[process] Rate limited, retrying in ${waitSec}s (attempt ${attempt + 1}/3)`)
+            await new Promise((r) => setTimeout(r, waitSec * 1000))
+          } else {
+            throw err
+          }
+        }
+      }
+
+      if (!result) {
+        throw new Error('No se pudo obtener respuesta del modelo de IA')
+      }
 
       // Check if response was blocked by safety filters
       const blockReason = result.response.promptFeedback?.blockReason
