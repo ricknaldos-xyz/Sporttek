@@ -103,9 +103,10 @@ export async function POST(request: NextRequest) {
       type: isVideo ? 'VIDEO' : 'IMAGE',
     })
   } catch (error) {
-    console.error('Upload error:', error)
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    console.error('Upload error:', errorMsg, error)
     return NextResponse.json(
-      { error: 'Error al subir archivo' },
+      { error: `Error al subir archivo: ${errorMsg.substring(0, 100)}` },
       { status: 500 }
     )
   }
