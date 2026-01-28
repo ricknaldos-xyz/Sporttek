@@ -13,8 +13,8 @@ function requireEnv(name: string): string {
 export const env = {
   DATABASE_URL: requireEnv('DATABASE_URL'),
   AUTH_SECRET: requireEnv('AUTH_SECRET'),
-  STRIPE_SECRET_KEY: requireEnv('STRIPE_SECRET_KEY'),
-  STRIPE_WEBHOOK_SECRET: requireEnv('STRIPE_WEBHOOK_SECRET'),
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
