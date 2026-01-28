@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { processDocument } from '@/lib/rag/processor'
 
-export const maxDuration = 300
-
-// PATCH: Recover or reprocess a document
+// PATCH: Recover FAILED documents or trigger reprocessing
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -34,7 +31,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 })
     }
 
-    // If FAILED but has chunks, just recover the status
+    // If FAILED but has chunks, just recover the status (no reprocessing needed)
     if (doc.status === 'FAILED' && doc._count.chunks > 0) {
       await prisma.document.update({
         where: { id },
@@ -46,10 +43,18 @@ export async function PATCH(
       })
     }
 
-    // Otherwise, full reprocessing
-    await processDocument(id)
+    // For docs without chunks, trigger processing via dynamic import
+    // (avoids bundling heavy processor dependencies in this function)
+    if (doc.status === 'FAILED' || doc.status === 'UPLOADING') {
+      const { processDocument } = await import('@/lib/rag/processor')
+      await processDocument(id)
+      return NextResponse.json({ success: true, message: 'Documento procesado correctamente' })
+    }
 
-    return NextResponse.json({ success: true, message: 'Documento procesado correctamente' })
+    return NextResponse.json({
+      success: true,
+      message: 'Documento ya esta procesado',
+    })
   } catch (error) {
     console.error('Document process/recover error:', error)
     return NextResponse.json(
