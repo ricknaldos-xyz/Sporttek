@@ -1,13 +1,26 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassCard } from '@/components/ui/glass-card'
 import { toast } from 'sonner'
-import { Loader2, Dumbbell, ArrowLeft, Check } from 'lucide-react'
+import { Loader2, Dumbbell, ArrowLeft, Check, Star, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+
+const DURATION_OPTIONS = [
+  { weeks: 2, label: 'Ajuste rapido', description: 'Correcciones puntuales para problemas leves' },
+  { weeks: 4, label: 'Correccion progresiva', description: 'Tiempo ideal para consolidar mejoras tecnicas' },
+  { weeks: 6, label: 'Transformacion tecnica', description: 'Trabajo profundo para problemas criticos' },
+  { weeks: 8, label: 'Dominio completo', description: 'Programa intensivo de perfeccionamiento total' },
+]
+
+interface Recommendation {
+  recommendedWeeks: number
+  techniqueName: string
+  issuesSummary: { critical: number; high: number; medium: number; low: number; total: number }
+}
 
 export function GeneratePlanForm() {
   const router = useRouter()
@@ -15,13 +28,33 @@ export function GeneratePlanForm() {
   const analysisId = searchParams.get('analysisId')
   const [generating, setGenerating] = useState(false)
   const [weeks, setWeeks] = useState(4)
+  const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
+  const [loadingRec, setLoadingRec] = useState(true)
+
+  const fetchRecommendation = useCallback(async () => {
+    if (!analysisId) return
+    try {
+      const res = await fetch(`/api/training-plans/recommend?analysisId=${analysisId}`)
+      if (res.ok) {
+        const data: Recommendation = await res.json()
+        setRecommendation(data)
+        setWeeks(data.recommendedWeeks)
+      }
+    } catch {
+      // Silently fail, use default
+    } finally {
+      setLoadingRec(false)
+    }
+  }, [analysisId])
 
   useEffect(() => {
     if (!analysisId) {
       toast.error('Analisis no especificado')
       router.push('/analyses')
+      return
     }
-  }, [analysisId, router])
+    fetchRecommendation()
+  }, [analysisId, router, fetchRecommendation])
 
   const handleGenerate = async () => {
     if (!analysisId) return
@@ -52,6 +85,8 @@ export function GeneratePlanForm() {
     }
   }
 
+  const summary = recommendation?.issuesSummary
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
@@ -61,60 +96,88 @@ export function GeneratePlanForm() {
           </Link>
         </GlassButton>
         <div>
-          <h1 className="text-2xl font-bold">Generar Plan de Entrenamiento</h1>
+          <h1 className="text-2xl font-bold">Tu Plan de Mejora Personalizado</h1>
           <p className="text-muted-foreground">
-            Crea un plan personalizado basado en tu analisis
+            {recommendation
+              ? `Basado en ${summary?.total} problema${summary?.total !== 1 ? 's' : ''} detectado${summary?.total !== 1 ? 's' : ''} en tu ${recommendation.techniqueName}`
+              : 'Crea un plan personalizado basado en tu analisis'}
           </p>
         </div>
       </div>
 
       <GlassCard intensity="medium" padding="lg" className="space-y-6">
-        <div className="flex items-center gap-4 p-4 glass-primary border-glass rounded-xl">
-          <div className="glass-light border-glass rounded-xl p-2">
-            <Dumbbell className="h-8 w-8 text-primary" />
+        {/* Issues summary */}
+        {summary && summary.total > 0 && (
+          <div className="flex items-center gap-3 p-4 glass-ultralight border-glass rounded-xl">
+            <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
+            <div className="text-sm">
+              <span className="font-medium">Problemas detectados: </span>
+              {[
+                summary.critical > 0 && `${summary.critical} critico${summary.critical > 1 ? 's' : ''}`,
+                summary.high > 0 && `${summary.high} alto${summary.high > 1 ? 's' : ''}`,
+                summary.medium > 0 && `${summary.medium} medio${summary.medium > 1 ? 's' : ''}`,
+                summary.low > 0 && `${summary.low} leve${summary.low > 1 ? 's' : ''}`,
+              ].filter(Boolean).join(', ')}
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold">Plan Personalizado</h3>
-            <p className="text-sm text-muted-foreground">
-              Ejercicios especificos para corregir los problemas detectados en tu
-              tecnica
-            </p>
-          </div>
-        </div>
+        )}
 
+        {/* Duration selector */}
         <div>
           <label className="block font-medium mb-3">
-            Duracion del plan (semanas)
+            Elige la duracion de tu plan
           </label>
-          <div className="grid grid-cols-4 gap-3">
-            {[2, 4, 6, 8].map((w) => (
-              <button
-                key={w}
-                onClick={() => setWeeks(w)}
-                className={cn(
-                  'p-3 rounded-xl text-center transition-all duration-[var(--duration-normal)]',
-                  weeks === w
-                    ? 'glass-primary border-glass shadow-glass-glow text-primary'
-                    : 'glass-ultralight border-glass hover:glass-light'
-                )}
-              >
-                <span className="text-lg font-semibold">{w}</span>
-                <span className="block text-xs text-muted-foreground">
-                  semanas
-                </span>
-              </button>
-            ))}
+          <div className="grid grid-cols-2 gap-3">
+            {loadingRec ? (
+              <div className="col-span-2 flex justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              DURATION_OPTIONS.map((option) => {
+                const isRecommended = recommendation?.recommendedWeeks === option.weeks
+                const isSelected = weeks === option.weeks
+                return (
+                  <button
+                    key={option.weeks}
+                    onClick={() => setWeeks(option.weeks)}
+                    className={cn(
+                      'p-4 rounded-xl text-left transition-all duration-[var(--duration-normal)] relative',
+                      isSelected
+                        ? 'glass-primary border-glass shadow-glass-glow'
+                        : 'glass-ultralight border-glass hover:glass-light'
+                    )}
+                  >
+                    {isRecommended && (
+                      <span className="absolute -top-2 right-3 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Star className="h-2.5 w-2.5" />
+                        Recomendado
+                      </span>
+                    )}
+                    <span className={cn(
+                      'text-xl font-bold block',
+                      isSelected ? 'text-primary' : ''
+                    )}>
+                      {option.weeks} semanas
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {option.label}
+                    </span>
+                  </button>
+                )
+              })
+            )}
           </div>
         </div>
 
+        {/* Plan includes */}
         <div className="space-y-3">
-          <h4 className="font-medium">El plan incluira:</h4>
+          <h4 className="font-medium">Tu plan incluira:</h4>
           <ul className="space-y-2">
             {[
               'Ejercicios especificos para cada problema detectado',
-              'Progresion de dificultad a lo largo del plan',
+              'Progresion de dificultad semana a semana',
               'Frecuencia optimizada segun severidad del problema',
-              'Instrucciones detalladas para cada ejercicio',
+              'Instrucciones detalladas paso a paso',
               'Seguimiento de progreso dia a dia',
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-2 text-sm">
@@ -129,7 +192,7 @@ export function GeneratePlanForm() {
 
         <GlassButton
           onClick={handleGenerate}
-          disabled={generating}
+          disabled={generating || loadingRec}
           variant="solid"
           className="w-full"
           size="lg"
@@ -137,7 +200,7 @@ export function GeneratePlanForm() {
           {generating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generando plan...
+              Generando tu plan personalizado...
             </>
           ) : (
             <>

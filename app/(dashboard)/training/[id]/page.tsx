@@ -28,6 +28,8 @@ import {
   Dumbbell,
   Clock,
   CheckCircle,
+  Video,
+  Trophy,
 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { ExerciseItem } from './exercise-item'
@@ -187,6 +189,29 @@ export default async function TrainingPlanDetailPage({
           </GlassCard>
         ))}
       </div>
+
+      {/* Completion CTA - Re-record */}
+      {completedExercises === totalExercises && totalExercises > 0 && (
+        <GlassCard intensity="medium" padding="lg" className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="bg-success/20 border border-success/30 rounded-full p-3">
+              <Trophy className="h-8 w-8 text-success" />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">Has completado tu plan!</h2>
+            <p className="text-muted-foreground mt-1">
+              Es momento de medir tu progreso. Grabate ejecutando la misma tecnica para comparar tus resultados.
+            </p>
+          </div>
+          <GlassButton variant="solid" size="lg" asChild>
+            <Link href={`/player/analyze`}>
+              <Video className="mr-2 h-4 w-4" />
+              Grabar nuevo video para comparar
+            </Link>
+          </GlassButton>
+        </GlassCard>
+      )}
 
       {/* Link to Analysis */}
       <GlassCard intensity="ultralight" padding="lg" className="text-center">
