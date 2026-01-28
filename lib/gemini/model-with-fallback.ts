@@ -24,6 +24,7 @@ export async function generateWithFallback(
       const model = genAI.getGenerativeModel({
         model: modelName,
         safetySettings,
+        generationConfig: { temperature: 0 },
       })
 
       const result = await model.generateContent(content)
