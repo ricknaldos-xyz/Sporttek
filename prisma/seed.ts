@@ -1,9 +1,43 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
   console.log('Seeding database...')
+
+  // Create test user
+  const hashedPassword = await bcrypt.hash('test1234', 10)
+
+  const testUser = await prisma.user.upsert({
+    where: { email: 'test@sporttech.pe' },
+    update: {},
+    create: {
+      email: 'test@sporttech.pe',
+      name: 'Test User',
+      password: hashedPassword,
+      role: 'USER',
+      subscription: 'FREE',
+      onboardingCompleted: true,
+      emailVerified: new Date(),
+      playerProfile: {
+        create: {
+          displayName: 'TestPlayer',
+          country: 'PE',
+          region: 'Lima',
+          city: 'Lima',
+          playStyle: 'Agresivo',
+          dominantHand: 'Derecha',
+          backhandType: 'Dos manos',
+          yearsPlaying: 3,
+          ageGroup: '18-25',
+          matchElo: 1200,
+        },
+      },
+    },
+  })
+
+  console.log('Created test user:', testUser.email)
 
   // Create Tennis sport
   const tennis = await prisma.sport.upsert({
