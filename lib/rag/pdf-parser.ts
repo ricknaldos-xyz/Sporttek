@@ -1,4 +1,5 @@
 // Polyfill browser APIs that pdfjs-dist expects but don't exist in Node.js/serverless.
+// MUST run before pdf-parse is imported since pdfjs-dist checks these at module load time.
 // Only text extraction is needed, so minimal stubs are sufficient.
 if (typeof globalThis.DOMMatrix === 'undefined') {
   // @ts-expect-error Minimal DOMMatrix stub for text extraction only
@@ -23,8 +24,6 @@ if (typeof globalThis.Path2D === 'undefined') {
   globalThis.Path2D = class Path2D {}
 }
 
-import { PDFParse } from 'pdf-parse'
-
 export interface ParsedPage {
   pageNumber: number
   text: string
@@ -37,6 +36,10 @@ export interface ParsedPdf {
 }
 
 export async function parsePdf(buffer: Buffer): Promise<ParsedPdf> {
+  // Dynamic import: polyfills above MUST be set before pdf-parse loads pdfjs-dist.
+  // Static imports are hoisted and would load before polyfills run.
+  const { PDFParse } = await import('pdf-parse')
+
   const parser = new PDFParse({ data: new Uint8Array(buffer), verbosity: 0 })
   const result = await parser.getText()
 
