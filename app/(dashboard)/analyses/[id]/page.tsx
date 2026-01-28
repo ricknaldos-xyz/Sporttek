@@ -34,7 +34,6 @@ import {
   CheckCircle,
   Target,
   Dumbbell,
-  Play,
 } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { RetryAnalysisButton } from '@/components/analysis/RetryAnalysisButton'
@@ -160,9 +159,14 @@ export default async function AnalysisDetailPage({
                 className="aspect-video glass-ultralight border-glass rounded-lg overflow-hidden relative"
               >
                 {item.type === 'VIDEO' ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Play className="h-8 w-8 text-muted-foreground" />
-                  </div>
+                  <video
+                    src={item.url}
+                    controls
+                    controlsList="nodownload"
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-cover bg-black"
+                  />
                 ) : (
                   <Image
                     src={item.url}
