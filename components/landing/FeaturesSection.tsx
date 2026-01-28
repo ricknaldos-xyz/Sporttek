@@ -1,6 +1,6 @@
 'use client'
 
-import { Brain, Target, Dumbbell, TrendingUp, History, Zap } from 'lucide-react'
+import { Brain, Target, Trophy, Swords, Medal, Users } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 
 const features = [
@@ -8,37 +8,37 @@ const features = [
     icon: Brain,
     title: 'Analisis con IA avanzada',
     description:
-      'Nuestra inteligencia artificial identifica errores especificos en tu tecnica que un ojo humano podria pasar por alto.',
+      'Sube un video de tu tecnica y nuestra IA identifica errores especificos que un ojo humano podria pasar por alto.',
   },
   {
     icon: Target,
-    title: 'Planes personalizados',
+    title: 'Planes de entrenamiento',
     description:
-      'Recibe ejercicios adaptados a tu nivel y objetivos especificos para corregir cada error detectado.',
+      'Recibe ejercicios personalizados basados en los errores detectados, con instrucciones paso a paso y progresion semanal.',
   },
   {
-    icon: Dumbbell,
-    title: 'Multiples deportes',
+    icon: Trophy,
+    title: 'Rankings nacionales',
     description:
-      'Tenis disponible hoy, con golf, basketball y futbol llegando proximamente a la plataforma.',
+      'Compite por tu posicion en el ranking peruano. Tu skill score se calcula con IA y sube de tier: Bronce, Plata, Oro, Platino, Diamante.',
   },
   {
-    icon: TrendingUp,
-    title: 'Seguimiento de progreso',
+    icon: Swords,
+    title: 'Matchmaking',
     description:
-      'Visualiza tu mejora con graficos y metricas detalladas que muestran tu evolucion en el tiempo.',
+      'Encuentra rivales de tu nivel para jugar partidos reales. El sistema sugiere oponentes basado en tu skill score y ubicacion.',
   },
   {
-    icon: History,
-    title: 'Historial completo',
+    icon: Medal,
+    title: 'Torneos',
     description:
-      'Accede a todos tus analisis anteriores para comparar tu evolucion y ver cuanto has mejorado.',
+      'Participa en torneos organizados por la comunidad. Registrate, compite y sube en el ranking con cada victoria.',
   },
   {
-    icon: Zap,
-    title: 'Feedback instantaneo',
+    icon: Users,
+    title: 'Comunidad',
     description:
-      'Obtiene resultados en minutos, no dias. Analiza tu tecnica y recibe recomendaciones al instante.',
+      'Conecta con otros tenistas. Sigue jugadores, comparte logros, comenta analisis y forma parte de la comunidad tenistica peruana.',
   },
 ]
 

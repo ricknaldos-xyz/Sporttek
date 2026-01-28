@@ -6,23 +6,23 @@ import { GlassCard } from '@/components/ui/glass-card'
 const testimonials = [
   {
     name: 'Carlos M.',
-    role: 'Tenista amateur',
+    role: 'Tenista amateur, Lima',
     content:
-      'Despues de solo 2 semanas usando SportTech, mi saque mejoro notablemente. La IA identifico un error en mi lanzamiento que ningun entrenador habia notado antes.',
+      'Subi un video de mi saque y la IA detecto que mi lanzamiento era inconsistente. El plan de ejercicios me ayudo a corregirlo en pocas semanas. Muy util.',
     rating: 5,
   },
   {
     name: 'Maria L.',
-    role: 'Jugadora de club',
+    role: 'Jugadora de club, Miraflores',
     content:
-      'Los planes de entrenamiento son increibles. Cada ejercicio esta pensado especificamente para corregir mis errores. He mejorado mi derecha en un mes.',
-    rating: 5,
+      'Me gusta el sistema de ranking y poder encontrar rivales de mi nivel. Los analisis de IA son bastante detallados, aunque a veces tarda un poco el procesamiento.',
+    rating: 4,
   },
   {
     name: 'Roberto S.',
-    role: 'Entrenador personal',
+    role: 'Entrenador, San Isidro',
     content:
-      'Uso SportTech con mis alumnos. Les ayuda a visualizar sus errores y entender exactamente que deben corregir. Ha transformado mis sesiones de entrenamiento.',
+      'Lo uso con mis alumnos para que vean sus errores tecnicos de forma objetiva. Los planes de entrenamiento generados complementan bien mis sesiones presenciales.',
     rating: 5,
   },
 ]
@@ -33,10 +33,10 @@ export function TestimonialsSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Lo que dicen nuestros usuarios
+            Lo que dicen nuestros primeros usuarios
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Miles de deportistas ya estan mejorando su tecnica con SportTech.
+            Deportistas que ya estan probando SportTech para mejorar su tecnica.
           </p>
         </div>
 

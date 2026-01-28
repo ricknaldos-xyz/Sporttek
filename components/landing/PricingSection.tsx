@@ -13,10 +13,11 @@ const plans = [
     name: 'Free',
     description: 'Para comenzar',
     price: 0,
+    currency: '',
     features: [
       '3 analisis por mes',
       '1 plan de entrenamiento activo',
-      'Acceso a Tenis',
+      'Acceso al ranking nacional',
       'Soporte por email',
     ],
     cta: 'Comenzar gratis',
@@ -26,12 +27,13 @@ const plans = [
     id: 'PRO',
     name: 'Pro',
     description: 'Para deportistas serios',
-    price: 19.99,
+    price: 69.99,
+    currency: 'S/',
     features: [
       'Analisis ilimitados',
       'Planes de entrenamiento ilimitados',
-      'Acceso a todos los deportes',
-      'Historial completo',
+      'Historial completo de analisis',
+      'Estadisticas avanzadas',
       'Soporte prioritario',
     ],
     cta: 'Elegir Pro',
@@ -40,15 +42,15 @@ const plans = [
   {
     id: 'ELITE',
     name: 'Elite',
-    description: 'Para profesionales',
-    price: 49.99,
+    description: 'Para competidores',
+    price: 179.99,
+    currency: 'S/',
     features: [
       'Todo en Pro',
-      'Analisis en video HD',
-      'Comparacion de progreso avanzada',
-      'Exportar informes PDF',
-      'Sesiones de coaching virtual',
-      'Soporte 24/7',
+      'Acceso a torneos exclusivos',
+      'Badge de perfil Elite',
+      'Analisis comparativo avanzado',
+      'Soporte VIP',
     ],
     cta: 'Elegir Elite',
     popular: false,
@@ -103,7 +105,7 @@ export function PricingSection() {
 
                 <div className="mb-6">
                   <span className="text-4xl font-bold">
-                    ${plan.price.toFixed(2)}
+                    {plan.currency}{plan.price.toFixed(2)}
                   </span>
                   {plan.price > 0 && (
                     <span className="text-muted-foreground">/mes</span>
@@ -136,8 +138,8 @@ export function PricingSection() {
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-8">
-          Sin tarjeta de credito para el plan gratuito. Los precios estan en
-          USD.
+          Sin tarjeta de credito para el plan gratuito. Precios en soles
+          peruanos (PEN).
         </p>
       </div>
     </section>

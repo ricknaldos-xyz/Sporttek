@@ -9,6 +9,7 @@ import { GlassNavbar } from '@/components/ui/glass-navbar'
 const navLinks = [
   { href: '#features', label: 'Caracteristicas' },
   { href: '#how-it-works', label: 'Como funciona' },
+  { href: '#ranking', label: 'Rankings' },
   { href: '#pricing', label: 'Precios' },
   { href: '#faq', label: 'FAQ' },
 ]

@@ -5,6 +5,8 @@ const footerLinks = {
   producto: [
     { label: 'Caracteristicas', href: '#features' },
     { label: 'Precios', href: '#pricing' },
+    { label: 'Rankings', href: '/rankings' },
+    { label: 'Torneos', href: '/tournaments' },
     { label: 'FAQ', href: '#faq' },
   ],
   cuenta: [

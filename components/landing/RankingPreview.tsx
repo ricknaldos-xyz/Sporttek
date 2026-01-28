@@ -49,7 +49,7 @@ export function RankingPreview() {
   }, [])
 
   return (
-    <section className="py-20 bg-background">
+    <section id="ranking" className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">

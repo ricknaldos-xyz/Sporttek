@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Users, BarChart3, Star, Swords, Trophy } from 'lucide-react'
+import { ArrowRight, Swords, Trophy } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
-import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
+import { StatsCounter } from '@/components/landing/StatsCounter'
 
 export function HeroSection() {
   return (
@@ -53,53 +53,8 @@ export function HeroSection() {
             </GlassButton>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            <GlassCard intensity="light" padding="md" hover="lift">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span className="text-2xl sm:text-3xl font-bold">+1,500</span>
-                </div>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Jugadores
-                </p>
-              </div>
-            </GlassCard>
-            <GlassCard intensity="light" padding="md" hover="lift">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                  <span className="text-2xl sm:text-3xl font-bold">+10,000</span>
-                </div>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Analisis IA
-                </p>
-              </div>
-            </GlassCard>
-            <GlassCard intensity="light" padding="md" hover="lift">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Swords className="h-5 w-5 text-primary" />
-                  <span className="text-2xl sm:text-3xl font-bold">+500</span>
-                </div>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Partidos jugados
-                </p>
-              </div>
-            </GlassCard>
-            <GlassCard intensity="light" padding="md" hover="lift">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Star className="h-5 w-5 text-primary fill-primary" />
-                  <span className="text-2xl sm:text-3xl font-bold">+50</span>
-                </div>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Entrenadores
-                </p>
-              </div>
-            </GlassCard>
-          </div>
+          {/* Stats — real data from API */}
+          <StatsCounter />
         </div>
       </div>
 

@@ -17,24 +17,29 @@ const faqs = [
       'El analisis con IA generalmente tarda entre 2-5 minutos dependiendo de la longitud del video y la complejidad de la tecnica analizada.',
   },
   {
+    question: 'Que deportes estan disponibles?',
+    answer:
+      'Actualmente ofrecemos analisis para Tenis, con soporte para saque, derecha, reves y volea. Estamos evaluando agregar mas deportes en el futuro.',
+  },
+  {
+    question: 'Como funciona el ranking?',
+    answer:
+      'Cada analisis que completas contribuye a tu skill score, calculado por nuestra IA. Segun tu puntaje, subes de tier: Bronce, Plata, Oro, Platino y Diamante. El ranking nacional muestra a los mejores tenistas de Peru.',
+  },
+  {
+    question: 'Como encuentro rivales para jugar?',
+    answer:
+      'La seccion de Matchmaking te sugiere rivales de tu nivel basandose en tu skill score y ubicacion. Puedes enviar desafios y coordinar partidos directamente desde la plataforma.',
+  },
+  {
     question: 'Puedo cancelar mi suscripcion en cualquier momento?',
     answer:
       'Si, puedes cancelar tu suscripcion en cualquier momento desde tu perfil. No hay compromisos a largo plazo ni penalizaciones por cancelacion. Tu acceso continua hasta el final del periodo de facturacion.',
   },
   {
-    question: 'Que deportes estan disponibles?',
-    answer:
-      'Actualmente ofrecemos analisis para Tenis, con soporte para 4 tecnicas diferentes (saque, derecha, reves, volea). Estamos trabajando para agregar Golf, Basketball y Futbol proximamente.',
-  },
-  {
-    question: 'Como funcionan los planes de entrenamiento?',
-    answer:
-      'Basado en los errores identificados en tu analisis, nuestra IA genera un plan de ejercicios personalizados. Cada ejercicio incluye instrucciones detalladas, repeticiones recomendadas y videos de referencia para que puedas practicar correctamente.',
-  },
-  {
     question: 'Es seguro mi video?',
     answer:
-      'Tus videos se almacenan de forma segura y privada en servidores encriptados. Solo tu puedes acceder a ellos. Cumplimos con todas las normativas de proteccion de datos y nunca compartimos tu contenido con terceros.',
+      'Tus videos se almacenan de forma segura y privada. Solo tu puedes acceder a ellos. Nunca compartimos tu contenido con terceros.',
   },
 ]
 

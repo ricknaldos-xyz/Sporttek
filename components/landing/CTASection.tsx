@@ -30,8 +30,8 @@ export function CTASection() {
               Listo para mejorar tu tecnica?
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-              Unete a miles de deportistas que ya estan mejorando su rendimiento
-              con SportTech.
+              Unete a la comunidad de tenistas que ya estan mejorando su
+              rendimiento con SportTech.
             </p>
             <GlassButton variant="solid" size="xl" asChild>
               <Link href="/register">
