@@ -27,6 +27,13 @@ interface OnboardingState {
 
 const defaultSteps: OnboardingStep[] = [
   {
+    id: 'select-sport',
+    title: 'Selecciona tu deporte',
+    description: 'Elige el deporte que quieres mejorar',
+    completed: false,
+    href: '/onboarding/sport',
+  },
+  {
     id: 'player-profile',
     title: 'Completa tu perfil de jugador',
     description: 'Agrega tu ubicacion, estilo de juego y mas',
@@ -76,8 +83,8 @@ export const useOnboardingStore = create<OnboardingState>()(
       startTour: () => set({ isTourActive: true, tourStep: 0 }),
 
       nextTourStep: () => {
-        const { tourStep } = get()
-        if (tourStep !== null && tourStep < 3) {
+        const { tourStep, steps } = get()
+        if (tourStep !== null && tourStep < steps.length - 1) {
           set({ tourStep: tourStep + 1 })
         } else {
           set({ isTourActive: false, tourStep: null })

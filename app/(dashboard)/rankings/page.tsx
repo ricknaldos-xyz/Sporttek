@@ -7,6 +7,7 @@ import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
 import { PlayerCard } from '@/components/player/PlayerCard'
 import { Trophy, Medal, ChevronLeft, ChevronRight, Loader2, AlertTriangle } from 'lucide-react'
+import { useSport } from '@/contexts/SportContext'
 import type { SkillTier } from '@prisma/client'
 
 interface RankingPlayer {
@@ -43,6 +44,7 @@ const TIER_FILTERS: { value: string; label: string }[] = [
 ]
 
 export default function RankingsPage() {
+  const { activeSport } = useSport()
   const [rankings, setRankings] = useState<RankingPlayer[]>([])
   const [myPosition, setMyPosition] = useState<MyPosition | null>(null)
   const [loading, setLoading] = useState(true)
@@ -54,7 +56,7 @@ export default function RankingsPage() {
   useEffect(() => {
     fetchRankings()
     fetchMyPosition()
-  }, [page, tierFilter])
+  }, [page, tierFilter, activeSport?.slug])
 
   async function fetchRankings() {
     setLoading(true)
@@ -64,6 +66,7 @@ export default function RankingsPage() {
         country: 'PE',
         page: page.toString(),
         limit: '20',
+        sport: activeSport?.slug || 'tennis',
       })
       if (tierFilter) params.set('skillTier', tierFilter)
 
@@ -81,7 +84,7 @@ export default function RankingsPage() {
 
   async function fetchMyPosition() {
     try {
-      const res = await fetch('/api/rankings/my-position')
+      const res = await fetch(`/api/rankings/my-position?sport=${activeSport?.slug || 'tennis'}`)
       if (res.ok) {
         const data = await res.json()
         setMyPosition(data)

@@ -337,6 +337,9 @@ model User {
   // Goals
   improvementGoals ImprovementGoal[]
 
+  // Sport Addons (paid additional sports)
+  sportAddons SportAddon[]
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   lastLoginAt DateTime?
@@ -371,8 +374,13 @@ model Sport {
   isActive    Boolean @default(true)
   order       Int     @default(0)
 
-  techniques Technique[]
-  users      UserSport[]
+  techniques    Technique[]
+  users         UserSport[]
+  sportProfiles SportProfile[]
+  rankings      Ranking[]
+  addons        SportAddon[]
+
+  configSchema Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -392,6 +400,7 @@ model Technique {
   correctForm  Json?
   commonErrors Json?
   keyPoints    String[]
+  weight       Float    @default(0.6)
 
   variants        Variant[]
   analyses        Analysis[]
@@ -828,6 +837,7 @@ model PlayerProfile {
   updatedAt       DateTime  @updatedAt
 
   // Relations
+  sportProfiles        SportProfile[]
   techniqueScores      TechniqueScore[]
   rankings             Ranking[]
   availabilities       PlayerAvailability[]
@@ -865,6 +875,9 @@ model TechniqueScore {
   techniqueId String
   technique   Technique     @relation(fields: [techniqueId], references: [id])
 
+  sportProfileId String?
+  sportProfile   SportProfile? @relation(fields: [sportProfileId], references: [id], onDelete: SetNull)
+
   bestScore      Float
   averageScore   Float
   analysisCount  Int       @default(0)
@@ -887,6 +900,9 @@ model Ranking {
   id        String        @id @default(cuid())
   profileId String
   profile   PlayerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  sportId String?
+  sport   Sport?  @relation(fields: [sportId], references: [id])
 
   category  RankingCategory
   period    RankingPeriod
@@ -1766,4 +1782,56 @@ model GoalAnalysis {
 
   @@unique([goalId, analysisId])
   @@map("goal_analyses")
+}
+
+// ============================================
+// MULTI-SPORT PROFILES
+// ============================================
+
+model SportProfile {
+  id        String        @id @default(cuid())
+  profileId String
+  profile   PlayerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  sportId   String
+  sport     Sport         @relation(fields: [sportId], references: [id])
+
+  sportConfig Json?
+
+  compositeScore  Float?
+  skillTier       SkillTier @default(UNRANKED)
+  effectiveScore  Float?
+  totalAnalyses   Int       @default(0)
+  totalTechniques Int       @default(0)
+  lastScoreUpdate DateTime?
+
+  matchElo      Int @default(1200)
+  matchesPlayed Int @default(0)
+  matchesWon    Int @default(0)
+  globalRank    Int?
+  countryRank   Int?
+
+  techniqueScores TechniqueScore[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([profileId, sportId])
+  @@index([sportId, effectiveScore])
+  @@map("sport_profiles")
+}
+
+model SportAddon {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sportId String
+  sport   Sport  @relation(fields: [sportId], references: [id])
+
+  active               Boolean @default(true)
+  stripeSubscriptionId String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, sportId])
+  @@map("sport_addons")
 }

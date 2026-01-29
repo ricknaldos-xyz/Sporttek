@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
 import { OnboardingProvider } from '@/components/onboarding/OnboardingProvider'
 import { CelebrationOverlay } from '@/components/gamification/CelebrationOverlay'
+import { SportProvider } from '@/contexts/SportContext'
 import { useState } from 'react'
 import { X, Target, LayoutDashboard, Video, History, Dumbbell, User, Trophy, Swords, Flag, Users, ShoppingBag, Wrench, Medal, CircleDot, Bell, GraduationCap, Shield } from 'lucide-react'
 import Link from 'next/link'
@@ -135,6 +136,7 @@ export default function DashboardLayout({
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
+        <SportProvider>
         <div className="min-h-screen bg-background">
           {/* Desktop Sidebar */}
           <Sidebar />
@@ -158,6 +160,7 @@ export default function DashboardLayout({
           {/* Bottom Navigation */}
           <BottomNav />
         </div>
+      </SportProvider>
       </SessionProvider>
     </QueryClientProvider>
   )

@@ -11,11 +11,13 @@ import { cn } from '@/lib/utils'
 interface OnboardingChecklistProps {
   analysisCount: number
   trainingPlanCount: number
+  hasSport?: boolean
 }
 
 export function OnboardingChecklist({
   analysisCount,
   trainingPlanCount,
+  hasSport,
 }: OnboardingChecklistProps) {
   const { steps, completeStep } = useOnboardingStore()
   const [mounted, setMounted] = useState(false)
@@ -27,6 +29,9 @@ export function OnboardingChecklist({
 
   // Auto-complete steps based on actual user data
   useEffect(() => {
+    if (hasSport) {
+      completeStep('select-sport')
+    }
     if (analysisCount > 0) {
       completeStep('first-analysis')
       completeStep('review-results')
@@ -34,7 +39,7 @@ export function OnboardingChecklist({
     if (trainingPlanCount > 0) {
       completeStep('training-plan')
     }
-  }, [analysisCount, trainingPlanCount, completeStep])
+  }, [analysisCount, trainingPlanCount, hasSport, completeStep])
 
   if (!mounted) {
     return null

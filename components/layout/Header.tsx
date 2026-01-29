@@ -12,6 +12,7 @@ import {
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassNavbar } from '@/components/ui/glass-navbar'
 import Link from 'next/link'
+import { SportSelectorPill } from '@/components/layout/SportSelectorPill'
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -33,6 +34,9 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Menu className="h-5 w-5" />
           <span className="sr-only">Abrir menu</span>
         </GlassButton>
+
+        {/* Sport Selector */}
+        <SportSelectorPill />
 
         {/* Spacer */}
         <div className="flex-1" />

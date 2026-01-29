@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useSport } from '@/contexts/SportContext'
 import { VideoGuidelines } from '@/components/upload/VideoGuidelines'
 import { VideoRequirements } from '@/components/upload/VideoRequirements'
 import { DetectionConfirmation } from '@/components/analyze/DetectionConfirmation'
@@ -72,6 +73,7 @@ type Step = 'sport' | 'technique' | 'variant' | 'upload' | 'detecting' | 'detect
 
 export default function AnalyzePage() {
   const router = useRouter()
+  const { activeSport } = useSport()
   const [step, setStep] = useState<Step>('sport')
   const [sports, setSports] = useState<Sport[]>([])
   const [techniques, setTechniques] = useState<Technique[]>([])
@@ -90,19 +92,25 @@ export default function AnalyzePage() {
     Array<{ url: string; type: string; filename: string; size: number }>
   >([])
 
-  // Fetch sports on mount
+  // Fetch sports on mount and pre-select active sport
   useEffect(() => {
     fetch('/api/sports')
       .then((res) => res.json())
       .then((data) => {
-        setSports(data.filter((s: Sport) => s.isActive))
+        const activeSports = data.filter((s: Sport) => s.isActive)
+        setSports(activeSports)
+        // Pre-select from sport context
+        if (activeSport && !selectedSport) {
+          const match = activeSports.find((s: Sport) => s.slug === activeSport.slug)
+          if (match) setSelectedSport(match)
+        }
         setLoadingSports(false)
       })
       .catch(() => {
         toast.error('Error al cargar deportes')
         setLoadingSports(false)
       })
-  }, [])
+  }, [activeSport])
 
   // Fetch techniques when sport is selected
   useEffect(() => {

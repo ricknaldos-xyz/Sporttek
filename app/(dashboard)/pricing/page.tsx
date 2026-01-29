@@ -17,7 +17,7 @@ const plans = [
     features: [
       '3 analisis por mes',
       '1 plan de entrenamiento activo',
-      'Acceso a Tenis',
+      '1 deporte incluido',
       'Soporte por email',
     ],
   },
@@ -30,7 +30,7 @@ const plans = [
     features: [
       'Analisis ilimitados',
       'Planes de entrenamiento ilimitados',
-      'Acceso a todos los deportes',
+      '1 deporte incluido + deportes adicionales',
       'Historial completo',
       'Soporte prioritario',
     ],

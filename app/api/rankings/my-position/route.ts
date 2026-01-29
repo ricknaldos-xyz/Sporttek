@@ -1,23 +1,22 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// GET - Current user's ranking position
-export async function GET() {
+// GET - Current user's ranking position for a sport
+export async function GET(request: NextRequest) {
   try {
     const session = await auth()
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
+    const { searchParams } = new URL(request.url)
+    const sportSlug = searchParams.get('sport') || 'tennis'
+
     const profile = await prisma.playerProfile.findUnique({
       where: { userId: session.user.id },
       select: {
-        compositeScore: true,
-        effectiveScore: true,
-        skillTier: true,
-        globalRank: true,
-        countryRank: true,
+        id: true,
         country: true,
       },
     })
@@ -26,32 +25,77 @@ export async function GET() {
       return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
     }
 
-    // Count total players in same country
-    const totalInCountry = await prisma.playerProfile.count({
+    // Find SportProfile for the requested sport
+    const sport = await prisma.sport.findUnique({
+      where: { slug: sportSlug },
+      select: { id: true },
+    })
+
+    if (!sport) {
+      return NextResponse.json({ error: 'Deporte no encontrado' }, { status: 404 })
+    }
+
+    const sportProfile = await prisma.sportProfile.findUnique({
       where: {
-        country: profile.country,
-        effectiveScore: { not: null },
-        skillTier: { not: 'UNRANKED' },
-        visibility: { not: 'PRIVATE' },
+        profileId_sportId: {
+          profileId: profile.id,
+          sportId: sport.id,
+        },
+      },
+      select: {
+        compositeScore: true,
+        effectiveScore: true,
+        skillTier: true,
+        globalRank: true,
+        countryRank: true,
       },
     })
 
-    // Count total players in same tier
-    const totalInTier = profile.skillTier !== 'UNRANKED'
-      ? await prisma.playerProfile.count({
+    if (!sportProfile) {
+      return NextResponse.json({
+        compositeScore: null,
+        effectiveScore: null,
+        skillTier: 'UNRANKED',
+        globalRank: null,
+        countryRank: null,
+        country: profile.country,
+        totalInCountry: 0,
+        totalInTier: 0,
+      })
+    }
+
+    // Count total players in same country for this sport
+    const totalInCountry = await prisma.sportProfile.count({
+      where: {
+        sportId: sport.id,
+        effectiveScore: { not: null },
+        skillTier: { not: 'UNRANKED' },
+        profile: {
+          country: profile.country,
+          visibility: { not: 'PRIVATE' },
+        },
+      },
+    })
+
+    // Count total players in same tier for this sport
+    const totalInTier = sportProfile.skillTier !== 'UNRANKED'
+      ? await prisma.sportProfile.count({
           where: {
-            skillTier: profile.skillTier,
-            visibility: { not: 'PRIVATE' },
+            sportId: sport.id,
+            skillTier: sportProfile.skillTier,
+            profile: {
+              visibility: { not: 'PRIVATE' },
+            },
           },
         })
       : 0
 
     return NextResponse.json({
-      compositeScore: profile.compositeScore,
-      effectiveScore: profile.effectiveScore,
-      skillTier: profile.skillTier,
-      globalRank: profile.globalRank,
-      countryRank: profile.countryRank,
+      compositeScore: sportProfile.compositeScore,
+      effectiveScore: sportProfile.effectiveScore,
+      skillTier: sportProfile.skillTier,
+      globalRank: sportProfile.globalRank,
+      countryRank: sportProfile.countryRank,
       country: profile.country,
       totalInCountry,
       totalInTier,

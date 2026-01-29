@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getGeminiClient, SPORTS_SAFETY_SETTINGS } from '@/lib/gemini/client'
 import { generateWithFallback } from '@/lib/gemini/model-with-fallback'
-import { buildTennisPrompt } from '@/lib/openai/prompts/tennis'
+import { getSportPromptBuilder } from '@/lib/prompts'
 import { sendAnalysisCompleteEmail } from '@/lib/email'
 import { recalculateSkillScore } from '@/lib/skill-score'
 import { updateGoalProgress } from '@/lib/goals/progress'
@@ -141,17 +141,14 @@ export async function POST(
       // Build prompt based on sport and technique
       let prompt: string
 
-      if (analysis.technique.sport.slug === 'tennis') {
-        prompt = buildTennisPrompt(
-          analysis.technique.slug,
-          analysis.variant?.slug || null,
-          analysis.technique.correctForm,
-          analysis.technique.commonErrors,
-          ragContext
-        )
-      } else {
-        prompt = `Analiza la tecnica deportiva en el video/imagenes y proporciona feedback detallado en formato JSON.${ragContext}`
-      }
+      const buildPrompt = getSportPromptBuilder(analysis.technique.sport.slug)
+      prompt = buildPrompt(
+        analysis.technique.slug,
+        analysis.variant?.slug || null,
+        analysis.technique.correctForm,
+        analysis.technique.commonErrors,
+        ragContext
+      )
 
       const genAI = getGeminiClient()
 

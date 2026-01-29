@@ -22,7 +22,7 @@ import { RecentBadgesCard } from '@/components/dashboard/RecentBadgesCard'
 import { ActivityHeatmap } from '@/components/gamification/ActivityHeatmap'
 
 async function getStats(userId: string) {
-  const [analysesCount, plansCount, completedPlans, recentAnalyses, user] =
+  const [analysesCount, plansCount, completedPlans, recentAnalyses, user, userSportsCount] =
     await Promise.all([
       prisma.analysis.count({ where: { userId } }),
       prisma.trainingPlan.count({ where: { userId } }),
@@ -41,9 +41,10 @@ async function getStats(userId: string) {
         where: { id: userId },
         select: { emailVerified: true, email: true },
       }),
+      prisma.userSport.count({ where: { userId } }),
     ])
 
-  return { analysesCount, plansCount, completedPlans, recentAnalyses, user }
+  return { analysesCount, plansCount, completedPlans, recentAnalyses, user, userSportsCount }
 }
 
 export default async function DashboardPage() {
@@ -73,6 +74,7 @@ export default async function DashboardPage() {
       <OnboardingChecklist
         analysisCount={stats.analysesCount}
         trainingPlanCount={stats.plansCount}
+        hasSport={stats.userSportsCount > 0}
       />
 
       {/* Streak Widget */}
