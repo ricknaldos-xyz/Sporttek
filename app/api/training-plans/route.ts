@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateTrainingPlan } from '@/lib/training/generator'
 import { linkTrainingPlanToGoal } from '@/lib/goals/progress'
+import { getUserSubscription, checkActivePlansLimit } from '@/lib/subscription'
 import { z } from 'zod'
 
 const createPlanSchema = z.object({
@@ -25,6 +26,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: validated.error.issues[0].message },
         { status: 400 }
+      )
+    }
+
+    // Check subscription limit for active training plans
+    const subscription = await getUserSubscription(session.user.id)
+    const planCheck = await checkActivePlansLimit(session.user.id, subscription)
+    if (!planCheck.allowed) {
+      return NextResponse.json(
+        { error: `Has alcanzado el límite de ${planCheck.limit} plan(es) de entrenamiento activo(s). Mejora tu plan para crear más.` },
+        { status: 403 }
       )
     }
 

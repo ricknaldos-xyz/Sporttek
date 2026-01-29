@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { generateGoalRoadmap } from '@/lib/goals/roadmap'
 import { GoalType, GoalStatus, SkillTier } from '@prisma/client'
+import { getUserSubscription, checkActiveGoalsLimit } from '@/lib/subscription'
 
 const TIER_LABELS: Record<string, string> = {
   BRONCE: 'Bronce',
@@ -76,6 +77,16 @@ export async function POST(request: NextRequest) {
     }
 
     const { type, techniqueIds, targetScore, targetTier, description } = validated.data
+
+    // Check subscription limit for active goals
+    const subscription = await getUserSubscription(session.user.id)
+    const goalsCheck = await checkActiveGoalsLimit(session.user.id, subscription)
+    if (!goalsCheck.allowed) {
+      return NextResponse.json(
+        { error: `Has alcanzado el límite de ${goalsCheck.limit} metas activas. Mejora tu plan para crear más.` },
+        { status: 403 }
+      )
+    }
 
     // Validate that all techniques exist
     const techniques = await prisma.technique.findMany({

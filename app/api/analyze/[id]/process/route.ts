@@ -12,6 +12,7 @@ import { buildRagContext } from '@/lib/rag/context-builder'
 import { readFile } from 'fs/promises'
 import path from 'path'
 import { analyzeLimiter } from '@/lib/rate-limit'
+import { checkAnalysisLimit } from '@/lib/subscription'
 
 export const maxDuration = 300 // 5 minutes for video processing
 
@@ -60,30 +61,21 @@ export async function POST(
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
     }
 
-    // Check subscription tier for free users
+    // Check subscription limit for analyses
     const userRecord = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { subscription: true },
     })
 
-    if (!userRecord || userRecord.subscription === 'FREE') {
-      const startOfMonth = new Date()
-      startOfMonth.setDate(1)
-      startOfMonth.setHours(0, 0, 0, 0)
-
-      const thisMonthCount = await prisma.analysis.count({
-        where: {
-          userId: session.user.id,
-          createdAt: { gte: startOfMonth },
-        },
-      })
-
-      if (thisMonthCount >= 3) {
-        return NextResponse.json(
-          { error: 'Has alcanzado el limite de analisis gratuitos este mes' },
-          { status: 403 }
-        )
-      }
+    const analysisCheck = await checkAnalysisLimit(
+      session.user.id,
+      userRecord?.subscription ?? 'FREE'
+    )
+    if (!analysisCheck.allowed) {
+      return NextResponse.json(
+        { error: `Has alcanzado el límite de ${analysisCheck.limit} análisis gratuitos este mes. Mejora tu plan para más análisis.` },
+        { status: 403 }
+      )
     }
 
     if (analysis.status === 'COMPLETED') {

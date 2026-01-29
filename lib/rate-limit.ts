@@ -1,32 +1,23 @@
-// Simple in-memory rate limiter using a Map with sliding window
-// Note: This works per-instance. In serverless (Vercel), each cold start gets a fresh map.
-// For production-grade rate limiting, use Upstash or similar.
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
 
+// In-memory fallback for development without Redis
 interface RateLimitEntry {
   count: number
   resetAt: number
 }
 
-const limiters = new Map<string, Map<string, RateLimitEntry>>()
+const inMemoryStore = new Map<string, RateLimitEntry>()
 
-export function rateLimit(options: {
-  key: string       // limiter name (e.g., 'auth', 'analyze')
-  limit: number     // max requests
-  window: number    // time window in seconds
-}) {
+function createInMemoryLimiter(prefix: string, limit: number, windowSec: number) {
   return {
     async check(identifier: string): Promise<{ success: boolean; remaining: number }> {
-      const { key, limit, window } = options
-
-      if (!limiters.has(key)) {
-        limiters.set(key, new Map())
-      }
-      const store = limiters.get(key)!
+      const key = `${prefix}:${identifier}`
       const now = Date.now()
-      const entry = store.get(identifier)
+      const entry = inMemoryStore.get(key)
 
       if (!entry || now > entry.resetAt) {
-        store.set(identifier, { count: 1, resetAt: now + window * 1000 })
+        inMemoryStore.set(key, { count: 1, resetAt: now + windowSec * 1000 })
         return { success: true, remaining: limit - 1 }
       }
 
@@ -36,8 +27,43 @@ export function rateLimit(options: {
 
       entry.count++
       return { success: true, remaining: limit - entry.count }
-    }
+    },
   }
+}
+
+function createUpstashLimiter(prefix: string, limit: number, windowSec: number) {
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  })
+
+  const limiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(limit, `${windowSec} s`),
+    prefix: `ratelimit:${prefix}`,
+  })
+
+  return {
+    async check(identifier: string): Promise<{ success: boolean; remaining: number }> {
+      const result = await limiter.limit(identifier)
+      return { success: result.success, remaining: result.remaining }
+    },
+  }
+}
+
+function rateLimit(options: {
+  key: string
+  limit: number
+  window: number // seconds
+}) {
+  const hasRedis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+
+  if (hasRedis) {
+    return createUpstashLimiter(options.key, options.limit, options.window)
+  }
+
+  // Fallback to in-memory for local development
+  return createInMemoryLimiter(options.key, options.limit, options.window)
 }
 
 // Pre-configured limiters
