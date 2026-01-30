@@ -73,15 +73,14 @@ export default function StudentDetailPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [studentsRes, analysesRes] = await Promise.all([
-          fetch('/api/coach/students'),
+        const [studentRes, analysesRes] = await Promise.all([
+          fetch(`/api/coach/students/${id}`),
           fetch(`/api/coach/students/${id}/analyses`),
         ])
 
-        if (studentsRes.ok) {
-          const allStudents = await studentsRes.json()
-          const found = allStudents.find((s: CoachStudentRecord) => s.id === id)
-          if (found) setStudent(found)
+        if (studentRes.ok) {
+          const data = await studentRes.json()
+          setStudent(data)
         }
 
         if (analysesRes.ok) {

@@ -25,6 +25,7 @@ import {
   AlertTriangle,
   CalendarDays,
   FileText,
+  Settings,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -65,6 +66,7 @@ export const profileNavigation: NavItem[] = [
 export const coachNavigation: NavItem[] = [
   { name: 'Coach Dashboard', href: '/coach/dashboard', icon: GraduationCap, tourId: 'coach-dashboard' },
   { name: 'Mis Alumnos', href: '/coach/students', icon: Users, tourId: 'coach-students' },
+  { name: 'Configuracion', href: '/coach/settings', icon: Settings, tourId: 'coach-settings' },
 ]
 
 export const providerCourtNavigation: NavItem[] = [

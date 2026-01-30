@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { logger } from '@/lib/logger'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
-import { GraduationCap, UserPlus, Loader2, X } from 'lucide-react'
+import { GraduationCap, UserPlus, Loader2, X, Search } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import type { SkillTier } from '@prisma/client'
@@ -26,12 +26,25 @@ interface Student {
   }
 }
 
+interface SearchResult {
+  id: string
+  userId: string
+  displayName: string | null
+  avatarUrl: string | null
+  skillTier: SkillTier
+  user: { name: string | null; email: string | null }
+}
+
 export default function CoachStudentsPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [showInviteModal, setShowInviteModal] = useState(false)
-  const [inviteEmail, setInviteEmail] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [searching, setSearching] = useState(false)
+  const [selectedPlayer, setSelectedPlayer] = useState<SearchResult | null>(null)
   const [inviting, setInviting] = useState(false)
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null)
 
   async function fetchStudents() {
     try {
@@ -51,20 +64,48 @@ export default function CoachStudentsPage() {
     fetchStudents()
   }, [])
 
+  const searchPlayers = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setSearchResults([])
+      return
+    }
+    setSearching(true)
+    try {
+      const res = await fetch(`/api/coach/students/search?q=${encodeURIComponent(query)}`)
+      if (res.ok) {
+        const data = await res.json()
+        setSearchResults(data)
+      }
+    } catch {
+      logger.error('Search failed')
+    } finally {
+      setSearching(false)
+    }
+  }, [])
+
+  function handleSearchChange(value: string) {
+    setSearchQuery(value)
+    setSelectedPlayer(null)
+    if (searchTimeout.current) clearTimeout(searchTimeout.current)
+    searchTimeout.current = setTimeout(() => searchPlayers(value), 300)
+  }
+
   async function handleInvite() {
-    if (!inviteEmail.trim()) return
+    if (!selectedPlayer) return
     setInviting(true)
     try {
       const res = await fetch('/api/coach/students/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentUserId: inviteEmail.trim() }),
+        body: JSON.stringify({ studentUserId: selectedPlayer.userId }),
       })
 
       if (res.ok) {
         toast.success('Invitacion enviada')
         setShowInviteModal(false)
-        setInviteEmail('')
+        setSearchQuery('')
+        setSearchResults([])
+        setSelectedPlayer(null)
         fetchStudents()
       } else {
         const data = await res.json().catch(() => ({}))
@@ -79,6 +120,7 @@ export default function CoachStudentsPage() {
 
   const statusLabels: Record<string, string> = {
     PENDING_INVITE: 'Invitacion pendiente',
+    PENDING_REQUEST: 'Solicitud pendiente',
     ACTIVE: 'Activo',
     PAUSED: 'Pausado',
     ENDED: 'Finalizado',
@@ -116,7 +158,7 @@ export default function CoachStudentsPage() {
 
             return (
               <GlassCard key={s.id} intensity="light" padding="md" hover="lift" asChild>
-                <Link href={`/player/${s.student.userId}`}>
+                <Link href={`/coach/students/${s.id}`}>
                   <div className="flex items-center gap-4">
                     <div className="relative h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {s.student.avatarUrl ? (
@@ -155,28 +197,86 @@ export default function CoachStudentsPage() {
           <GlassCard intensity="medium" padding="lg" className="w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Invitar alumno</h2>
-              <button onClick={() => setShowInviteModal(false)} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => { setShowInviteModal(false); setSearchQuery(''); setSearchResults([]); setSelectedPlayer(null) }} className="text-muted-foreground hover:text-foreground">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Ingresa el ID del jugador que quieres invitar. Puedes encontrar jugadores en la seccion de{' '}
-              <Link href="/matchmaking" className="text-primary hover:underline">emparejamiento</Link> o{' '}
-              <Link href="/rankings" className="text-primary hover:underline">rankings</Link>.
+              Busca un jugador por nombre o email para enviarle una invitacion.
             </p>
-            <input
-              type="text"
-              placeholder="ID del jugador"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-              className="w-full px-3 py-2 rounded-lg border border-glass bg-background/50 text-sm mb-4"
-            />
+            <div className="relative mb-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Buscar jugador..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 rounded-lg border border-glass bg-background/50 text-sm"
+                autoFocus
+              />
+              {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+            </div>
+
+            {/* Selected player */}
+            {selectedPlayer && (
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-primary bg-primary/5 mb-4">
+                <div className="relative h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {selectedPlayer.avatarUrl ? (
+                    <Image src={selectedPlayer.avatarUrl} alt="" fill className="object-cover rounded-full" />
+                  ) : (
+                    <span className="text-sm font-bold text-primary">
+                      {(selectedPlayer.displayName || selectedPlayer.user.name || '?').charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{selectedPlayer.displayName || selectedPlayer.user.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{selectedPlayer.user.email}</p>
+                </div>
+                <button onClick={() => setSelectedPlayer(null)} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Search results */}
+            {!selectedPlayer && searchResults.length > 0 && (
+              <div className="max-h-48 overflow-y-auto space-y-1 mb-4">
+                {searchResults.map((player) => {
+                  const pName = player.displayName || player.user.name || 'Jugador'
+                  return (
+                    <button
+                      key={player.id}
+                      onClick={() => { setSelectedPlayer(player); setSearchResults([]) }}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 text-left transition-colors"
+                    >
+                      <div className="relative h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {player.avatarUrl ? (
+                          <Image src={player.avatarUrl} alt="" fill className="object-cover rounded-full" />
+                        ) : (
+                          <span className="text-xs font-bold text-primary">{pName.charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{pName}</p>
+                        <p className="text-xs text-muted-foreground truncate">{player.user.email}</p>
+                      </div>
+                      <TierBadge tier={player.skillTier} size="sm" />
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {!selectedPlayer && searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4 mb-4">No se encontraron jugadores</p>
+            )}
+
             <div className="flex gap-3 justify-end">
-              <GlassButton variant="ghost" size="sm" onClick={() => setShowInviteModal(false)}>
+              <GlassButton variant="ghost" size="sm" onClick={() => { setShowInviteModal(false); setSearchQuery(''); setSearchResults([]); setSelectedPlayer(null) }}>
                 Cancelar
               </GlassButton>
-              <GlassButton variant="solid" size="sm" onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
+              <GlassButton variant="solid" size="sm" onClick={handleInvite} disabled={inviting || !selectedPlayer}>
                 {inviting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <UserPlus className="h-4 w-4 mr-2" />}
                 Enviar invitacion
               </GlassButton>

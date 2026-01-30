@@ -4,6 +4,56 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
 
+// GET - Get single student relationship
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { id } = await params
+
+    const coachProfile = await prisma.coachProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    })
+    if (!coachProfile) {
+      return NextResponse.json({ error: 'No eres entrenador' }, { status: 403 })
+    }
+
+    const coachStudent = await prisma.coachStudent.findUnique({
+      where: { id },
+      include: {
+        student: {
+          select: {
+            userId: true,
+            displayName: true,
+            avatarUrl: true,
+            skillTier: true,
+            compositeScore: true,
+            totalAnalyses: true,
+            totalTechniques: true,
+            user: { select: { name: true, email: true } },
+          },
+        },
+      },
+    })
+
+    if (!coachStudent || coachStudent.coachId !== coachProfile.id) {
+      return NextResponse.json({ error: 'Alumno no encontrado' }, { status: 404 })
+    }
+
+    return NextResponse.json(coachStudent)
+  } catch (error) {
+    logger.error('Get student detail error:', error)
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+  }
+}
+
 const updateStudentSchema = z.object({
   status: z.enum(['PENDING_INVITE', 'PENDING_REQUEST', 'ACTIVE', 'PAUSED', 'ENDED']).optional(),
   canViewAnalyses: z.boolean().optional(),
