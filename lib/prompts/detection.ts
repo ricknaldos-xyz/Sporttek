@@ -38,40 +38,55 @@ export function buildDetectionPrompt(
 
   return `Eres un clasificador experto de tecnicas de ${sportName}.
 
-ANTES DE RESPONDER, analiza el video paso a paso:
+ANTES DE RESPONDER, analiza el video siguiendo estos pasos EN ORDEN ESTRICTO:
 
-PASO 0: DETERMINA LA POSICION DE LA CAMARA
-- La camara puede estar DELANTE del jugador (se ve su pecho), DETRAS (se ve su espalda), o de LADO
-- IMPORTANTE: Si la camara esta DETRAS del jugador, lo que aparece a la IZQUIERDA en la imagen es en realidad el lado DERECHO del jugador, y viceversa
-- Identifica la posicion de la camara ANTES de determinar izquierda/derecha del jugador
+PASO 0: POSICION DE LA CAMARA
+- Determina si la camara esta DELANTE (se ve el pecho), DETRAS (se ve la espalda), o de LADO del jugador
+- CRITICO: Si la camara esta DETRAS del jugador, la imagen esta INVERTIDA horizontalmente respecto a la perspectiva del jugador (izquierda en imagen = derecha del jugador)
+- Si la camara esta de LADO, identifica de que lado (derecho o izquierdo del jugador)
 
-PASO 1: Identifica si el jugador es DIESTRO o ZURDO
-- Mira que mano sostiene la raqueta principalmente
+PASO 1: MANO DOMINANTE
+- Identifica que mano sostiene la raqueta como mano PRINCIPAL (la mas cercana al final del mango)
 - La mayoria de jugadores son diestros (mano derecha dominante)
+- Si hay dos manos en la raqueta, la mano dominante es la que esta mas abajo en el mango (mas lejos de la cabeza de la raqueta)
 
-PASO 2: Observa de QUE LADO DEL CUERPO DEL JUGADOR golpea la pelota
-- ATENCION: Usa la perspectiva DEL JUGADOR, no de la camara
-- Para un DIESTRO:
-  - DERECHA (forehand) = golpea del lado de su mano dominante (derecha del jugador)
-  - REVES (backhand) = golpea del lado OPUESTO a su mano dominante (izquierda del jugador)
-- CLAVE BIOMECANICA para distinguir:
-  - DERECHA: El brazo dominante se extiende NATURALMENTE hacia el lado de la mano dominante. El pecho mira hacia la red.
-  - REVES: El brazo dominante CRUZA el cuerpo hacia el lado opuesto. La espalda o el hombro apunta hacia la red durante la preparacion.
+PASO 2: CUENTA LAS MANOS EN LA RAQUETA (HACER ESTO ANTES DE CLASIFICAR)
+- Observa el momento del swing/golpe: cuantas manos tiene el jugador en la raqueta?
+- UNA mano = solo la mano dominante sostiene la raqueta
+- DOS manos = ambas manos en el mango de la raqueta durante el golpe
+- NOTA: Dos manos en la raqueta NO significa automaticamente que es reves. Los jugadores pueden usar dos manos tanto en derecha como en reves (aunque es raro en derecha)
 
-PASO 3: Para REVES, cuenta las manos en la raqueta durante el golpe
-- UNA sola mano = reves a una mano (one-handed-backhand)
-- DOS manos = reves a dos manos (two-handed-backhand)
+PASO 3: CLASIFICA LA TECNICA usando LADO DEL CUERPO + MANOS
+- Observa de QUE LADO DEL CUERPO DEL JUGADOR se ejecuta el golpe (usa la perspectiva del jugador, NO de la camara)
+- REGLA PRINCIPAL: El LADO del cuerpo donde se golpea determina si es derecha o reves:
+  * Golpe del MISMO LADO que la mano dominante → DERECHA (forehand)
+  * Golpe del LADO OPUESTO a la mano dominante → REVES (backhand)
+- REGLA SECUNDARIA: El numero de manos determina la VARIANTE del reves:
+  * Reves + una mano = one-handed-backhand
+  * Reves + dos manos = two-handed-backhand
+- REGLA DE SEGURIDAD: Dos manos en la raqueta + golpe del lado DOMINANTE = DERECHA (forehand). NO confundir con reves a dos manos.
 
-CLAVES BIOMECANICAS PARA DISTINGUIR DERECHA vs REVES:
-- En la DERECHA (forehand): la raqueta se prepara DETRAS del cuerpo del lado dominante. El movimiento va de atras hacia adelante por el lado de la mano dominante.
-- En el REVES (backhand): la raqueta CRUZA el cuerpo durante la preparacion. El dorso de la mano dominante mira hacia la red al momento del impacto. El hombro delantero apunta hacia la red.
-- Si el jugador esta de espaldas a la camara y ves que el brazo cruza hacia el otro lado = REVES
-- Si el jugador rota mostrando la espalda al oponente durante la preparacion = probablemente REVES
+CLAVES BIOMECANICAS PARA VERIFICAR TU CLASIFICACION:
+- DERECHA (forehand):
+  * La raqueta se prepara DETRAS del cuerpo por el lado de la mano dominante
+  * El follow-through va desde el lado dominante CRUZANDO hacia el lado opuesto
+  * El pecho del jugador se orienta hacia la red durante/despues del golpe
+  * El brazo dominante se extiende naturalmente sin cruzar el cuerpo
+- REVES (backhand):
+  * La raqueta CRUZA el cuerpo durante la preparacion hacia el lado NO dominante
+  * El follow-through va desde el lado no-dominante CRUZANDO hacia el lado dominante
+  * La espalda o el hombro del brazo dominante apunta hacia la red durante la preparacion
+  * El dorso de la mano dominante mira hacia la red al momento del impacto
+- REVES A DOS MANOS especificamente:
+  * La mano NO dominante esta mas ARRIBA en el mango (mas cerca de la cabeza de la raqueta)
+  * Ambos brazos estan flexionados durante el swing
+  * El swing se inicia desde el lado NO dominante del cuerpo
+  * El jugador tiene una rotacion de hombros mas compacta que el reves a una mano
 
 OTRAS TECNICAS:
-- SAQUE (serve): El jugador LANZA la pelota al aire y golpea desde ARRIBA de la cabeza
-- VOLEA (volley): Golpe en la RED, la pelota NO BOTA
-- REMATE (smash): Golpe sobre la cabeza respondiendo a un globo
+- SAQUE (serve): El jugador LANZA la pelota al aire y golpea desde ARRIBA de la cabeza. Posicion inicial estatica.
+- VOLEA (volley): Golpe en la RED, la pelota NO BOTA. Movimiento corto tipo "punch".
+- REMATE (smash): Golpe sobre la cabeza respondiendo a un globo alto.
 
 TECNICAS DISPONIBLES:
 ${techniquesList}
@@ -83,7 +98,7 @@ Responde EXCLUSIVAMENTE en formato JSON valido:
   "technique": "<slug de la tecnica>",
   "variant": "<slug de variante o null>",
   "confidence": <numero entre 0.0 y 1.0>,
-  "reasoning": "Camara desde [delante/detras/lado]. Jugador [diestro/zurdo]. El brazo [cruza/no cruza] el cuerpo. [X] mano(s) en raqueta. Por lo tanto es [tecnica].",
+  "reasoning": "PASO 0: Camara desde [delante/detras/lado]. PASO 1: Jugador [diestro/zurdo], mano [derecha/izquierda] principal en raqueta. PASO 2: [1/2] mano(s) en raqueta durante el golpe. PASO 3: Golpe ejecutado del lado [dominante/opuesto] del cuerpo, por lo tanto es [derecha/reves]. [Verificacion biomecanica].",
   "multipleDetected": false,
   "alternatives": []
 }
@@ -95,7 +110,7 @@ Si detectas MULTIPLES tecnicas diferentes en el video:
   "technique": "<slug de la tecnica PRINCIPAL>",
   "variant": "<slug o null>",
   "confidence": <0.0-1.0>,
-  "reasoning": "<explicacion>",
+  "reasoning": "<explicacion con los 4 pasos>",
   "multipleDetected": true,
   "alternatives": [
     { "technique": "<slug>", "variant": "<slug o null>", "confidence": <0.0-1.0> }
@@ -103,16 +118,12 @@ Si detectas MULTIPLES tecnicas diferentes en el video:
 }
 \`\`\`
 
-REGLAS:
+REGLAS OBLIGATORIAS:
 1. Responde SOLO con el JSON, sin texto adicional
-2. Sigue los 4 PASOS de analisis (0,1,2,3) antes de decidir
-3. En "reasoning" DEBES incluir:
-   - Posicion de la camara (delante, detras, lado)
-   - Si el jugador es diestro o zurdo
-   - Si el brazo cruza el cuerpo o no
-   - De que LADO DEL CUERPO DEL JUGADOR golpea
-   - Cuantas manos tiene en la raqueta (si aplica)
-4. Si el brazo dominante CRUZA el cuerpo hacia el lado opuesto = es REVES (backhand)
-5. Si solo hay UNA mano en la raqueta en un reves = es "one-handed-backhand"
-6. Si no estas seguro (confidence < 0.6), explicalo`
+2. Sigue los 4 PASOS de analisis (0,1,2,3) EN ORDEN antes de decidir
+3. En "reasoning" DEBES documentar cada paso explicitamente
+4. El LADO del cuerpo donde se golpea es el factor PRINCIPAL para distinguir derecha vs reves
+5. El NUMERO de manos solo determina la variante del reves, NO si es derecha o reves
+6. Si la camara esta detras del jugador y el golpe es ambiguo, baja la confianza y agrega la alternativa en "alternatives"
+7. Si no estas seguro (confidence < 0.6), explicalo en reasoning`
 }
