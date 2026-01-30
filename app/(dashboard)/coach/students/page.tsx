@@ -6,8 +6,9 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { logger } from '@/lib/logger'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
-import { GraduationCap, UserPlus, Loader2 } from 'lucide-react'
+import { GraduationCap, UserPlus, Loader2, X } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import type { SkillTier } from '@prisma/client'
 
 interface Student {
@@ -28,23 +29,53 @@ interface Student {
 export default function CoachStudentsPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviting, setInviting] = useState(false)
+
+  async function fetchStudents() {
+    try {
+      const res = await fetch('/api/coach/students')
+      if (res.ok) {
+        const data = await res.json()
+        setStudents(data)
+      }
+    } catch {
+      logger.error('Failed to fetch students')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    async function fetchStudents() {
-      try {
-        const res = await fetch('/api/coach/students')
-        if (res.ok) {
-          const data = await res.json()
-          setStudents(data)
-        }
-      } catch {
-        logger.error('Failed to fetch students')
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchStudents()
   }, [])
+
+  async function handleInvite() {
+    if (!inviteEmail.trim()) return
+    setInviting(true)
+    try {
+      const res = await fetch('/api/coach/students/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentUserId: inviteEmail.trim() }),
+      })
+
+      if (res.ok) {
+        toast.success('Invitacion enviada')
+        setShowInviteModal(false)
+        setInviteEmail('')
+        fetchStudents()
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Error al invitar alumno')
+      }
+    } catch {
+      toast.error('Error de conexion')
+    } finally {
+      setInviting(false)
+    }
+  }
 
   const statusLabels: Record<string, string> = {
     PENDING_INVITE: 'Invitacion pendiente',
@@ -60,7 +91,7 @@ export default function CoachStudentsPage() {
           <GraduationCap className="h-7 w-7 text-primary" />
           <h1 className="text-2xl font-bold">Mis Alumnos</h1>
         </div>
-        <GlassButton variant="solid" size="sm">
+        <GlassButton variant="solid" size="sm" onClick={() => setShowInviteModal(true)}>
           <UserPlus className="h-4 w-4 mr-2" />
           Invitar alumno
         </GlassButton>
@@ -115,6 +146,42 @@ export default function CoachStudentsPage() {
               </GlassCard>
             )
           })}
+        </div>
+      )}
+
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <GlassCard intensity="medium" padding="lg" className="w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Invitar alumno</h2>
+              <button onClick={() => setShowInviteModal(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ingresa el ID del jugador que quieres invitar. Puedes encontrar jugadores en la seccion de{' '}
+              <Link href="/matchmaking" className="text-primary hover:underline">emparejamiento</Link> o{' '}
+              <Link href="/rankings" className="text-primary hover:underline">rankings</Link>.
+            </p>
+            <input
+              type="text"
+              placeholder="ID del jugador"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+              className="w-full px-3 py-2 rounded-lg border border-glass bg-background/50 text-sm mb-4"
+            />
+            <div className="flex gap-3 justify-end">
+              <GlassButton variant="ghost" size="sm" onClick={() => setShowInviteModal(false)}>
+                Cancelar
+              </GlassButton>
+              <GlassButton variant="solid" size="sm" onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
+                {inviting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <UserPlus className="h-4 w-4 mr-2" />}
+                Enviar invitacion
+              </GlassButton>
+            </div>
+          </GlassCard>
         </div>
       )}
     </div>

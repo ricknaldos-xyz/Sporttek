@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       const charge = await culqi.charges.createCharge({
         amount: String(order.totalCents),
         currency_code: 'PEN',
-        email: session.user.email!,
+        email: session.user.email || '',
         source_id: tokenId,
         metadata: {
           type: 'stringing_order',

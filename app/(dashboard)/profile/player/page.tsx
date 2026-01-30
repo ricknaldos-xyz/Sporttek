@@ -180,16 +180,16 @@ export default async function PlayerProfilePage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold tabular-nums">{ts.bestScore.toFixed(1)}</p>
+                  <p className="font-bold tabular-nums">{ts.bestScore != null ? ts.bestScore.toFixed(1) : '--'}</p>
                   <p className="text-xs text-muted-foreground">
-                    Prom: {ts.averageScore.toFixed(1)}
+                    Prom: {ts.averageScore != null ? ts.averageScore.toFixed(1) : '--'}
                   </p>
                 </div>
                 {/* Score bar */}
                 <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all"
-                    style={{ width: `${ts.bestScore}%` }}
+                    style={{ width: `${ts.bestScore ?? 0}%` }}
                   />
                 </div>
               </div>

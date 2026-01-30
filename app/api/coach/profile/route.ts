@@ -103,14 +103,21 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    const validated = updateCoachSchema.safeParse(body)
+    if (!validated.success) {
+      return NextResponse.json(
+        { error: validated.error.issues[0].message },
+        { status: 400 }
+      )
+    }
 
     const profile = await prisma.coachProfile.create({
       data: {
         userId: session.user.id,
-        headline: body.headline,
-        bio: body.bio,
-        country: body.country || 'PE',
-        city: body.city,
+        headline: validated.data.headline,
+        bio: validated.data.bio,
+        country: validated.data.country || 'PE',
+        city: validated.data.city,
       },
     })
 

@@ -16,6 +16,7 @@ import {
   Eye,
   EyeOff,
   FileText,
+  X,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -49,6 +50,13 @@ interface Analysis {
   technique: { name: string; slug: string }
 }
 
+interface TrainingPlan {
+  id: string
+  title: string
+  status: string
+  createdAt: string
+}
+
 export default function StudentDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [student, setStudent] = useState<CoachStudentRecord | null>(null)
@@ -56,6 +64,11 @@ export default function StudentDetailPage() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [activeTab, setActiveTab] = useState<'analyses' | 'plans'>('analyses')
+  const [showAssignModal, setShowAssignModal] = useState(false)
+  const [plans, setPlans] = useState<TrainingPlan[]>([])
+  const [loadingPlans, setLoadingPlans] = useState(false)
+  const [selectedPlanId, setSelectedPlanId] = useState('')
+  const [assigning, setAssigning] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -83,6 +96,46 @@ export default function StudentDetailPage() {
     }
     fetchData()
   }, [id])
+
+  async function openAssignModal() {
+    setShowAssignModal(true)
+    setLoadingPlans(true)
+    try {
+      const res = await fetch('/api/training-plans')
+      if (res.ok) {
+        const data = await res.json()
+        setPlans(Array.isArray(data) ? data : data.plans || data.data || [])
+      }
+    } catch {
+      toast.error('Error al cargar planes')
+    } finally {
+      setLoadingPlans(false)
+    }
+  }
+
+  async function handleAssignPlan() {
+    if (!selectedPlanId) return
+    setAssigning(true)
+    try {
+      const res = await fetch(`/api/coach/students/${id}/assign-plan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trainingPlanId: selectedPlanId }),
+      })
+      if (res.ok) {
+        toast.success('Plan asignado exitosamente')
+        setShowAssignModal(false)
+        setSelectedPlanId('')
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Error al asignar plan')
+      }
+    } catch {
+      toast.error('Error de conexion')
+    } finally {
+      setAssigning(false)
+    }
+  }
 
   async function updateRelationship(data: Record<string, unknown>) {
     setUpdating(true)
@@ -210,7 +263,7 @@ export default function StudentDetailPage() {
               <XCircle className="h-4 w-4 mr-2" />
               Finalizar
             </GlassButton>
-            <GlassButton variant="solid" size="sm" disabled={updating}>
+            <GlassButton variant="solid" size="sm" disabled={updating} onClick={openAssignModal}>
               <ClipboardList className="h-4 w-4 mr-2" />
               Asignar plan
             </GlassButton>
@@ -335,6 +388,59 @@ export default function StudentDetailPage() {
             <p className="text-sm">Los planes asignados apareceran aqui</p>
           </div>
         </GlassCard>
+      )}
+
+      {/* Assign Plan Modal */}
+      {showAssignModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <GlassCard intensity="medium" padding="lg" className="w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Asignar plan de entrenamiento</h2>
+              <button onClick={() => setShowAssignModal(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {loadingPlans ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : plans.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No tienes planes de entrenamiento. Crea uno primero desde la seccion de analisis.
+              </p>
+            ) : (
+              <>
+                <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
+                  {plans.map((plan) => (
+                    <button
+                      key={plan.id}
+                      onClick={() => setSelectedPlanId(plan.id)}
+                      className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
+                        selectedPlanId === plan.id
+                          ? 'border-primary bg-primary/10'
+                          : 'border-glass hover:bg-muted/50'
+                      }`}
+                    >
+                      <p className="font-medium">{plan.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(plan.createdAt).toLocaleDateString('es-PE')}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <GlassButton variant="ghost" size="sm" onClick={() => setShowAssignModal(false)}>
+                    Cancelar
+                  </GlassButton>
+                  <GlassButton variant="solid" size="sm" onClick={handleAssignPlan} disabled={assigning || !selectedPlanId}>
+                    {assigning ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ClipboardList className="h-4 w-4 mr-2" />}
+                    Asignar
+                  </GlassButton>
+                </div>
+              </>
+            )}
+          </GlassCard>
+        </div>
       )}
     </div>
   )
