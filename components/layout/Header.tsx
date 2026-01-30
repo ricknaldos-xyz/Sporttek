@@ -35,8 +35,10 @@ export function Header({ onMenuClick }: HeaderProps) {
           <span className="sr-only">Abrir menu</span>
         </GlassButton>
 
-        {/* Sport Selector */}
-        <SportSelectorPill />
+        {/* Sport Selector - only visible on mobile (desktop uses sidebar) */}
+        <div className="lg:hidden">
+          <SportSelectorPill />
+        </div>
 
         {/* Spacer */}
         <div className="flex-1" />

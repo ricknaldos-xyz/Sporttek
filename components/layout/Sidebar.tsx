@@ -5,145 +5,16 @@ import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import { GlassButton } from '@/components/ui/glass-button'
+import { Target, Video, ChevronRight, GraduationCap, Shield } from 'lucide-react'
+import { SidebarSportSelector } from '@/components/layout/SidebarSportSelector'
 import {
-  Target,
-  LayoutDashboard,
-  Video,
-  History,
-  Dumbbell,
-  User,
-  ChevronRight,
-  Trophy,
-  Swords,
-  Flag,
-  Users,
-  ShoppingBag,
-  Wrench,
-  Medal,
-  CircleDot,
-  Bell,
-  GraduationCap,
-  Shield,
-  MapPin,
-} from 'lucide-react'
-
-interface NavItem {
-  name: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  tourId: string
-}
-
-const mainNavigation: NavItem[] = [
-  {
-    name: 'Dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
-    tourId: 'dashboard',
-  },
-  {
-    name: 'Nuevo Analisis',
-    href: '/analyze',
-    icon: Video,
-    tourId: 'new-analysis',
-  },
-  {
-    name: 'Mis Analisis',
-    href: '/analyses',
-    icon: History,
-    tourId: 'analyses',
-  },
-  {
-    name: 'Entrenamiento',
-    href: '/training',
-    icon: Dumbbell,
-    tourId: 'training',
-  },
-  {
-    name: 'Objetivos',
-    href: '/goals',
-    icon: Target,
-    tourId: 'goals',
-  },
-]
-
-const competitionNavigation: NavItem[] = [
-  {
-    name: 'Rankings',
-    href: '/rankings',
-    icon: Trophy,
-    tourId: 'rankings',
-  },
-  {
-    name: 'Matchmaking',
-    href: '/matchmaking',
-    icon: Swords,
-    tourId: 'matchmaking',
-  },
-  {
-    name: 'Desafios',
-    href: '/challenges',
-    icon: Flag,
-    tourId: 'challenges',
-  },
-  {
-    name: 'Torneos',
-    href: '/tournaments',
-    icon: Medal,
-    tourId: 'tournaments',
-  },
-  {
-    name: 'Partidos',
-    href: '/matches',
-    icon: CircleDot,
-    tourId: 'matches',
-  },
-]
-
-const communityNavigation: NavItem[] = [
-  {
-    name: 'Comunidad',
-    href: '/community',
-    icon: Users,
-    tourId: 'community',
-  },
-  {
-    name: 'Notificaciones',
-    href: '/notifications',
-    icon: Bell,
-    tourId: 'notifications',
-  },
-]
-
-const servicesNavigation: NavItem[] = [
-  {
-    name: 'Canchas',
-    href: '/courts',
-    icon: MapPin,
-    tourId: 'courts',
-  },
-  {
-    name: 'Tienda',
-    href: '/tienda',
-    icon: ShoppingBag,
-    tourId: 'shop',
-  },
-  {
-    name: 'Encordado',
-    href: '/encordado',
-    icon: Wrench,
-    tourId: 'stringing',
-  },
-]
-
-const profileNavigation: NavItem[] = [
-  {
-    name: 'Mi Perfil',
-    href: '/profile',
-    icon: User,
-    tourId: 'profile',
-  },
-]
+  sportNavigation,
+  competitionNavigation,
+  globalNavigation,
+  profileNavigation,
+  type NavItem,
+} from '@/lib/navigation'
+import { useSport } from '@/contexts/SportContext'
 
 function NavSection({ items, label }: { items: NavItem[]; label?: string }) {
   const pathname = usePathname()
@@ -183,6 +54,7 @@ function NavSection({ items, label }: { items: NavItem[]; label?: string }) {
 
 export function Sidebar() {
   const { data: session } = useSession()
+  const { activeSport } = useSport()
   const user = session?.user as { hasCoachProfile?: boolean; role?: string } | undefined
 
   const roleNavigation: NavItem[] = []
@@ -203,6 +75,8 @@ export function Sidebar() {
     })
   }
 
+  const sportLabel = activeSport ? activeSport.name : 'Mi Deporte'
+
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 glass-light border-r border-glass">
       {/* Logo */}
@@ -213,15 +87,18 @@ export function Sidebar() {
         <span className="text-xl font-bold">SportTech</span>
       </div>
 
+      {/* Sport Selector */}
+      <div className="pt-4">
+        <SidebarSportSelector />
+      </div>
+
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
-        <NavSection items={mainNavigation} />
+      <nav className="flex-1 px-3 py-2 space-y-4 overflow-y-auto">
+        <NavSection items={sportNavigation} label={sportLabel} />
         <hr className="border-glass mx-2" />
         <NavSection items={competitionNavigation} label="Competencia" />
         <hr className="border-glass mx-2" />
-        <NavSection items={communityNavigation} label="Social" />
-        <hr className="border-glass mx-2" />
-        <NavSection items={servicesNavigation} label="Servicios" />
+        <NavSection items={globalNavigation} label="General" />
         {roleNavigation.length > 0 && (
           <>
             <hr className="border-glass mx-2" />

@@ -8,62 +8,44 @@ import { OnboardingProvider } from '@/components/onboarding/OnboardingProvider'
 import { CelebrationOverlay } from '@/components/gamification/CelebrationOverlay'
 import { SportProvider } from '@/contexts/SportContext'
 import { useState } from 'react'
-import { X, Target, LayoutDashboard, Video, History, Dumbbell, User, Trophy, Swords, Flag, Users, ShoppingBag, Wrench, Medal, CircleDot, Bell, GraduationCap, Shield } from 'lucide-react'
+import { X, Target, GraduationCap, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { BottomNav } from '@/components/layout/BottomNav'
-
-const mainNavigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Nuevo Analisis', href: '/analyze', icon: Video },
-  { name: 'Mis Analisis', href: '/analyses', icon: History },
-  { name: 'Entrenamiento', href: '/training', icon: Dumbbell },
-]
-
-const competitionNavigation = [
-  { name: 'Rankings', href: '/rankings', icon: Trophy },
-  { name: 'Matchmaking', href: '/matchmaking', icon: Swords },
-  { name: 'Desafios', href: '/challenges', icon: Flag },
-  { name: 'Torneos', href: '/tournaments', icon: Medal },
-  { name: 'Partidos', href: '/matches', icon: CircleDot },
-]
-
-const communityNavigation = [
-  { name: 'Comunidad', href: '/community', icon: Users },
-  { name: 'Notificaciones', href: '/notifications', icon: Bell },
-]
-
-const servicesNavigation = [
-  { name: 'Tienda', href: '/tienda', icon: ShoppingBag },
-  { name: 'Encordado', href: '/encordado', icon: Wrench },
-]
-
-const profileNavigation = [
-  { name: 'Mi Perfil', href: '/profile', icon: User },
-]
+import { SidebarSportSelector } from '@/components/layout/SidebarSportSelector'
+import {
+  sportNavigation,
+  competitionNavigation,
+  globalNavigation,
+  profileNavigation,
+  type NavItem,
+} from '@/lib/navigation'
+import { useSport } from '@/contexts/SportContext'
 
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const { activeSport } = useSport()
   const user = session?.user as { hasCoachProfile?: boolean; role?: string } | undefined
 
-  const roleNavigation: { name: string; href: string; icon: React.ComponentType<{ className?: string }> }[] = []
+  const roleNavigation: NavItem[] = []
   if (user?.hasCoachProfile) {
-    roleNavigation.push({ name: 'Coach Dashboard', href: '/coach/dashboard', icon: GraduationCap })
+    roleNavigation.push({ name: 'Coach Dashboard', href: '/coach/dashboard', icon: GraduationCap, tourId: 'coach-dashboard' })
   }
   if (user?.role === 'ADMIN') {
-    roleNavigation.push({ name: 'Admin', href: '/admin', icon: Shield })
+    roleNavigation.push({ name: 'Admin', href: '/admin', icon: Shield, tourId: 'admin' })
   }
 
   if (!open) return null
 
+  const sportLabel = activeSport ? activeSport.name : 'Mi Deporte'
+
   const sections = [
-    { items: mainNavigation },
-    { items: competitionNavigation },
-    { items: communityNavigation },
-    { items: servicesNavigation },
-    ...(roleNavigation.length > 0 ? [{ items: roleNavigation }] : []),
+    { items: sportNavigation, label: sportLabel },
+    { items: competitionNavigation, label: 'Competencia' },
+    { items: globalNavigation, label: 'General' },
+    ...(roleNavigation.length > 0 ? [{ items: roleNavigation, label: 'Gestion' }] : []),
     { items: profileNavigation },
   ]
 
@@ -73,7 +55,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
         className="fixed inset-0 bg-black/50"
         onClick={onClose}
       />
-      <div className="fixed inset-y-0 left-0 w-64 bg-card border-r border-border">
+      <div className="fixed inset-y-0 left-0 w-64 bg-card border-r border-border flex flex-col">
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div className="flex items-center gap-2">
             <Target className="h-8 w-8 text-primary" />
@@ -86,10 +68,21 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <nav className="px-3 py-4 space-y-1 overflow-y-auto flex-1">
+
+        {/* Sport Selector */}
+        <div className="pt-4">
+          <SidebarSportSelector />
+        </div>
+
+        <nav className="px-3 py-2 space-y-1 overflow-y-auto flex-1">
           {sections.map((section, sectionIdx) => (
             <div key={sectionIdx}>
               {sectionIdx > 0 && <hr className="border-border my-2" />}
+              {section.label && (
+                <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
+                  {section.label}
+                </p>
+              )}
               {section.items.map((item) => (
                 <Link
                   key={item.name}
