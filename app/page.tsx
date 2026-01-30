@@ -2,11 +2,11 @@ import type { Metadata } from 'next'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 
 export const metadata: Metadata = {
-  title: 'SportTech - Analisis Deportivo con IA',
-  description: 'Mejora tu tecnica deportiva con analisis de video impulsado por inteligencia artificial. Entrenamiento personalizado, rankings y comunidad.',
+  title: 'SportTech - Analisis Deportivo con IA | Tenis, Padel, Pickleball',
+  description: 'Mejora tu tecnica deportiva con analisis de video con IA, planes de entrenamiento personalizados, rankings, matchmaking, torneos y comunidad. Tenis, padel, pickleball y mas.',
   openGraph: {
-    title: 'SportTech - Analisis Deportivo con IA',
-    description: 'Mejora tu tecnica deportiva con analisis de video impulsado por inteligencia artificial. Entrenamiento personalizado, rankings y comunidad.',
+    title: 'SportTech - Analisis Deportivo con IA | Tenis, Padel, Pickleball',
+    description: 'Mejora tu tecnica deportiva con analisis de video con IA, planes de entrenamiento personalizados, rankings, matchmaking, torneos y comunidad.',
     type: 'website',
     locale: 'es_PE',
     siteName: 'SportTech',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'SportTech - Analisis Deportivo con IA',
-    description: 'Mejora tu tecnica deportiva con analisis de video impulsado por inteligencia artificial.',
+    description: 'Analisis de video con IA, planes de entrenamiento, rankings y comunidad para tenis, padel y pickleball.',
   },
 }
 import { HeroSection } from '@/components/landing/HeroSection'

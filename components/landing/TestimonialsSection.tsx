@@ -12,17 +12,17 @@ const testimonials = [
     rating: 5,
   },
   {
-    name: 'Maria L.',
-    role: 'Jugadora de club, Miraflores',
+    name: 'Andrea P.',
+    role: 'Jugadora de padel, Miraflores',
     content:
-      'Me gusta el sistema de ranking y poder encontrar rivales de mi nivel. Los analisis de IA son bastante detallados, aunque a veces tarda un poco el procesamiento.',
-    rating: 4,
+      'Me encanta poder analizar mi bandeja y ver exactamente donde pierdo potencia. El matchmaking me ayudo a encontrar pareja de mi nivel para torneos.',
+    rating: 5,
   },
   {
     name: 'Roberto S.',
     role: 'Entrenador, San Isidro',
     content:
-      'Lo uso con mis alumnos para que vean sus errores tecnicos de forma objetiva. Los planes de entrenamiento generados complementan bien mis sesiones presenciales.',
+      'Lo uso con mis alumnos de tenis y padel para que vean sus errores tecnicos de forma objetiva. El marketplace me permite llegar a mas alumnos.',
     rating: 5,
   },
 ]
@@ -36,7 +36,7 @@ export function TestimonialsSection() {
             Lo que dicen nuestros primeros usuarios
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Deportistas que ya estan probando SportTech para mejorar su tecnica.
+            Deportistas y entrenadores que ya estan usando la plataforma para mejorar su rendimiento.
           </p>
         </div>
 

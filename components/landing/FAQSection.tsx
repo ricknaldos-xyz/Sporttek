@@ -19,17 +19,22 @@ const faqs = [
   {
     question: 'Que deportes estan disponibles?',
     answer:
-      'Actualmente ofrecemos analisis para Tenis, con soporte para saque, derecha, reves y volea. Estamos evaluando agregar mas deportes en el futuro.',
+      'Actualmente ofrecemos analisis para Tenis (saque, derecha, reves, volea), Padel y Pickleball. El plan gratuito incluye acceso a Tenis, mientras que los planes Pro y Elite incluyen todos los deportes. Pronto agregaremos mas deportes como futbol.',
   },
   {
     question: 'Como funciona el ranking?',
     answer:
-      'Cada analisis que completas contribuye a tu skill score, calculado por nuestra IA. Segun tu puntaje, subes de tier: Bronce, Plata, Oro, Platino y Diamante. El ranking nacional muestra a los mejores tenistas de Peru.',
+      'Cada analisis que completas contribuye a tu skill score, calculado por nuestra IA. Segun tu puntaje, subes de tier: Bronce, Plata, Oro, Platino y Diamante. El ranking nacional muestra a los mejores jugadores de Peru por deporte.',
   },
   {
     question: 'Como encuentro rivales para jugar?',
     answer:
-      'La seccion de Matchmaking te sugiere rivales de tu nivel basandose en tu skill score y ubicacion. Puedes enviar desafios y coordinar partidos directamente desde la plataforma.',
+      'La seccion de Matchmaking te sugiere rivales de tu nivel basandose en tu ELO score y ubicacion. Puedes enviar desafios y coordinar partidos directamente desde la plataforma.',
+  },
+  {
+    question: 'Que es el Coach Marketplace?',
+    answer:
+      'Es un directorio de entrenadores verificados donde puedes encontrar coaches por deporte, ubicacion, especialidad y rango de precios. Los entrenadores pueden ofrecer sus servicios y los jugadores pueden contactarlos directamente.',
   },
   {
     question: 'Puedo cancelar mi suscripcion en cualquier momento?',
@@ -57,7 +62,7 @@ export function FAQSection() {
             Preguntas frecuentes
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Encuentra respuestas a las preguntas mas comunes sobre SportTech.
+            Encuentra respuestas a las preguntas mas comunes sobre la plataforma.
           </p>
         </div>
 

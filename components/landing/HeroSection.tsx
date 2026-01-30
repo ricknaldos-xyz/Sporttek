@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Swords, Trophy } from 'lucide-react'
+import { ArrowRight, Swords, Trophy, Flame, Globe } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { StatsCounter } from '@/components/landing/StatsCounter'
@@ -21,6 +21,10 @@ export function HeroSection() {
               <Swords className="h-3.5 w-3.5 mr-1.5" />
               Encuentra rivales de tu nivel
             </GlassBadge>
+            <GlassBadge variant="primary" size="lg">
+              <Globe className="h-3.5 w-3.5 mr-1.5" />
+              Tenis, Padel, Pickleball y mas
+            </GlassBadge>
           </div>
 
           {/* Headline */}
@@ -33,8 +37,8 @@ export function HeroSection() {
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            La plataforma de ranking, competencia y comunidad para tenistas amateur en Peru.
-            Sube videos, recibe tu skill score con IA, sube en el ranking nacional y encuentra rivales de tu nivel.
+            La plataforma de analisis deportivo con IA para tenis, padel y pickleball.
+            Sube videos, recibe tu skill score, entrena con planes personalizados, sube en el ranking y encuentra rivales de tu nivel.
           </p>
 
           {/* Dual CTAs */}
