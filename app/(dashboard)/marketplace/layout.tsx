@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Marketplace de Coaches | SportTech',
+  title: 'Marketplace de Coaches | SportTek',
   description: 'Encuentra entrenadores profesionales de tenis para mejorar tu juego.',
 }
 

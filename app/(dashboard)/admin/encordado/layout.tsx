@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Admin - Encordado | SportTech',
+  title: 'Admin - Encordado | SportTek',
   description: 'Administracion del servicio de encordado: pedidos y talleres.',
 }
 

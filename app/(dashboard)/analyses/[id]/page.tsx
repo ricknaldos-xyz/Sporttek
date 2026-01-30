@@ -16,11 +16,11 @@ export async function generateMetadata({
   })
 
   if (!analysis) {
-    return { title: 'Analisis no encontrado | SportTech' }
+    return { title: 'Analisis no encontrado | SportTek' }
   }
 
   return {
-    title: `${analysis.technique.name} - ${analysis.technique.sport.name} | SportTech`,
+    title: `${analysis.technique.name} - ${analysis.technique.sport.name} | SportTek`,
     description: `Resultados del analisis de ${analysis.technique.name} en ${analysis.technique.sport.name}. Revisa tu puntuacion y recomendaciones.`,
   }
 }

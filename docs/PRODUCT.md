@@ -1,4 +1,4 @@
-# SportTech — Documentación Completa de Producto
+# SportTek — Documentación Completa de Producto
 
 > Plataforma de análisis deportivo con inteligencia artificial
 
@@ -80,7 +80,7 @@ El mercado de deportes de raqueta en Latinoamérica está creciendo aceleradamen
 
 ## 3. Nuestra Solución
 
-SportTech es una plataforma integral que combina:
+SportTek es una plataforma integral que combina:
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -1578,7 +1578,7 @@ Variables requeridas (fail-fast al inicio):
 
 ### Competidores directos
 
-| Competidor | Fortaleza | Debilidad | Diferenciador SportTech |
+| Competidor | Fortaleza | Debilidad | Diferenciador SportTek |
 |-----------|-----------|-----------|-------------------------|
 | **SwingVision** | Tracking de tenis en tiempo real | Solo iOS, solo tenis, caro ($150/año) | Multi-deporte, accesible, comunidad |
 | **HomeCourt** | Detección de shots por IA | Sin planes de entrenamiento, sin comunidad | Ciclo completo: análisis → plan → progreso |
@@ -1587,7 +1587,7 @@ Variables requeridas (fail-fast al inicio):
 
 ### Competidores indirectos
 
-| Competidor | Overlap | Diferenciador SportTech |
+| Competidor | Overlap | Diferenciador SportTek |
 |-----------|---------|-------------------------|
 | YouTube tutorials | Contenido gratuito | Personalización vs genérico |
 | Coach particular | Análisis experto | Costo (S/30/mes vs S/200/hora) |

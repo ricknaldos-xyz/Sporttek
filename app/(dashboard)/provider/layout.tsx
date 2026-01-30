@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Proveedor | SportTech',
+  title: 'Proveedor | SportTek',
   description: 'Gestiona tu cuenta de proveedor de canchas y talleres.',
 }
 

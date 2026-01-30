@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Mi Perfil de Jugador | SportTech',
+  title: 'Mi Perfil de Jugador | SportTek',
   description: 'Tu perfil de jugador con Skill Score, radar de tecnicas y estadisticas de partidos.',
 }
 import { auth } from '@/lib/auth'

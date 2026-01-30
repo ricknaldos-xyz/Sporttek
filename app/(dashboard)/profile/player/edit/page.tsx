@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Editar Perfil de Jugador | SportTech',
-  description: 'Actualiza la informacion de tu perfil de jugador en SportTech.',
+  title: 'Editar Perfil de Jugador | SportTek',
+  description: 'Actualiza la informacion de tu perfil de jugador en SportTek.',
 }
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Servicio de Encordado | SportTech',
+  title: 'Servicio de Encordado | SportTek',
   description: 'Solicita el servicio de encordado profesional para tu raqueta de tenis.',
 }
 

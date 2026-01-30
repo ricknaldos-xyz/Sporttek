@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Buscar Rival | SportTech',
+  title: 'Buscar Rival | SportTek',
   description: 'Encuentra rivales de tu nivel para jugar partidos de tenis cerca de ti.',
 }
 

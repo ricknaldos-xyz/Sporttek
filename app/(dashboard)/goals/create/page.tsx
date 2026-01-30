@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { CreateGoalForm } from './CreateGoalForm'
 
 export const metadata: Metadata = {
-  title: 'Crear Objetivo | SportTech',
+  title: 'Crear Objetivo | SportTek',
   description: 'Crea un nuevo objetivo de mejora deportiva.',
 }
 

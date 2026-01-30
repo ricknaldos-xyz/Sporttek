@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Comunidad | SportTech',
+  title: 'Comunidad | SportTek',
   description: 'Conecta con otros jugadores, unete a clubes y participa en la comunidad deportiva.',
 }
 

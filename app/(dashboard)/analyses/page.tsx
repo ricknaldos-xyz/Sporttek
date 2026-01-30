@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Mis Analisis | SportTech',
+  title: 'Mis Analisis | SportTek',
   description: 'Historial de todos tus analisis de tecnica deportiva con resultados y puntuaciones.',
 }
 import { prisma } from '@/lib/prisma'

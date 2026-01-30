@@ -30,7 +30,7 @@ export async function generateMetadata({
     select: { title: true },
   })
   return {
-    title: goal ? `${goal.title} | SportTech` : 'Objetivo | SportTech',
+    title: goal ? `${goal.title} | SportTek` : 'Objetivo | SportTek',
     description: 'Detalle de tu objetivo de mejora con roadmap y progreso.',
   }
 }

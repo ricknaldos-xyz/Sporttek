@@ -16,8 +16,8 @@ export async function generateMetadata({
 
   const name = profile?.displayName || 'Jugador'
   return {
-    title: `${name} - Perfil de Jugador | SportTech`,
-    description: `Perfil publico de ${name} en SportTech. Consulta su Skill Score y estadisticas.`,
+    title: `${name} - Perfil de Jugador | SportTek`,
+    description: `Perfil publico de ${name} en SportTek. Consulta su Skill Score y estadisticas.`,
   }
 }
 import { GlassCard } from '@/components/ui/glass-card'

@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Dashboard | SportTech',
+  title: 'Dashboard | SportTek',
   description: 'Tu panel de entrenamiento deportivo. Revisa tus analisis, planes y progreso.',
 }
 import { prisma } from '@/lib/prisma'

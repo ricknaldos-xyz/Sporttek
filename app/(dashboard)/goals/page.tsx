@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Mis Objetivos | SportTech',
+  title: 'Mis Objetivos | SportTek',
   description: 'Gestiona tus objetivos de mejora deportiva.',
 }
 

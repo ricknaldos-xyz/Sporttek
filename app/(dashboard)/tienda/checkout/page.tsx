@@ -111,7 +111,7 @@ export default function CheckoutPage() {
               <div className="mt-4">
                 <CulqiCheckout
                   amount={totalCents}
-                  title="Compra SportTech"
+                  title="Compra SportTek"
                   description={`Pedido - ${items.length} producto(s)`}
                   onToken={async (tokenId) => {
                     setSubmitting(true)

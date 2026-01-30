@@ -38,7 +38,7 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div className="flex items-center gap-2">
             <Target className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold">SportTech</span>
+            <span className="text-xl font-bold">SportTek</span>
           </div>
           <button
             onClick={onClose}

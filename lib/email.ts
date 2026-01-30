@@ -13,7 +13,7 @@ function getResendClient(): Resend {
   return resend
 }
 
-const FROM_EMAIL = process.env.FROM_EMAIL || 'SportTech <noreply@sporttech.app>'
+const FROM_EMAIL = process.env.FROM_EMAIL || 'SportTek <noreply@sporttek.xyz>'
 
 export interface SendEmailOptions {
   to: string
@@ -54,13 +54,13 @@ export function getWelcomeEmailHtml(name: string) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bienvenido a SportTech</title>
+  <title>Bienvenido a SportTek</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f4f5;">
   <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <div style="background-color: white; border-radius: 16px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
       <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="color: #18181b; font-size: 24px; margin: 0;">Bienvenido a SportTech</h1>
+        <h1 style="color: #18181b; font-size: 24px; margin: 0;">Bienvenido a SportTek</h1>
       </div>
 
       <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
@@ -68,7 +68,7 @@ export function getWelcomeEmailHtml(name: string) {
       </p>
 
       <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
-        Gracias por unirte a SportTech. Estamos emocionados de ayudarte a mejorar tu tecnica deportiva con el poder de la inteligencia artificial.
+        Gracias por unirte a SportTek. Estamos emocionados de ayudarte a mejorar tu tecnica deportiva con el poder de la inteligencia artificial.
       </p>
 
       <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
@@ -94,7 +94,7 @@ export function getWelcomeEmailHtml(name: string) {
     </div>
 
     <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
-      © ${new Date().getFullYear()} SportTech. Todos los derechos reservados.
+      © ${new Date().getFullYear()} SportTek. Todos los derechos reservados.
     </p>
   </div>
 </body>
@@ -152,7 +152,7 @@ export function getAnalysisCompleteEmailHtml(
     </div>
 
     <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
-      © ${new Date().getFullYear()} SportTech. Todos los derechos reservados.
+      © ${new Date().getFullYear()} SportTek. Todos los derechos reservados.
     </p>
   </div>
 </body>
@@ -214,7 +214,7 @@ export function getTrainingReminderEmailHtml(
     </div>
 
     <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
-      © ${new Date().getFullYear()} SportTech. Todos los derechos reservados.
+      © ${new Date().getFullYear()} SportTek. Todos los derechos reservados.
     </p>
   </div>
 </body>
@@ -262,7 +262,7 @@ export function getPasswordResetEmailHtml(name: string, resetUrl: string) {
     </div>
 
     <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
-      ${new Date().getFullYear()} SportTech. Todos los derechos reservados.
+      ${new Date().getFullYear()} SportTek. Todos los derechos reservados.
     </p>
   </div>
 </body>
@@ -291,7 +291,7 @@ export function getEmailVerificationHtml(name: string, verifyUrl: string) {
       </p>
 
       <p style="color: #3f3f46; font-size: 16px; line-height: 24px; margin-bottom: 24px;">
-        Gracias por registrarte en SportTech. Por favor verifica tu direccion de email haciendo clic en el boton de abajo.
+        Gracias por registrarte en SportTek. Por favor verifica tu direccion de email haciendo clic en el boton de abajo.
       </p>
 
       <div style="text-align: center; margin-bottom: 32px;">
@@ -301,12 +301,12 @@ export function getEmailVerificationHtml(name: string, verifyUrl: string) {
       </div>
 
       <p style="color: #71717a; font-size: 14px;">
-        Este enlace expirara en 24 horas. Si no creaste una cuenta en SportTech, puedes ignorar este email.
+        Este enlace expirara en 24 horas. Si no creaste una cuenta en SportTek, puedes ignorar este email.
       </p>
     </div>
 
     <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
-      ${new Date().getFullYear()} SportTech. Todos los derechos reservados.
+      ${new Date().getFullYear()} SportTek. Todos los derechos reservados.
     </p>
   </div>
 </body>
@@ -351,7 +351,7 @@ export function getStreakAtRiskEmailHtml(name: string, currentStreak: number) {
     </div>
 
     <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
-      ${new Date().getFullYear()} SportTech. Todos los derechos reservados.
+      ${new Date().getFullYear()} SportTek. Todos los derechos reservados.
     </p>
   </div>
 </body>
@@ -364,7 +364,7 @@ export function getStreakAtRiskEmailHtml(name: string, currentStreak: number) {
 export async function sendWelcomeEmail(email: string, name: string) {
   return sendEmail({
     to: email,
-    subject: 'Bienvenido a SportTech',
+    subject: 'Bienvenido a SportTek',
     html: getWelcomeEmailHtml(name),
   })
 }
@@ -412,7 +412,7 @@ export async function sendPasswordResetEmail(
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password/${token}`
   return sendEmail({
     to: email,
-    subject: 'Restablecer tu contrasena - SportTech',
+    subject: 'Restablecer tu contrasena - SportTek',
     html: getPasswordResetEmailHtml(name, resetUrl),
   })
 }
@@ -425,7 +425,7 @@ export async function sendEmailVerification(
   const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email/${token}`
   return sendEmail({
     to: email,
-    subject: 'Verifica tu email - SportTech',
+    subject: 'Verifica tu email - SportTek',
     html: getEmailVerificationHtml(name, verifyUrl),
   })
 }

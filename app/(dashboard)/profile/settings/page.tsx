@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 
 export const metadata: Metadata = {
-  title: 'Configuracion | SportTech',
+  title: 'Configuracion | SportTek',
   description: 'Administra tus preferencias de cuenta, notificaciones y suscripcion.',
 }
 import { prisma } from '@/lib/prisma'

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Notificaciones | SportTech',
+  title: 'Notificaciones | SportTek',
   description: 'Revisa tus notificaciones de desafios, partidos, torneos y actividad social.',
 }
 

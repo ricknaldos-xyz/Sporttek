@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Torneos | SportTech',
+  title: 'Torneos | SportTek',
   description: 'Descubre y participa en torneos de tenis organizados en tu zona.',
 }
 

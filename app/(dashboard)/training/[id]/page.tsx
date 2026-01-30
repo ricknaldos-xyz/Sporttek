@@ -15,7 +15,7 @@ export async function generateMetadata({
   })
 
   return {
-    title: plan ? `${plan.title} | SportTech` : 'Plan de Entrenamiento | SportTech',
+    title: plan ? `${plan.title} | SportTek` : 'Plan de Entrenamiento | SportTek',
     description: 'Detalle de tu plan de entrenamiento con ejercicios y seguimiento de progreso.',
   }
 }

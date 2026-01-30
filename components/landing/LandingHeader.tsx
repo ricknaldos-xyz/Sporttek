@@ -41,7 +41,7 @@ export function LandingHeader() {
             <div className="glass-primary border-glass rounded-xl p-2">
               <Target className="h-6 w-6 text-primary" />
             </div>
-            <span className="text-xl font-bold">SportTech</span>
+            <span className="text-xl font-bold">SportTek</span>
           </Link>
 
           {/* Desktop Navigation */}

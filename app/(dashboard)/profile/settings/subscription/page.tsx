@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { CancelSubscriptionButton } from './cancel-button'
 
 export const metadata: Metadata = {
-  title: 'Gestionar Suscripcion | SportTech',
+  title: 'Gestionar Suscripcion | SportTek',
   description: 'Administra tu suscripcion y metodo de pago.',
 }
 

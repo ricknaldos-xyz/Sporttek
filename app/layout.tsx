@@ -15,7 +15,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'SportTech - Analisis Deportivo con IA',
+  title: 'SportTek - Analisis Deportivo con IA',
   description: 'Mejora tu tecnica deportiva con analisis de video impulsado por inteligencia artificial',
   manifest: '/manifest.json',
   icons: {
@@ -28,18 +28,18 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'SportTech',
+    title: 'SportTek',
   },
   openGraph: {
-    title: 'SportTech - Analisis Deportivo con IA',
+    title: 'SportTek - Analisis Deportivo con IA',
     description: 'Mejora tu tecnica deportiva con analisis de video impulsado por inteligencia artificial',
     type: 'website',
     locale: 'es_PE',
-    siteName: 'SportTech',
+    siteName: 'SportTek',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SportTech - Analisis Deportivo con IA',
+    title: 'SportTek - Analisis Deportivo con IA',
     description: 'Mejora tu tecnica deportiva con analisis de video impulsado por IA',
   },
 }

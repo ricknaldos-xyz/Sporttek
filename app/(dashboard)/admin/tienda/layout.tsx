@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Admin - Tienda | SportTech',
+  title: 'Admin - Tienda | SportTek',
   description: 'Administracion de la tienda: productos, pedidos e inventario.',
 }
 

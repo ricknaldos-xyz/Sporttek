@@ -3,8 +3,8 @@ import { Target } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Autenticacion | SportTech',
-  description: 'Inicia sesion o crea tu cuenta en SportTech para mejorar tu tecnica deportiva.',
+  title: 'Autenticacion | SportTek',
+  description: 'Inicia sesion o crea tu cuenta en SportTek para mejorar tu tecnica deportiva.',
 }
 
 export default function AuthLayout({
@@ -27,7 +27,7 @@ export default function AuthLayout({
         <div className="glass-primary border-glass rounded-xl p-2 shadow-glass-glow">
           <Target className="h-6 w-6 text-primary" />
         </div>
-        <span className="text-2xl font-bold">SportTech</span>
+        <span className="text-2xl font-bold">SportTek</span>
       </Link>
       <div className="relative z-10 w-full flex justify-center">
         {children}

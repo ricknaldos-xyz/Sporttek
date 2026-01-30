@@ -31,7 +31,7 @@ export function LandingFooter() {
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Target className="h-6 w-6 text-primary" />
-              <span className="text-lg font-bold">SportTech</span>
+              <span className="text-lg font-bold">SportTek</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Analisis deportivo con IA para tenis, padel y pickleball.
@@ -92,7 +92,7 @@ export function LandingFooter() {
 
         {/* Bottom */}
         <div className="border-t border-border mt-12 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2026 SportTech. Todos los derechos reservados.</p>
+          <p>&copy; 2026 SportTek. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

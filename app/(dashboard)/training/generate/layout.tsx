@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Generar Plan de Entrenamiento | SportTech',
+  title: 'Generar Plan de Entrenamiento | SportTek',
   description: 'Genera un plan de entrenamiento personalizado basado en tu analisis de tecnica.',
 }
 

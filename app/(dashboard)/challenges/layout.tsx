@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Desafios | SportTech',
+  title: 'Desafios | SportTek',
   description: 'Envia y recibe desafios de otros jugadores para partidos competitivos.',
 }
 

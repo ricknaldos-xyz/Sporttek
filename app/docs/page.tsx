@@ -126,7 +126,7 @@ function DocsSidebar({
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-bold">SportTech</h2>
+              <h2 className="text-lg font-bold">SportTek</h2>
               <p className="text-xs text-muted-foreground">Documentación v1.0</p>
             </div>
             <button onClick={onClose} className="lg:hidden p-2 rounded-lg hover:glass-light">
@@ -303,7 +303,7 @@ export default function DocsPage() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <span className="font-bold text-sm">SportTech Docs</span>
+          <span className="font-bold text-sm">SportTek Docs</span>
           <div className="w-9" />
         </div>
       </div>
@@ -320,7 +320,7 @@ export default function DocsPage() {
         {/* Hero */}
         <div className="mb-12">
           <div className="glass-primary border-glass rounded-3xl p-8 lg:p-12">
-            <h1 className="text-3xl lg:text-4xl font-bold mb-3">SportTech</h1>
+            <h1 className="text-3xl lg:text-4xl font-bold mb-3">SportTek</h1>
             <p className="text-lg text-muted-foreground mb-4">
               Plataforma de análisis deportivo con inteligencia artificial
             </p>
@@ -410,7 +410,7 @@ export default function DocsPage() {
         <Section id="solucion" icon={Lightbulb} title="3. Nuestra Solución">
           <Card>
             <p className="text-sm text-muted-foreground mb-4">
-              SportTech es una plataforma integral que combina análisis con IA, entrenamiento
+              SportTek es una plataforma integral que combina análisis con IA, entrenamiento
               personalizado, competencia, y comunidad.
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -1121,7 +1121,7 @@ Prisma Gemini Culqi Resend Blob Redis
         <Section id="competencia" icon={Search} title="20. Análisis Competitivo">
           <Card>
             <Table
-              headers={['Competidor', 'Fortaleza', 'Debilidad', 'Diferenciador SportTech']}
+              headers={['Competidor', 'Fortaleza', 'Debilidad', 'Diferenciador SportTek']}
               rows={[
                 ['SwingVision', 'Tracking en tiempo real', 'Solo iOS, solo tenis, $150/año', 'Multi-deporte, accesible, comunidad'],
                 ['HomeCourt', 'Detección de shots', 'Sin planes ni comunidad', 'Ciclo completo: análisis→plan→progreso'],
@@ -1263,7 +1263,7 @@ Prisma Gemini Culqi Resend Blob Redis
         {/* Footer */}
         <div className="mt-16 pt-8 border-t border-glass text-center">
           <p className="text-xs text-muted-foreground">
-            SportTech v1.0.0 — Documentación generada en Enero 2026
+            SportTek v1.0.0 — Documentación generada en Enero 2026
           </p>
         </div>
       </main>

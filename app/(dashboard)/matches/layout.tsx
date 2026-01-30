@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Partidos | SportTech',
+  title: 'Partidos | SportTek',
   description: 'Revisa tu historial de partidos, resultados y estadisticas de juego.',
 }
 

@@ -18,7 +18,7 @@ async function main() {
     update: {},
     create: {
       email: 'admin@sporttech.pe',
-      name: 'Admin SportTech',
+      name: 'Admin SportTek',
       password: hashedPassword,
       role: 'ADMIN',
       accountType: 'PLAYER',
@@ -1825,7 +1825,7 @@ async function main() {
 
   const workshops = [
     {
-      name: 'SportTech Workshop Central',
+      name: 'SportTek Workshop Central',
       address: 'Jr. de la Union 456',
       district: 'Cercado de Lima',
       city: 'Lima',

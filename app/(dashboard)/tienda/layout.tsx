@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Tienda | SportTech',
+  title: 'Tienda | SportTek',
   description: 'Compra equipamiento deportivo, raquetas, cuerdas y accesorios de tenis.',
 }
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Rankings | SportTech',
+  title: 'Rankings | SportTek',
   description: 'Consulta los rankings de jugadores por Skill Score y posicion en el pais.',
 }
 
