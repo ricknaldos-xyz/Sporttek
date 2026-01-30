@@ -89,6 +89,7 @@ export default function AnalyzePage() {
   const [loadingTechniques, setLoadingTechniques] = useState(false)
   const [autoDetectMode, setAutoDetectMode] = useState(false)
   const [detectionResult, setDetectionResult] = useState<DetectionResponse | null>(null)
+  const [uploadProgress, setUploadProgress] = useState('')
   const [uploadedMediaItems, setUploadedMediaItems] = useState<
     Array<{ url: string; type: string; filename: string; size: number }>
   >([])
@@ -180,7 +181,10 @@ export default function AnalyzePage() {
       size: number
     }> = []
 
-    for (const file of files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      setUploadProgress(files.length > 1 ? `Subiendo ${i + 1} de ${files.length}...` : 'Subiendo...')
+
       const isVideo = file.type.startsWith('video/')
 
       // Generate unique filename
@@ -189,21 +193,27 @@ export default function AnalyzePage() {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'bin'
       const uniqueName = `analyses/${timestamp}-${random}.${ext}`
 
-      // Use client-side upload directly to Vercel Blob (bypasses server size limit)
-      const { upload } = await import('@vercel/blob/client')
-      const blob = await upload(uniqueName, file, {
-        access: 'public',
-        handleUploadUrl: '/api/upload/token',
-      })
+      try {
+        // Use client-side upload directly to Vercel Blob (bypasses server size limit)
+        const { upload } = await import('@vercel/blob/client')
+        const blob = await upload(uniqueName, file, {
+          access: 'public',
+          handleUploadUrl: '/api/upload/token',
+        })
 
-      mediaItems.push({
-        url: blob.url,
-        type: isVideo ? 'VIDEO' : 'IMAGE',
-        filename: file.name,
-        size: file.size,
-      })
+        mediaItems.push({
+          url: blob.url,
+          type: isVideo ? 'VIDEO' : 'IMAGE',
+          filename: file.name,
+          size: file.size,
+        })
+      } catch (error) {
+        logger.error(`Upload failed for ${file.name}:`, error)
+        throw new Error(`Error al subir ${file.name}. Verifica tu conexion e intenta de nuevo.`)
+      }
     }
 
+    setUploadProgress('')
     return mediaItems
   }
 
@@ -772,7 +782,7 @@ export default function AnalyzePage() {
               {uploading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Subiendo...
+                  {uploadProgress || 'Subiendo...'}
                 </>
               ) : step === 'upload' ? (
                 autoDetectMode ? (

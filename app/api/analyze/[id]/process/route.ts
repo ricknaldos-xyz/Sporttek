@@ -152,6 +152,7 @@ export async function POST(
       > = []
 
       // Process each media item
+      let failedFiles = 0
       for (const item of analysis.mediaItems) {
         logger.debug(`[process] Processing ${item.type}: ${item.filename}, url: ${item.url.substring(0, 80)}`)
 
@@ -165,6 +166,7 @@ export async function POST(
             const response = await fetch(item.url)
             if (!response.ok) {
               logger.error(`[process] Failed to download file: ${item.url}, status: ${response.status}`)
+              failedFiles++
               continue
             }
             buffer = Buffer.from(await response.arrayBuffer())
@@ -194,12 +196,17 @@ export async function POST(
           contentParts.push({ inlineData: { mimeType, data: base64 } })
         } catch (fileError) {
           logger.error(`[process] Error loading file: ${item.filename}`, fileError)
+          failedFiles++
           continue
         }
       }
 
       if (contentParts.length === 0) {
-        throw new Error('No se encontraron archivos para analizar')
+        throw new Error(
+          failedFiles > 0
+            ? `No se pudieron descargar los ${failedFiles} archivo(s). Intenta subir el video de nuevo.`
+            : 'No se encontraron archivos para analizar'
+        )
       }
 
       // Add the text prompt
