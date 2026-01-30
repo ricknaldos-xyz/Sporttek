@@ -6,7 +6,7 @@ export default auth((req) => {
   const { pathname } = req.nextUrl
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/pricing', '/rankings']
+  const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/pricing', '/rankings', '/docs']
   const isPublicRoute = publicRoutes.includes(pathname)
 
   // Pattern-based public routes (dynamic segments)
