@@ -159,6 +159,8 @@ enum NotificationType {
   BADGE_EARNED
   COACH_INVITATION
   TIER_PROMOTION
+  // System
+  SYSTEM_ANNOUNCEMENT
   // Provider lifecycle
   PROVIDER_APPLICATION_SUBMITTED
   PROVIDER_APPROVED
@@ -400,6 +402,9 @@ model User {
 
   // Sport Addons (paid additional sports)
   sportAddons SportAddon[]
+
+  bannedAt       DateTime?
+  suspendedUntil DateTime?
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -1176,8 +1181,11 @@ model Report {
   targetType  String
   reason      ReportReason
   description String?
-  resolved    Boolean       @default(false)
-  createdAt   DateTime      @default(now())
+  resolved       Boolean       @default(false)
+  resolvedAction String?
+  resolvedAt     DateTime?
+  resolvedById   String?
+  createdAt      DateTime      @default(now())
 
   @@index([resolved])
   @@map("reports")

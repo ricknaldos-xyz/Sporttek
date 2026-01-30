@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger'
 import { toast } from 'sonner'
 import {
   ArrowLeft, Loader2, User, BarChart3, ClipboardList,
-  Shield, CheckCircle, Save,
+  Shield, CheckCircle, Save, Ban, Clock,
 } from 'lucide-react'
 
 interface PlayerProfile {
@@ -33,6 +33,8 @@ interface UserDetail {
   role: string
   accountType: string
   subscription: string
+  bannedAt: string | null
+  suspendedUntil: string | null
   createdAt: string
   lastLoginAt: string | null
   playerProfile: PlayerProfile | null
@@ -71,6 +73,8 @@ export default function AdminUserDetailPage() {
 
   const [editRole, setEditRole] = useState('')
   const [editSubscription, setEditSubscription] = useState('')
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [suspendDate, setSuspendDate] = useState('')
 
   const fetchUser = useCallback(async () => {
     setLoading(true)
@@ -131,6 +135,45 @@ export default function AdminUserDetailPage() {
     }
   }
 
+  const handleAction = async (action: 'ban' | 'unban' | 'suspend') => {
+    if (!user) return
+
+    if (action === 'ban' && !confirm('Estas seguro de que deseas banear a este usuario?')) return
+    if (action === 'suspend' && !suspendDate) {
+      toast.error('Selecciona una fecha de suspension')
+      return
+    }
+
+    setActionLoading(action)
+    try {
+      const body: Record<string, string> = { action }
+      if (action === 'suspend') body.suspendedUntil = new Date(suspendDate).toISOString()
+
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+      if (res.ok) {
+        const labels = { ban: 'Usuario baneado', unban: 'Usuario desbaneado', suspend: 'Usuario suspendido' }
+        toast.success(labels[action])
+        setSuspendDate('')
+        fetchUser()
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Error al ejecutar accion')
+      }
+    } catch {
+      toast.error('Error de conexion')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const isBanned = !!user?.bannedAt
+  const isSuspended = user?.suspendedUntil && new Date(user.suspendedUntil) > new Date()
+
   const hasChanges = user && (editRole !== user.role || editSubscription !== user.subscription)
 
   if (loading) {
@@ -181,6 +224,18 @@ export default function AdminUserDetailPage() {
               >
                 {user.role}
               </GlassBadge>
+              {isBanned && (
+                <GlassBadge variant="destructive" size="sm">
+                  <Ban className="h-3 w-3 mr-1" />
+                  Baneado
+                </GlassBadge>
+              )}
+              {isSuspended && (
+                <GlassBadge variant="warning" size="sm">
+                  <Clock className="h-3 w-3 mr-1" />
+                  Suspendido hasta {formatDate(user.suspendedUntil)}
+                </GlassBadge>
+              )}
             </div>
             <p className="text-muted-foreground">{user.email || 'Sin email'}</p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground pt-1">
@@ -284,6 +339,74 @@ export default function AdminUserDetailPage() {
           </div>
         </GlassCard>
       )}
+
+      {/* Moderation actions */}
+      <GlassCard intensity="medium" padding="lg">
+        <h2 className="text-lg font-semibold mb-4">Acciones de Moderacion</h2>
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Ban / Unban */}
+          <div>
+            {isBanned ? (
+              <GlassButton
+                variant="solid"
+                size="lg"
+                disabled={actionLoading === 'unban'}
+                onClick={() => handleAction('unban')}
+              >
+                {actionLoading === 'unban' ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Ban className="h-4 w-4 mr-2" />
+                )}
+                Desbanear usuario
+              </GlassButton>
+            ) : (
+              <GlassButton
+                variant="destructive"
+                size="lg"
+                disabled={actionLoading === 'ban'}
+                onClick={() => handleAction('ban')}
+              >
+                {actionLoading === 'ban' ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Ban className="h-4 w-4 mr-2" />
+                )}
+                Banear usuario
+              </GlassButton>
+            )}
+          </div>
+
+          {/* Suspend */}
+          <div className="flex items-end gap-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Suspender hasta
+              </label>
+              <input
+                type="datetime-local"
+                value={suspendDate}
+                onChange={(e) => setSuspendDate(e.target.value)}
+                className="glass-input w-full"
+                min={new Date().toISOString().slice(0, 16)}
+              />
+            </div>
+            <GlassButton
+              variant="destructive"
+              size="lg"
+              disabled={!suspendDate || actionLoading === 'suspend'}
+              onClick={() => handleAction('suspend')}
+            >
+              {actionLoading === 'suspend' ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Clock className="h-4 w-4 mr-2" />
+              )}
+              Suspender
+            </GlassButton>
+          </div>
+        </div>
+      </GlassCard>
 
       {/* Edit section */}
       <GlassCard intensity="medium" padding="lg">

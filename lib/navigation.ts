@@ -22,6 +22,9 @@ import {
   Building2,
   ClipboardList,
   Inbox,
+  AlertTriangle,
+  CalendarDays,
+  FileText,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -73,11 +76,18 @@ export const providerWorkshopNavigation: NavItem[] = [
 ]
 
 export const adminNavigation: NavItem[] = [
-  { name: 'Admin Panel', href: '/admin', icon: Shield, tourId: 'admin' },
+  { name: 'Dashboard', href: '/admin', icon: Shield, tourId: 'admin' },
   { name: 'Usuarios', href: '/admin/users', icon: Users, tourId: 'admin-users' },
+  { name: 'Moderacion', href: '/admin/moderation', icon: AlertTriangle, tourId: 'admin-moderation' },
+  { name: 'Torneos', href: '/admin/tournaments', icon: Medal, tourId: 'admin-tournaments' },
+  { name: 'Partidos', href: '/admin/matches', icon: Swords, tourId: 'admin-matches' },
   { name: 'Analiticas', href: '/admin/analytics', icon: BarChart3, tourId: 'admin-analytics' },
   { name: 'Coaches', href: '/admin/coaches', icon: UserCheck, tourId: 'admin-coaches' },
   { name: 'Proveedores', href: '/admin/providers', icon: Building2, tourId: 'admin-providers' },
+  { name: 'Reservas', href: '/admin/bookings', icon: CalendarDays, tourId: 'admin-bookings' },
+  { name: 'Notificaciones', href: '/admin/notifications', icon: Bell, tourId: 'admin-notifications' },
+  { name: 'Ejercicios', href: '/admin/exercise-templates', icon: Dumbbell, tourId: 'admin-exercises' },
+  { name: 'Knowledge Base', href: '/admin/knowledge-base', icon: FileText, tourId: 'admin-kb' },
   { name: 'Tienda', href: '/admin/tienda', icon: ShoppingBag, tourId: 'admin-shop' },
   { name: 'Encordado', href: '/admin/encordado', icon: Wrench, tourId: 'admin-stringing' },
   { name: 'Canchas', href: '/admin/courts', icon: MapPin, tourId: 'admin-courts' },

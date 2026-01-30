@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
+import { GlassButton } from '@/components/ui/glass-button'
 import {
   Users,
   Brain,
@@ -13,6 +14,7 @@ import {
   Flag,
   ShoppingBag,
   Wrench,
+  RefreshCw,
 } from 'lucide-react'
 import { logger } from '@/lib/logger'
 
@@ -49,6 +51,8 @@ function SkeletonCard() {
 export default function AdminAnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [recomputingRankings, setRecomputingRankings] = useState(false)
+  const [rankingsResult, setRankingsResult] = useState<string | null>(null)
 
   const fetchAnalytics = useCallback(async () => {
     try {
@@ -77,6 +81,28 @@ export default function AdminAnalyticsPage() {
 
   const pct = (n: number) =>
     subscriptionTotal > 0 ? ((n / subscriptionTotal) * 100).toFixed(1) : '0'
+
+  const handleRecomputeRankings = async () => {
+    setRecomputingRankings(true)
+    setRankingsResult(null)
+    try {
+      const res = await fetch('/api/admin/rankings/recompute', { method: 'POST' })
+      if (res.ok) {
+        const result = await res.json()
+        setRankingsResult(
+          `Rankings recomputados: ${result.recomputed} perfiles en ${result.countries} paises`
+        )
+      } else {
+        const err = await res.json()
+        setRankingsResult(`Error: ${err.error || 'Error al recomputar rankings'}`)
+      }
+    } catch (error) {
+      logger.error('Failed to recompute rankings:', error)
+      setRankingsResult('Error de conexion al recomputar rankings')
+    } finally {
+      setRecomputingRankings(false)
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -319,6 +345,49 @@ export default function AdminAnalyticsPage() {
             </>
           ) : null}
         </div>
+      </div>
+
+      {/* Rankings Section */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Rankings</h2>
+        <GlassCard intensity="light">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Recomputar Rankings</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Recalcula rankings globales y por pais para todos los jugadores
+              </p>
+            </div>
+            <GlassButton
+              variant="primary"
+              size="sm"
+              onClick={handleRecomputeRankings}
+              disabled={recomputingRankings}
+            >
+              {recomputingRankings ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Recomputando...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Recomputar Rankings
+                </>
+              )}
+            </GlassButton>
+          </div>
+          {rankingsResult && (
+            <div className="mt-4">
+              <GlassBadge
+                variant={rankingsResult.startsWith('Error') ? 'destructive' : 'success'}
+                size="sm"
+              >
+                {rankingsResult}
+              </GlassBadge>
+            </div>
+          )}
+        </GlassCard>
       </div>
     </div>
   )
