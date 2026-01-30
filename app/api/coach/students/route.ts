@@ -21,7 +21,10 @@ export async function GET() {
     }
 
     const students = await prisma.coachStudent.findMany({
-      where: { coachId: coachProfile.id },
+      where: {
+        coachId: coachProfile.id,
+        status: { in: ['PENDING_INVITE', 'PENDING_REQUEST', 'ACTIVE', 'PAUSED'] },
+      },
       include: {
         student: {
           select: {
