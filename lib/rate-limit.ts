@@ -72,3 +72,7 @@ export const registerLimiter = rateLimit({ key: 'register', limit: 3, window: 60
 export const forgotPasswordLimiter = rateLimit({ key: 'forgot', limit: 3, window: 300 }) // 3 per 5 min
 export const analyzeLimiter = rateLimit({ key: 'analyze', limit: 10, window: 60 })     // 10 per minute
 export const reportLimiter = rateLimit({ key: 'report', limit: 5, window: 300 })       // 5 per 5 min
+export const uploadLimiter = rateLimit({ key: 'upload', limit: 10, window: 60 })       // 10 per minute
+export const checkoutLimiter = rateLimit({ key: 'checkout', limit: 5, window: 60 })     // 5 per minute
+export const tournamentLimiter = rateLimit({ key: 'tournament', limit: 5, window: 60 }) // 5 per minute
+export const challengeLimiter = rateLimit({ key: 'challenge', limit: 10, window: 60 })  // 10 per minute

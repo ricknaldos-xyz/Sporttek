@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 
 const STALE_THRESHOLD_MS = 5 * 60 * 1000 // 5 minutes
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    console.log(`Marked ${result.count} stale analyses as failed`)
+    logger.debug(`Marked ${result.count} stale analyses as failed`)
 
     return NextResponse.json({
       message: 'Stale analyses check completed',
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
       marked: result.count,
     })
   } catch (error) {
-    console.error('Stale analyses check error:', error)
+    logger.error('Stale analyses check error:', error)
     return NextResponse.json(
       { error: 'Error checking stale analyses' },
       { status: 500 }

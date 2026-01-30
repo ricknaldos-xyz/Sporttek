@@ -75,6 +75,11 @@ export async function retrieveRelevantChunks(
     ? `WHERE ${conditions.join(' AND ')}`
     : 'WHERE dc.embedding IS NOT NULL'
 
+  // Add threshold as a parameterized value to prevent SQL injection
+  const thresholdParamIdx = paramIdx
+  params.push(threshold)
+  paramIdx++
+
   try {
     const results = await prisma.$queryRawUnsafe<RetrievedChunk[]>(`
       SELECT
@@ -89,7 +94,7 @@ export async function retrieveRelevantChunks(
       FROM document_chunks dc
       JOIN documents d ON dc."documentId" = d.id
       ${whereClause}
-      AND 1 - (dc.embedding <=> $1::vector) > ${threshold}
+      AND 1 - (dc.embedding <=> $1::vector) > $${thresholdParamIdx}
       ORDER BY dc.embedding <=> $1::vector
       LIMIT $2
     `, ...params)

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { auth } from '@/lib/auth'
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
 
@@ -44,18 +45,17 @@ export async function POST(request: NextRequest) {
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
         // This runs after upload completes
-        console.log('Upload completed:', blob.url)
+        logger.debug('Upload completed:', blob.url)
         const payload = JSON.parse(tokenPayload || '{}')
-        console.log('User ID:', payload.userId)
+        logger.debug('User ID:', payload.userId)
       },
     })
 
     return NextResponse.json(jsonResponse)
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Error desconocido'
-    console.error('Upload token error:', errorMsg)
+    logger.error('Upload token error:', error)
     return NextResponse.json(
-      { error: errorMsg },
+      { error: 'Error al generar token de subida' },
       { status: 400 }
     )
   }

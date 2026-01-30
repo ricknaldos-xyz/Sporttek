@@ -411,6 +411,7 @@ model Technique {
   updatedAt DateTime @updatedAt
 
   @@unique([sportId, slug])
+  @@index([sportId])
   @@map("techniques")
 }
 
@@ -431,6 +432,7 @@ model Variant {
   updatedAt DateTime @updatedAt
 
   @@unique([techniqueId, slug])
+  @@index([techniqueId])
   @@map("variants")
 }
 
@@ -498,6 +500,7 @@ model MediaItem {
 
   createdAt DateTime @default(now())
 
+  @@index([analysisId])
   @@map("media_items")
 }
 
@@ -561,6 +564,7 @@ model TrainingPlan {
   updatedAt DateTime @updatedAt
 
   @@index([userId, status])
+  @@index([analysisId])
   @@map("training_plans")
 }
 
@@ -922,6 +926,7 @@ model Ranking {
   @@unique([profileId, category, period, country, skillTier, ageGroup, periodStart])
   @@index([category, period, country, rank])
   @@index([profileId])
+  @@index([sportId])
   @@map("rankings")
 }
 
@@ -1031,6 +1036,8 @@ model Follow {
   createdAt   DateTime      @default(now())
 
   @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
   @@map("follows")
 }
 
@@ -1064,6 +1071,7 @@ model Comment {
   updatedAt   DateTime      @updatedAt
 
   @@index([targetId, targetType, createdAt])
+  @@index([authorId])
   @@map("comments")
 }
 
@@ -1093,6 +1101,8 @@ model Block {
   createdAt DateTime      @default(now())
 
   @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
   @@map("blocks")
 }
 
@@ -1185,6 +1195,7 @@ model Tournament {
 
   @@index([status, country])
   @@index([clubId])
+  @@index([organizerId])
   @@map("tournaments")
 }
 
@@ -1202,6 +1213,8 @@ model TournamentParticipant {
   registeredAt DateTime @default(now())
 
   @@unique([tournamentId, profileId])
+  @@index([tournamentId])
+  @@index([profileId])
   @@map("tournament_participants")
 }
 
@@ -1284,6 +1297,8 @@ model CoachStudent {
   updatedAt DateTime  @updatedAt
 
   @@unique([coachId, studentId])
+  @@index([coachId])
+  @@index([studentId])
   @@map("coach_students")
 }
 
@@ -1533,6 +1548,7 @@ model ShopOrderItem {
 
   createdAt DateTime @default(now())
 
+  @@index([orderId])
   @@map("shop_order_items")
 }
 
@@ -1758,6 +1774,8 @@ model GoalTechnique {
   technique   Technique       @relation(fields: [techniqueId], references: [id], onDelete: Cascade)
 
   @@unique([goalId, techniqueId])
+  @@index([goalId])
+  @@index([techniqueId])
   @@map("goal_techniques")
 }
 
@@ -1817,6 +1835,7 @@ model SportProfile {
 
   @@unique([profileId, sportId])
   @@index([sportId, effectiveScore])
+  @@index([profileId])
   @@map("sport_profiles")
 }
 

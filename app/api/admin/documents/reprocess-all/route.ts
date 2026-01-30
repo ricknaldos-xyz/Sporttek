@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { processDocument } from '@/lib/rag/processor'
@@ -36,21 +37,21 @@ export async function POST() {
       })
     }
 
-    console.log(`[reprocess] Starting reprocess of ${documents.length} documents`)
+    logger.debug(`[reprocess] Starting reprocess of ${documents.length} documents`)
 
     const results: Array<{ name: string; status: string; error?: string }> = []
 
     // Process each document sequentially
     for (const doc of documents) {
-      console.log(`[reprocess] Processing: ${doc.originalName}`)
+      logger.debug(`[reprocess] Processing: ${doc.originalName}`)
       try {
         await processDocument(doc.id)
         results.push({ name: doc.originalName, status: 'OK' })
-        console.log(`[reprocess] ✓ ${doc.originalName} completed`)
+        logger.debug(`[reprocess] ✓ ${doc.originalName} completed`)
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error)
         results.push({ name: doc.originalName, status: 'ERROR', error: errorMsg })
-        console.error(`[reprocess] ✗ ${doc.originalName} failed:`, errorMsg)
+        logger.error(`[reprocess] ✗ ${doc.originalName} failed:`, errorMsg)
       }
     }
 
@@ -64,7 +65,7 @@ export async function POST() {
       results
     })
   } catch (error) {
-    console.error('[reprocess] Error:', error)
+    logger.error('[reprocess] Error:', error)
     return NextResponse.json(
       { error: 'Error al reprocesar documentos' },
       { status: 500 }

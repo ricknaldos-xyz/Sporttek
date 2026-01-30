@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
+import { uploadLimiter } from '@/lib/rate-limit'
 import { writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
@@ -28,6 +29,14 @@ export async function POST(request: NextRequest) {
     const session = await auth()
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { success } = await uploadLimiter.check(session.user.id)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Intenta de nuevo mas tarde.' },
+        { status: 429 }
+      )
     }
 
     const formData = await request.formData()
@@ -67,7 +76,7 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now()
     const random = Math.random().toString(36).substring(2, 8)
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'bin'
+    const ext = (file.name.split('.').pop()?.toLowerCase() || 'bin').replace(/[^a-z0-9]/g, '')
     const uniqueName = `${timestamp}-${random}.${ext}`
 
     let fileUrl: string
@@ -106,10 +115,9 @@ export async function POST(request: NextRequest) {
       type: isVideo ? 'VIDEO' : 'IMAGE',
     })
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    console.error('Upload error:', errorMsg, error)
+    console.error('Upload error:', error)
     return NextResponse.json(
-      { error: `Error al subir archivo: ${errorMsg.substring(0, 100)}` },
+      { error: 'Error al subir archivo' },
       { status: 500 }
     )
   }

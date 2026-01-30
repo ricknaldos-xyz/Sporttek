@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
+import { tournamentLimiter } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'
 import { Prisma, TournamentStatus } from '@prisma/client'
 import { z } from 'zod'
@@ -25,6 +26,14 @@ export async function POST(request: NextRequest) {
     const session = await auth()
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { success } = await tournamentLimiter.check(session.user.id)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Intenta de nuevo mas tarde.' },
+        { status: 429 }
+      )
     }
 
     const body = await request.json()

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getGeminiClient, SPORTS_SAFETY_SETTINGS } from '@/lib/gemini/client'
@@ -106,7 +107,7 @@ export async function POST(
       let ragContext = ''
       try {
         const retrievalQuery = `${analysis.technique.name} ${analysis.variant?.name || ''} técnica biomecánica errores comunes corrección ejercicios`
-        console.log('[process] RAG query:', retrievalQuery)
+        logger.debug('[process] RAG query:', retrievalQuery)
 
         const ragChunks = await retrieveRelevantChunks(retrievalQuery, {
           sportSlug: analysis.technique.sport.slug,
@@ -115,9 +116,9 @@ export async function POST(
           threshold: 0.4,  // Higher threshold for more relevant results
         })
 
-        console.log('[process] RAG chunks retrieved:', ragChunks.length)
+        logger.debug('[process] RAG chunks retrieved:', ragChunks.length)
         if (ragChunks.length > 0) {
-          console.log('[process] RAG top results:', ragChunks.slice(0, 3).map(c => ({
+          logger.debug('[process] RAG top results:', ragChunks.slice(0, 3).map(c => ({
             similarity: c.similarity.toFixed(3),
             category: c.category,
             source: c.documentFilename,
@@ -125,9 +126,9 @@ export async function POST(
         }
 
         ragContext = buildRagContext(ragChunks)
-        console.log('[process] RAG context length:', ragContext.length, 'chars')
+        logger.debug('[process] RAG context length:', ragContext.length, 'chars')
       } catch (error) {
-        console.warn('[process] RAG retrieval failed:', error)
+        logger.warn('[process] RAG retrieval failed:', error)
       }
 
       // Build prompt based on sport and technique
@@ -152,7 +153,7 @@ export async function POST(
 
       // Process each media item
       for (const item of analysis.mediaItems) {
-        console.log(`[process] Processing ${item.type}: ${item.filename}, url: ${item.url.substring(0, 80)}`)
+        logger.debug(`[process] Processing ${item.type}: ${item.filename}, url: ${item.url.substring(0, 80)}`)
 
         try {
           let buffer: Buffer
@@ -163,13 +164,13 @@ export async function POST(
           } else {
             const response = await fetch(item.url)
             if (!response.ok) {
-              console.error(`[process] Failed to download file: ${item.url}, status: ${response.status}`)
+              logger.error(`[process] Failed to download file: ${item.url}, status: ${response.status}`)
               continue
             }
             buffer = Buffer.from(await response.arrayBuffer())
           }
 
-          console.log(`[process] File loaded, size: ${buffer.length} bytes`)
+          logger.debug(`[process] File loaded, size: ${buffer.length} bytes`)
 
           // Determine mime type
           let mimeType: string
@@ -192,7 +193,7 @@ export async function POST(
           const base64 = buffer.toString('base64')
           contentParts.push({ inlineData: { mimeType, data: base64 } })
         } catch (fileError) {
-          console.error(`[process] Error loading file: ${item.filename}`, fileError)
+          logger.error(`[process] Error loading file: ${item.filename}`, fileError)
           continue
         }
       }
@@ -204,7 +205,7 @@ export async function POST(
       // Add the text prompt
       contentParts.push({ text: prompt })
 
-      console.log('[process] Sending to Gemini for analysis...')
+      logger.debug('[process] Sending to Gemini for analysis...')
 
       // Call Gemini API with automatic model fallback
       const { result, modelUsed } = await generateWithFallback(
@@ -212,19 +213,19 @@ export async function POST(
         contentParts,
         SPORTS_SAFETY_SETTINGS
       )
-      console.log('[process] Using model:', modelUsed)
+      logger.debug('[process] Using model:', modelUsed)
 
       // Check if response was blocked by safety filters
       const blockReason = result.response.promptFeedback?.blockReason
       if (blockReason) {
-        console.error('Gemini blocked analysis response:', blockReason)
+        logger.error('Gemini blocked analysis response:', blockReason)
         throw new Error(`Video bloqueado por filtros de seguridad: ${blockReason}`)
       }
 
       const content = result.response.text()
 
       if (!content || content.trim().length === 0) {
-        console.error('Gemini returned empty analysis response')
+        logger.error('Gemini returned empty analysis response')
         throw new Error('Respuesta vacia de Gemini')
       }
 
@@ -240,7 +241,7 @@ export async function POST(
       try {
         analysisResult = JSON.parse(jsonContent)
       } catch {
-        console.error('Failed to parse Gemini analysis response:', content.substring(0, 500))
+        logger.error('Failed to parse Gemini analysis response:', content.substring(0, 500))
         throw new Error('Formato de respuesta invalido de Gemini')
       }
 
@@ -315,18 +316,18 @@ export async function POST(
           updatedAnalysis.overallScore || 0,
           updatedAnalysis.id
         ).catch((error) => {
-          console.error('Failed to send analysis complete email:', error)
+          logger.error('Failed to send analysis complete email:', error)
         })
       }
 
       // Recalculate skill score (non-blocking)
       recalculateSkillScore(session.user.id).catch((error) => {
-        console.error('Failed to recalculate skill score:', error)
+        logger.error('Failed to recalculate skill score:', error)
       })
 
       // Update goal progress (non-blocking)
       updateGoalProgress(session.user.id, id).catch((error) => {
-        console.error('Failed to update goal progress:', error)
+        logger.error('Failed to update goal progress:', error)
       })
 
       // Log activity for streaks (non-blocking)
@@ -362,13 +363,13 @@ export async function POST(
           },
         })
       }).catch((error) => {
-        console.error('Failed to log activity:', error)
+        logger.error('Failed to log activity:', error)
       })
 
       return NextResponse.json(updatedAnalysis)
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
-      console.error('Processing error:', errorMsg)
+      logger.error('Processing error:', errorMsg)
 
       // Update status to failed
       await prisma.analysis.update({
@@ -396,12 +397,12 @@ export async function POST(
       }
 
       return NextResponse.json(
-        { error: `Error al procesar: ${errorMsg.substring(0, 100)}` },
+        { error: 'Error al procesar analisis' },
         { status: 500 }
       )
     }
   } catch (error) {
-    console.error('Process analysis error:', error)
+    logger.error('Process analysis error:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

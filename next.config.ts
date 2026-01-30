@@ -35,6 +35,20 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' blob: data: *.public.blob.vercel-storage.com *.vercel-storage.com lh3.googleusercontent.com",
+              "font-src 'self'",
+              "connect-src 'self' *.stripe.com *.upstash.io vitals.vercel-insights.com",
+              "frame-src 'self' *.stripe.com",
+              "object-src 'none'",
+              "base-uri 'self'",
+            ].join('; '),
+          },
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },

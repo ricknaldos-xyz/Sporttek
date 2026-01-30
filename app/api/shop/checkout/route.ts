@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
+import { checkoutLimiter } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { createShopCheckoutSession } from '@/lib/shop-stripe'
@@ -29,6 +30,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
+      )
+    }
+
+    const { success } = await checkoutLimiter.check(session.user.id)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Intenta de nuevo mas tarde.' },
+        { status: 429 }
       )
     }
 
