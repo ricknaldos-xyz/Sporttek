@@ -222,7 +222,7 @@ No somos una app de tracking ni una red social deportiva. Somos el **coach virtu
 | Streaks | STREAK_7, STREAK_30, STREAK_100 |
 | Competencia | FIRST_CHALLENGE, FIRST_MATCH, TEN_MATCHES, FIFTY_MATCHES |
 | Torneos | FIRST_TOURNAMENT, TOURNAMENT_WINNER, TOURNAMENT_FINALIST |
-| Tiers | TIER_BRONCE, TIER_PLATA, TIER_ORO, TIER_PLATINO, TIER_DIAMANTE |
+| Categorias | TIER_QUINTA, TIER_CUARTA, TIER_TERCERA, TIER_SEGUNDA, TIER_PRIMERA |
 | Rankings | TOP_100_COUNTRY, TOP_10_COUNTRY, NUMBER_ONE_COUNTRY |
 | Social | FIRST_FOLLOWER, CLUB_FOUNDER, COACH_CERTIFIED |
 
@@ -248,7 +248,7 @@ No somos una app de tracking ni una red social deportiva. Somos el **coach virtu
 
 **Skill Tiers:**
 ```
-UNRANKED → BRONCE → PLATA → ORO → PLATINO → DIAMANTE
+UNRANKED → 5ta B → 5ta A → 4ta B → 4ta A → 3ra B → 3ra A → 2da B → 2da A → 1ra B → 1ra A
 ```
 
 **Cálculo de Score:**
@@ -377,7 +377,7 @@ UNRANKED → BRONCE → PLATA → ORO → PLATINO → DIAMANTE
 |------|-------------|
 | TECHNIQUE | Mejorar técnica específica |
 | SCORE_TARGET | Alcanzar un score objetivo (0-10) |
-| TIER_TARGET | Alcanzar un tier específico (BRONCE→DIAMANTE) |
+| TIER_TARGET | Alcanzar una categoria especifica (5ta B→1ra A) |
 
 - Tracking de baseline → current → target
 - Porcentaje de progreso calculado automáticamente
@@ -859,7 +859,7 @@ Entregado → Dejar review (opcional)
 | MediaType | VIDEO, IMAGE |
 | TokenType | PASSWORD_RESET, EMAIL_VERIFICATION |
 | BadgeType | 24 valores (ver sección Gamificación) |
-| SkillTier | UNRANKED, BRONCE, PLATA, ORO, PLATINO, DIAMANTE |
+| SkillTier | UNRANKED, QUINTA_B, QUINTA_A, CUARTA_B, CUARTA_A, TERCERA_B, TERCERA_A, SEGUNDA_B, SEGUNDA_A, PRIMERA_B, PRIMERA_A |
 | ProfileVisibility | PUBLIC, FRIENDS_ONLY, PRIVATE |
 | RankingPeriod | WEEKLY, MONTHLY, ALL_TIME |
 | RankingCategory | GLOBAL, COUNTRY, SKILL_TIER, AGE_GROUP |
