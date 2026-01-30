@@ -33,7 +33,7 @@ interface OrderDetail {
   shippingDistrict: string
   shippingCity: string
   shippingNotes: string | null
-  stripePaymentIntentId: string | null
+  culqiChargeId: string | null
   paidAt: string | null
   shippedAt: string | null
   deliveredAt: string | null
@@ -232,8 +232,8 @@ export default function AdminPedidoDetailPage() {
               <CreditCard className="h-5 w-5 text-primary" />
               <h3 className="font-semibold">Pago</h3>
             </div>
-            {order.stripePaymentIntentId ? (
-              <p className="text-sm font-mono break-all">{order.stripePaymentIntentId}</p>
+            {order.culqiChargeId ? (
+              <p className="text-sm font-mono break-all">{order.culqiChargeId}</p>
             ) : (
               <p className="text-sm text-muted-foreground">Sin informacion de pago</p>
             )}

@@ -24,9 +24,9 @@ async function getUserSettings(userId: string) {
       emailNotifications: true,
       reminderTime: true,
       subscription: true,
-      stripeCustomerId: true,
-      stripeSubscriptionId: true,
-      stripeCurrentPeriodEnd: true,
+      culqiCustomerId: true,
+      culqiSubscriptionId: true,
+      culqiCurrentPeriodEnd: true,
     },
   })
 }
@@ -115,10 +115,10 @@ export default async function SettingsPage() {
             </div>
             <GlassBadge variant="primary">{user.subscription}</GlassBadge>
           </div>
-          {user.stripeCurrentPeriodEnd && (
+          {user.culqiCurrentPeriodEnd && (
             <p className="text-sm text-muted-foreground">
               Tu suscripcion se renueva el{' '}
-              {new Date(user.stripeCurrentPeriodEnd).toLocaleDateString('es-ES', {
+              {new Date(user.culqiCurrentPeriodEnd).toLocaleDateString('es-ES', {
                 day: 'numeric',
                 month: 'long',
                 year: 'numeric',
@@ -132,7 +132,7 @@ export default async function SettingsPage() {
               </GlassButton>
             ) : (
               <GlassButton variant="outline" asChild>
-                <Link href="/api/stripe/portal">Gestionar Suscripcion</Link>
+                <Link href="/profile/settings/subscription">Gestionar Suscripcion</Link>
               </GlassButton>
             )}
           </div>

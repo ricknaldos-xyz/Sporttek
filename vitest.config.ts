@@ -10,6 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
+      'culqi-node': path.resolve(__dirname, 'node_modules/culqi-node/index.js'),
     },
   },
 })

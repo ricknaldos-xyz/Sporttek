@@ -293,10 +293,10 @@ model User {
   // Onboarding
   onboardingCompleted Boolean @default(false)
 
-  // Stripe fields
-  stripeCustomerId       String?   @unique
-  stripeSubscriptionId   String?
-  stripeCurrentPeriodEnd DateTime?
+  // Culqi fields
+  culqiCustomerId       String?   @unique
+  culqiSubscriptionId   String?
+  culqiCurrentPeriodEnd DateTime?
 
   // Email notification preferences
   emailNotifications Boolean @default(true)
@@ -1271,7 +1271,7 @@ model CoachProfile {
   reviews       CoachReview[]
   assignedPlans CoachAssignedPlan[]
 
-  stripeConnectId String?
+  culqiConnectId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1511,9 +1511,8 @@ model ShopOrder {
   shippingCity     String  @default("Lima")
   shippingNotes    String?
 
-  // Stripe
-  stripePaymentIntentId   String?
-  stripeCheckoutSessionId String?
+  // Culqi
+  culqiChargeId   String?
 
   // Marketplace future
   vendorId String?
@@ -1622,9 +1621,8 @@ model StringingOrder {
   scheduledPickupDate     DateTime?
   estimatedCompletionDate DateTime?
 
-  // Stripe
-  stripePaymentIntentId   String?
-  stripeCheckoutSessionId String?
+  // Culqi
+  culqiChargeId   String?
 
   // Tracking notes (admin sets these)
   internalNotes String?
@@ -1847,7 +1845,7 @@ model SportAddon {
   sport   Sport  @relation(fields: [sportId], references: [id])
 
   active               Boolean @default(true)
-  stripeSubscriptionId String?
+  culqiSubscriptionId String?
 
   createdAt DateTime @default(now())
 

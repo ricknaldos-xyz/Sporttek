@@ -9,6 +9,7 @@ import { CheckoutForm } from '@/components/shop/CheckoutForm'
 import { CartSummary } from '@/components/shop/CartSummary'
 import { CreditCard, ArrowLeft, Loader2, ShoppingBag } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
+import CulqiCheckout from '@/components/CulqiCheckout'
 import { toast } from 'sonner'
 
 interface CartItem {
@@ -26,6 +27,14 @@ export default function CheckoutPage() {
   const [items, setItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [shippingData, setShippingData] = useState<{
+    shippingName: string
+    shippingPhone: string
+    shippingAddress: string
+    shippingDistrict: string
+    shippingCity: string
+    shippingNotes?: string
+  } | null>(null)
   const [subtotalCents, setSubtotalCents] = useState(0)
   const [shippingCents, setShippingCents] = useState(0)
   const [totalCents, setTotalCents] = useState(0)
@@ -56,7 +65,7 @@ export default function CheckoutPage() {
     }
   }
 
-  async function handleCheckout(data: {
+  function handleShippingSubmit(data: {
     shippingName: string
     shippingPhone: string
     shippingAddress: string
@@ -64,28 +73,7 @@ export default function CheckoutPage() {
     shippingCity: string
     shippingNotes?: string
   }) {
-    setSubmitting(true)
-    try {
-      const res = await fetch('/api/shop/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-
-      if (res.ok) {
-        const result = await res.json()
-        if (result.checkoutUrl) {
-          window.location.href = result.checkoutUrl
-        }
-      } else {
-        const result = await res.json()
-        toast.error(result.error || 'Error al procesar el pago')
-      }
-    } catch {
-      toast.error('Error al procesar el pago')
-    } finally {
-      setSubmitting(false)
-    }
+    setShippingData(data)
   }
 
   if (loading) {
@@ -117,7 +105,41 @@ export default function CheckoutPage() {
         <div className="lg:col-span-2">
           <GlassCard intensity="light" padding="lg">
             <h2 className="text-lg font-semibold mb-4">Datos de envio</h2>
-            <CheckoutForm onSubmit={handleCheckout} loading={submitting} />
+            <CheckoutForm onSubmit={handleShippingSubmit} loading={submitting} />
+            {shippingData && (
+              <div className="mt-4">
+                <CulqiCheckout
+                  amount={totalCents}
+                  title="Compra SportTech"
+                  description={`Pedido - ${items.length} producto(s)`}
+                  onToken={async (tokenId) => {
+                    setSubmitting(true)
+                    try {
+                      const res = await fetch('/api/shop/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...shippingData, tokenId }),
+                      })
+                      if (res.ok) {
+                        const result = await res.json()
+                        router.push(`/tienda/checkout/success?orderId=${result.orderId}`)
+                      } else {
+                        const result = await res.json()
+                        toast.error(result.error || 'Error al procesar el pago')
+                      }
+                    } catch {
+                      toast.error('Error al procesar el pago')
+                    } finally {
+                      setSubmitting(false)
+                    }
+                  }}
+                  onError={(msg) => toast.error(msg)}
+                  loading={submitting}
+                  buttonText="Confirmar y pagar"
+                  buttonVariant="solid"
+                />
+              </div>
+            )}
           </GlassCard>
         </div>
 

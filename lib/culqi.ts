@@ -1,27 +1,17 @@
-import Stripe from 'stripe'
+import Culqi from 'culqi-node'
 
-let stripeClient: Stripe | null = null
+let culqiClient: InstanceType<typeof Culqi> | null = null
 
-export function getStripeClient(): Stripe {
-  if (!stripeClient) {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('STRIPE_SECRET_KEY is not configured')
+export function getCulqiClient() {
+  if (!culqiClient) {
+    if (!process.env.CULQI_SECRET_KEY) {
+      throw new Error('CULQI_SECRET_KEY is not configured')
     }
-    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-12-15.clover',
-      typescript: true,
+    culqiClient = new Culqi({
+      privateKey: process.env.CULQI_SECRET_KEY,
     })
   }
-  return stripeClient
-}
-
-// For backwards compatibility
-export const stripe = {
-  get customers() { return getStripeClient().customers },
-  get subscriptions() { return getStripeClient().subscriptions },
-  get checkout() { return getStripeClient().checkout },
-  get billingPortal() { return getStripeClient().billingPortal },
-  get webhooks() { return getStripeClient().webhooks },
+  return culqiClient
 }
 
 export const PLANS = {
@@ -29,7 +19,7 @@ export const PLANS = {
     name: 'Free',
     description: 'Para comenzar',
     price: 0,
-    priceId: null,
+    culqiPlanId: null,
     features: [
       '3 analisis por mes',
       '1 plan de entrenamiento activo',
@@ -44,8 +34,8 @@ export const PLANS = {
   PRO: {
     name: 'Pro',
     description: 'Para deportistas serios',
-    price: 19.99,
-    priceId: process.env.STRIPE_PRO_PRICE_ID,
+    price: 29.90,
+    culqiPlanId: process.env.CULQI_PRO_PLAN_ID || null,
     features: [
       'Analisis ilimitados',
       'Planes de entrenamiento ilimitados',
@@ -54,7 +44,7 @@ export const PLANS = {
       'Soporte prioritario',
     ],
     limits: {
-      analysesPerMonth: -1, // unlimited
+      analysesPerMonth: -1,
       activePlans: -1,
     },
   },
@@ -62,7 +52,7 @@ export const PLANS = {
     name: 'Elite',
     description: 'Para profesionales',
     price: 49.99,
-    priceId: process.env.STRIPE_ELITE_PRICE_ID,
+    culqiPlanId: process.env.CULQI_ELITE_PLAN_ID || null,
     features: [
       'Todo en Pro',
       'Analisis en video HD',

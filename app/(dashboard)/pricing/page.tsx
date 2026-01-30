@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { Check, Loader2 } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassCard } from '@/components/ui/glass-card'
+import CulqiCheckout from '@/components/CulqiCheckout'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -54,32 +55,28 @@ const plans = [
 export default function PricingPage() {
   const { data: session } = useSession()
   const [loading, setLoading] = useState<string | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
 
   const currentPlan = (session?.user as { subscription?: string })?.subscription || 'FREE'
 
-  async function handleSubscribe(planId: string) {
-    if (planId === 'FREE' || planId === currentPlan) return
-
-    setLoading(planId)
-
+  async function handleToken(tokenId: string) {
+    setLoading(selectedPlan)
     try {
-      const response = await fetch('/api/stripe/checkout', {
+      const response = await fetch('/api/culqi/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planId }),
+        body: JSON.stringify({ plan: selectedPlan, tokenId }),
       })
-
       const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al procesar pago')
-      }
-
-      // Redirect to Stripe Checkout
-      window.location.href = data.url
+      if (!response.ok) throw new Error(data.error)
+      toast.success('Suscripcion activada correctamente')
+      // Refresh session
+      window.location.href = '/dashboard?checkout=success'
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al procesar pago')
+    } finally {
       setLoading(null)
+      setSelectedPlan(null)
     }
   }
 
@@ -153,7 +150,7 @@ export default function PricingPage() {
               </ul>
 
               <GlassButton
-                onClick={() => handleSubscribe(plan.id)}
+                onClick={() => setSelectedPlan(plan.id)}
                 disabled={isCurrentPlan || loading !== null || plan.id === 'FREE'}
                 variant={plan.popular ? 'solid' : 'outline'}
                 className="w-full"
@@ -173,6 +170,20 @@ export default function PricingPage() {
                   'Seleccionar'
                 )}
               </GlassButton>
+              {selectedPlan === plan.id && (
+                <div className="mt-4">
+                  <CulqiCheckout
+                    amount={Math.round(plan.price * 100)}
+                    title={`Plan ${plan.name}`}
+                    description={`Suscripcion mensual Plan ${plan.name}`}
+                    onToken={handleToken}
+                    onError={(msg) => toast.error(msg)}
+                    loading={loading === plan.id}
+                    buttonText="Pagar suscripcion"
+                    buttonVariant="solid"
+                  />
+                </div>
+              )}
             </GlassCard>
           )
         })}

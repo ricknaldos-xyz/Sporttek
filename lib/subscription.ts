@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { PLANS, PlanType } from '@/lib/stripe'
+import { PLANS, PlanType } from '@/lib/culqi'
 
 /**
  * Get the user's subscription plan limits.

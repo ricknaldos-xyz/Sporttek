@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { createStringingCheckoutSession } from '@/lib/shop-stripe'
+import { getCulqiClient } from '@/lib/culqi'
 
 const checkoutSchema = z.object({
   orderId: z.string(),
+  tokenId: z.string(),
 })
 
-// POST - Create Stripe checkout session for stringing order
+// POST - Process payment for stringing order
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { orderId } = validated.data
+    const { orderId, tokenId } = validated.data
 
     const order = await prisma.stringingOrder.findUnique({
       where: { id: orderId },
@@ -47,21 +48,39 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL
-    if (!baseUrl) {
-      throw new Error('NEXTAUTH_URL or NEXT_PUBLIC_APP_URL must be configured')
-    }
-    const checkoutSession = await createStringingCheckoutSession({
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      description: `${order.racketBrand} ${order.racketModel} - ${order.stringName}`,
-      totalCents: order.totalCents,
-      successUrl: `${baseUrl}/encordado/pedidos/${order.id}`,
-      cancelUrl: `${baseUrl}/encordado/pedidos`,
-      customerEmail: session.user.email!,
-    })
+    // Create Culqi charge
+    try {
+      const culqi = getCulqiClient()
+      const charge = await culqi.charges.createCharge({
+        amount: String(order.totalCents),
+        currency_code: 'PEN',
+        email: session.user.email!,
+        source_id: tokenId,
+        metadata: {
+          type: 'stringing_order',
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+        },
+      })
 
-    return NextResponse.json({ checkoutUrl: checkoutSession.url })
+      await prisma.stringingOrder.update({
+        where: { id: order.id },
+        data: {
+          status: 'CONFIRMED',
+          culqiChargeId: charge.id,
+          paidAt: new Date(),
+          confirmedAt: new Date(),
+        },
+      })
+
+      return NextResponse.json({ success: true, orderId: order.id })
+    } catch (chargeError) {
+      console.error('Culqi charge failed:', chargeError)
+      return NextResponse.json(
+        { error: 'Error al procesar el pago. Intenta de nuevo.' },
+        { status: 400 }
+      )
+    }
   } catch (error) {
     console.error('Stringing checkout error:', error)
     return NextResponse.json(

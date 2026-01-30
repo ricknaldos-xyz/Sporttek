@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { checkoutLimiter } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { createShopCheckoutSession } from '@/lib/shop-stripe'
+import { getCulqiClient } from '@/lib/culqi'
 import { Prisma } from '@prisma/client'
 
 const checkoutSchema = z.object({
@@ -13,6 +13,7 @@ const checkoutSchema = z.object({
   shippingDistrict: z.string().min(2, 'Distrito requerido').max(50),
   shippingCity: z.string().max(50).default('Lima'),
   shippingNotes: z.string().max(500).optional(),
+  tokenId: z.string(),
 })
 
 function generateOrderNumber(): string {
@@ -22,7 +23,7 @@ function generateOrderNumber(): string {
   return `ORD-${dateStr}-${random}`
 }
 
-// POST - Create checkout session
+// POST - Create checkout and process payment
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
@@ -50,6 +51,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    const { tokenId } = parsed.data
 
     // Get cart with items
     const cart = await prisma.cart.findUnique({
@@ -171,25 +174,55 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create Stripe checkout session
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL
-    if (!baseUrl) {
-      throw new Error('NEXTAUTH_URL or NEXT_PUBLIC_APP_URL must be configured')
-    }
-    const checkoutSession = await createShopCheckoutSession({
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      lineItems: order.items.map((item) => ({
-        name: item.productName,
-        quantity: item.quantity,
-        priceCents: item.priceCents,
-      })),
-      successUrl: `${baseUrl}/tienda/checkout/success?orderId=${order.id}`,
-      cancelUrl: `${baseUrl}/tienda/carrito`,
-      customerEmail: session.user.email!,
-    })
+    // Create Culqi charge
+    try {
+      const culqi = getCulqiClient()
+      const charge = await culqi.charges.createCharge({
+        amount: String(order.totalCents),
+        currency_code: 'PEN',
+        email: session.user.email!,
+        source_id: tokenId,
+        metadata: {
+          type: 'shop_order',
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+        },
+      })
 
-    return NextResponse.json({ checkoutUrl: checkoutSession.url })
+      await prisma.shopOrder.update({
+        where: { id: order.id },
+        data: {
+          status: 'PAID',
+          culqiChargeId: charge.id,
+          paidAt: new Date(),
+        },
+      })
+
+      // Clear cart
+      const cart2 = await prisma.cart.findUnique({ where: { userId: session.user.id } })
+      if (cart2) {
+        await prisma.cartItem.deleteMany({ where: { cartId: cart2.id } })
+      }
+
+      return NextResponse.json({ success: true, orderId: order.id })
+    } catch (chargeError) {
+      console.error('Culqi charge failed:', chargeError)
+
+      // Revert stock and delete order
+      for (const item of order.items) {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        })
+      }
+      await prisma.shopOrderItem.deleteMany({ where: { orderId: order.id } })
+      await prisma.shopOrder.delete({ where: { id: order.id } })
+
+      return NextResponse.json(
+        { error: 'Error al procesar el pago. Intenta de nuevo.' },
+        { status: 400 }
+      )
+    }
   } catch (error) {
     console.error('Checkout error:', error)
     return NextResponse.json(
