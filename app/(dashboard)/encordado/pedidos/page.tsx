@@ -18,11 +18,13 @@ interface StringingOrder {
   stringName: string
   totalCents: number
   createdAt: string
+  deliveryMode: string
 }
 
 export default function PedidosEncordadoPage() {
   const [orders, setOrders] = useState<StringingOrder[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'all'>('active')
 
   useEffect(() => {
     async function fetchOrders() {
@@ -41,6 +43,18 @@ export default function PedidosEncordadoPage() {
     fetchOrders()
   }, [])
 
+  const activeOrders = orders.filter(
+    (o) => !['DELIVERED', 'STRINGING_CANCELLED'].includes(o.status)
+  )
+  const completedOrders = orders.filter((o) => o.status === 'DELIVERED')
+
+  const filteredOrders =
+    activeTab === 'active'
+      ? activeOrders
+      : activeTab === 'completed'
+        ? completedOrders
+        : orders
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
@@ -48,11 +62,35 @@ export default function PedidosEncordadoPage() {
         <h1 className="text-2xl font-bold">Mis Pedidos de Encordado</h1>
       </div>
 
+      <div className="flex gap-2 mb-4">
+        <GlassButton
+          variant={activeTab === 'active' ? 'solid' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('active')}
+        >
+          Activos ({activeOrders.length})
+        </GlassButton>
+        <GlassButton
+          variant={activeTab === 'completed' ? 'solid' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('completed')}
+        >
+          Completados ({completedOrders.length})
+        </GlassButton>
+        <GlassButton
+          variant={activeTab === 'all' ? 'solid' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('all')}
+        >
+          Todos ({orders.length})
+        </GlassButton>
+      </div>
+
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : orders.length === 0 ? (
+      ) : filteredOrders.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
           <div className="text-center py-8">
             <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
@@ -69,7 +107,7 @@ export default function PedidosEncordadoPage() {
         </GlassCard>
       ) : (
         <div className="space-y-3">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <StringingOrderCard key={order.id} order={order} />
           ))}
         </div>

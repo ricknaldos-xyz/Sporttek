@@ -1,5 +1,7 @@
 'use client'
 
+import { PopularStrings } from '@/components/stringing/PopularStrings'
+
 interface StringSelectorProps {
   stringName: string
   onStringNameChange: (value: string) => void
@@ -13,6 +15,8 @@ export function StringSelector({
 }: StringSelectorProps) {
   return (
     <div>
+      <PopularStrings selected={stringName} onSelect={onStringNameChange} />
+      <div className="mb-3" />
       <label className="block text-sm font-medium mb-1">
         Nombre de la Cuerda *
       </label>

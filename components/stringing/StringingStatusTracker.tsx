@@ -11,6 +11,7 @@ interface StringingStatusTrackerProps {
     completedAt: string | null
     deliveredAt: string | null
   }
+  layout?: 'vertical' | 'auto'
 }
 
 interface TimelineStep {
@@ -47,14 +48,25 @@ function getStepStatus(
   return 'future'
 }
 
-export function StringingStatusTracker({
-  status,
-  deliveryMode,
-  timestamps,
-}: StringingStatusTrackerProps) {
-  const steps = deliveryMode === 'HOME_PICKUP_DELIVERY' ? HOME_STEPS : WORKSHOP_STEPS
-  const activeIndex = steps.findIndex((step) => step.key === status)
+function formatTimestamp(timestamp: string) {
+  return new Date(timestamp).toLocaleDateString('es-PE', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 
+function VerticalTracker({
+  steps,
+  activeIndex,
+  timestamps,
+}: {
+  steps: TimelineStep[]
+  activeIndex: number
+  timestamps: StringingStatusTrackerProps['timestamps']
+}) {
   return (
     <div className="space-y-0">
       {steps.map((step, index) => {
@@ -100,13 +112,7 @@ export function StringingStatusTracker({
               </p>
               {timestamp && (
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {new Date(timestamp).toLocaleDateString('es-PE', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  {formatTimestamp(timestamp)}
                 </p>
               )}
             </div>
@@ -114,5 +120,94 @@ export function StringingStatusTracker({
         )
       })}
     </div>
+  )
+}
+
+function HorizontalTracker({
+  steps,
+  activeIndex,
+  timestamps,
+}: {
+  steps: TimelineStep[]
+  activeIndex: number
+  timestamps: StringingStatusTrackerProps['timestamps']
+}) {
+  return (
+    <div className="flex items-start justify-between">
+      {steps.map((step, index) => {
+        const stepStatus = getStepStatus(index, activeIndex === -1 ? 0 : activeIndex)
+        const timestamp = step.timestampKey ? timestamps[step.timestampKey] : null
+
+        return (
+          <div key={step.key} className="flex items-center flex-1 last:flex-none">
+            {/* Step circle + label */}
+            <div className="flex flex-col items-center">
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                  stepStatus === 'completed'
+                    ? 'bg-green-500 text-white'
+                    : stepStatus === 'active'
+                    ? 'bg-primary text-primary-foreground animate-pulse'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {stepStatus === 'completed' ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <span className="text-xs font-medium">{index + 1}</span>
+                )}
+              </div>
+              <p
+                className={`text-xs text-center max-w-[80px] mt-1.5 font-medium ${
+                  stepStatus === 'future' ? 'text-muted-foreground' : 'text-foreground'
+                }`}
+              >
+                {step.label}
+              </p>
+              {timestamp && (
+                <p className="text-xs text-muted-foreground text-center max-w-[80px] mt-0.5">
+                  {formatTimestamp(timestamp)}
+                </p>
+              )}
+            </div>
+
+            {/* Connecting line */}
+            {index < steps.length - 1 && (
+              <div
+                className={`flex-1 h-0.5 mt-3.5 -mx-1 ${
+                  stepStatus === 'completed' ? 'bg-green-500' : 'bg-muted'
+                }`}
+              />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+export function StringingStatusTracker({
+  status,
+  deliveryMode,
+  timestamps,
+  layout = 'auto',
+}: StringingStatusTrackerProps) {
+  const steps = deliveryMode === 'HOME_PICKUP_DELIVERY' ? HOME_STEPS : WORKSHOP_STEPS
+  const activeIndex = steps.findIndex((step) => step.key === status)
+
+  if (layout === 'vertical') {
+    return <VerticalTracker steps={steps} activeIndex={activeIndex} timestamps={timestamps} />
+  }
+
+  // layout === 'auto': show vertical on mobile, horizontal on md+
+  return (
+    <>
+      <div className="md:hidden">
+        <VerticalTracker steps={steps} activeIndex={activeIndex} timestamps={timestamps} />
+      </div>
+      <div className="hidden md:block">
+        <HorizontalTracker steps={steps} activeIndex={activeIndex} timestamps={timestamps} />
+      </div>
+    </>
   )
 }

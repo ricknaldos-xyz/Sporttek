@@ -5,8 +5,11 @@ import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
-import { Clock, Zap, Truck, MapPin, Shield, Loader2 } from 'lucide-react'
+import { Truck, MapPin, Shield, Loader2, Package } from 'lucide-react'
 import { logger } from '@/lib/logger'
+import { TrustStats } from '@/components/stringing/TrustStats'
+import { ServiceComparison } from '@/components/stringing/ServiceComparison'
+import { FAQ } from '@/components/stringing/FAQ'
 
 interface CoverageData {
   districts: string[]
@@ -35,7 +38,10 @@ export default function EncordadoPage() {
   }, [])
 
   return (
-    <div className="max-w-5xl mx-auto space-y-10">
+    <div className="max-w-5xl mx-auto space-y-10 pb-24 md:pb-0">
+      {/* Trust Stats */}
+      <TrustStats />
+
       {/* Hero */}
       <div className="text-center space-y-4">
         <h1 className="text-3xl md:text-4xl font-bold">
@@ -47,41 +53,18 @@ export default function EncordadoPage() {
         </p>
       </div>
 
-      {/* Service Types */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Tipos de Servicio</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <GlassCard intensity="medium" padding="lg">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-blue-500/10">
-                <Clock className="h-6 w-6 text-blue-500" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold">Estandar</h3>
-                <p className="text-muted-foreground text-sm mt-1">
-                  Entrega en 24-48 horas habiles
-                </p>
-                <p className="text-2xl font-bold mt-3">S/ 25.00</p>
-              </div>
-            </div>
-          </GlassCard>
-
-          <GlassCard intensity="medium" padding="lg">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-amber-500/10">
-                <Zap className="h-6 w-6 text-amber-500" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold">Express</h3>
-                <p className="text-muted-foreground text-sm mt-1">
-                  Entrega el mismo dia
-                </p>
-                <p className="text-2xl font-bold mt-3">S/ 45.00</p>
-              </div>
-            </div>
-          </GlassCard>
-        </div>
+      {/* Quick link to orders */}
+      <div className="flex justify-center">
+        <Link href="/encordado/pedidos">
+          <GlassButton variant="ghost" size="sm">
+            <Package className="h-4 w-4" />
+            Ver mis pedidos
+          </GlassButton>
+        </Link>
       </div>
+
+      {/* Service Comparison */}
+      <ServiceComparison />
 
       {/* Delivery Options */}
       <div>
@@ -162,10 +145,22 @@ export default function EncordadoPage() {
         )}
       </GlassCard>
 
+      {/* FAQ */}
+      <FAQ />
+
       {/* CTA */}
       <div className="text-center">
         <Link href="/encordado/solicitar">
           <GlassButton variant="solid" size="xl">
+            Solicitar Encordado
+          </GlassButton>
+        </Link>
+      </div>
+
+      {/* Sticky mobile CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/80 backdrop-blur-xl border-t border-glass md:hidden">
+        <Link href="/encordado/solicitar" className="block">
+          <GlassButton variant="solid" size="lg" className="w-full">
             Solicitar Encordado
           </GlassButton>
         </Link>

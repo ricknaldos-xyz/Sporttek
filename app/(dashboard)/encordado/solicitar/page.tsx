@@ -14,7 +14,8 @@ import { CoverageChecker } from '@/components/stringing/CoverageChecker'
 import { SchedulePicker } from '@/components/stringing/SchedulePicker'
 import { formatPrice } from '@/lib/shop'
 import { toast } from 'sonner'
-import { ArrowLeft, ArrowRight, Loader2, CreditCard } from 'lucide-react'
+import { FloatingPriceBar } from '@/components/stringing/FloatingPriceBar'
+import { ArrowLeft, ArrowRight, Loader2, CreditCard, Check } from 'lucide-react'
 
 type ServiceType = 'STANDARD' | 'EXPRESS'
 type DeliveryMode = 'HOME_PICKUP_DELIVERY' | 'WORKSHOP_DROP_PICKUP'
@@ -153,7 +154,7 @@ export default function SolicitarEncordadoPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6 pb-20">
       <h1 className="text-2xl font-bold">Solicitar Encordado</h1>
 
       {/* Step Indicator */}
@@ -170,9 +171,9 @@ export default function SolicitarEncordadoPage() {
                     : 'bg-muted text-muted-foreground'
                 }`}
               >
-                {i + 1}
+                {i < step ? <Check className="h-4 w-4" /> : i + 1}
               </div>
-              <span className="text-xs mt-1 text-muted-foreground hidden sm:block">{label}</span>
+              <span className="text-xs mt-1 text-muted-foreground">{label}</span>
             </div>
             {i < STEP_LABELS.length - 1 && (
               <div className={`h-0.5 flex-1 ${i < step ? 'bg-primary' : 'bg-muted'}`} />
@@ -400,6 +401,8 @@ export default function SolicitarEncordadoPage() {
           </GlassButton>
         )}
       </div>
+
+      <FloatingPriceBar serviceType={serviceType} deliveryMode={deliveryMode} visible={step < 4} />
     </div>
   )
 }

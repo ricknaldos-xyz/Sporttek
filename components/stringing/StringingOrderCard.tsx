@@ -3,8 +3,10 @@
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
+import { GlassButton } from '@/components/ui/glass-button'
+import { OrderProgressBar } from '@/components/stringing/OrderProgressBar'
 import { formatPrice } from '@/lib/shop'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, RefreshCw } from 'lucide-react'
 
 interface StringingOrderCardProps {
   order: {
@@ -17,6 +19,7 @@ interface StringingOrderCardProps {
     stringName: string
     totalCents: number
     createdAt: string
+    deliveryMode: string
   }
 }
 
@@ -48,6 +51,7 @@ const STATUS_VARIANT: Record<string, 'default' | 'primary' | 'success' | 'warnin
 
 export function StringingOrderCard({ order }: StringingOrderCardProps) {
   return (
+    <>
     <Link href={`/encordado/pedidos/${order.id}`}>
       <GlassCard intensity="light" padding="md" hover="lift">
         <div className="flex items-center gap-4">
@@ -84,7 +88,21 @@ export function StringingOrderCard({ order }: StringingOrderCardProps) {
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
         </div>
+        <OrderProgressBar status={order.status} />
       </GlassCard>
     </Link>
+    {order.status === 'DELIVERED' && (
+      <div className="mt-1" onClick={(e) => e.stopPropagation()}>
+        <Link
+          href={`/encordado/solicitar?brand=${encodeURIComponent(order.racketBrand)}&model=${encodeURIComponent(order.racketModel)}&string=${encodeURIComponent(order.stringName)}`}
+        >
+          <GlassButton variant="ghost" size="sm">
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Repetir
+          </GlassButton>
+        </Link>
+      </div>
+    )}
+    </>
   )
 }

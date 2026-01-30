@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { StringingStatusTracker } from '@/components/stringing/StringingStatusTracker'
 import { formatPrice } from '@/lib/shop'
-import { Loader2, Package, ArrowLeft } from 'lucide-react'
+import { Loader2, Package, ArrowLeft, MessageCircle, RefreshCw } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
 import Link from 'next/link'
 
@@ -163,9 +163,9 @@ export default function PedidoDetailPage() {
         />
       </GlassCard>
 
-      {/* Racket Info */}
+      {/* Card 1: Raqueta y Cuerda */}
       <GlassCard intensity="light" padding="lg">
-        <h2 className="text-lg font-semibold mb-3">Raqueta</h2>
+        <h2 className="text-lg font-semibold mb-3">Raqueta y Cuerda</h2>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Marca</span>
@@ -181,13 +181,6 @@ export default function PedidoDetailPage() {
               <span className="font-medium">{order.racketNotes}</span>
             </div>
           )}
-        </div>
-      </GlassCard>
-
-      {/* String Info */}
-      <GlassCard intensity="light" padding="lg">
-        <h2 className="text-lg font-semibold mb-3">Cuerda</h2>
-        <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Cuerda</span>
             <span className="font-medium">{order.stringName}</span>
@@ -205,7 +198,7 @@ export default function PedidoDetailPage() {
         </div>
       </GlassCard>
 
-      {/* Service & Delivery */}
+      {/* Card 2: Servicio y Entrega */}
       <GlassCard intensity="light" padding="lg">
         <h2 className="text-lg font-semibold mb-3">Servicio y Entrega</h2>
         <div className="space-y-2 text-sm">
@@ -225,66 +218,62 @@ export default function PedidoDetailPage() {
             <span className="text-muted-foreground">Telefono</span>
             <span className="font-medium">{order.contactPhone}</span>
           </div>
+
+          {/* Workshop info */}
+          {order.workshop && (
+            <>
+              <hr className="border-glass" />
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Taller</span>
+                <span className="font-medium">{order.workshop.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Direccion taller</span>
+                <span className="font-medium">{order.workshop.address}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Distrito taller</span>
+                <span className="font-medium">{order.workshop.district}</span>
+              </div>
+              {order.workshop.phone && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Telefono taller</span>
+                  <span className="font-medium">{order.workshop.phone}</span>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Home delivery addresses */}
+          {order.deliveryMode === 'HOME_PICKUP_DELIVERY' && (
+            <>
+              <hr className="border-glass" />
+              {order.pickupAddress && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Recojo</span>
+                  <span className="font-medium">{order.pickupAddress} - {order.pickupDistrict}</span>
+                </div>
+              )}
+              {order.deliveryAddress && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Entrega</span>
+                  <span className="font-medium">{order.deliveryAddress} - {order.deliveryDistrict}</span>
+                </div>
+              )}
+              {order.preferredPickupDate && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Fecha preferida</span>
+                  <span className="font-medium">
+                    {new Date(order.preferredPickupDate).toLocaleDateString('es-PE')}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </GlassCard>
 
-      {/* Workshop */}
-      {order.workshop && (
-        <GlassCard intensity="light" padding="lg">
-          <h2 className="text-lg font-semibold mb-3">Taller</h2>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Nombre</span>
-              <span className="font-medium">{order.workshop.name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Direccion</span>
-              <span className="font-medium">{order.workshop.address}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Distrito</span>
-              <span className="font-medium">{order.workshop.district}</span>
-            </div>
-            {order.workshop.phone && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Telefono</span>
-                <span className="font-medium">{order.workshop.phone}</span>
-              </div>
-            )}
-          </div>
-        </GlassCard>
-      )}
-
-      {/* Addresses */}
-      {order.deliveryMode === 'HOME_PICKUP_DELIVERY' && (
-        <GlassCard intensity="light" padding="lg">
-          <h2 className="text-lg font-semibold mb-3">Direcciones</h2>
-          <div className="space-y-2 text-sm">
-            {order.pickupAddress && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Recojo</span>
-                <span className="font-medium">{order.pickupAddress} - {order.pickupDistrict}</span>
-              </div>
-            )}
-            {order.deliveryAddress && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Entrega</span>
-                <span className="font-medium">{order.deliveryAddress} - {order.deliveryDistrict}</span>
-              </div>
-            )}
-            {order.preferredPickupDate && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Fecha preferida</span>
-                <span className="font-medium">
-                  {new Date(order.preferredPickupDate).toLocaleDateString('es-PE')}
-                </span>
-              </div>
-            )}
-          </div>
-        </GlassCard>
-      )}
-
-      {/* Price Breakdown */}
+      {/* Card 3: Detalle de Precio */}
       <GlassCard intensity="medium" padding="lg">
         <h2 className="text-lg font-semibold mb-3">Detalle de Precio</h2>
         <div className="space-y-2 text-sm">
@@ -309,6 +298,34 @@ export default function PedidoDetailPage() {
           </div>
         </div>
       </GlassCard>
+
+      {/* Action Buttons */}
+      {(order.workshop?.phone || order.status === 'DELIVERED') && (
+        <div className="flex flex-wrap gap-3">
+          {order.workshop?.phone && (
+            <a
+              href={`https://wa.me/51${order.workshop.phone.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <GlassButton variant="outline">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Contactar taller
+              </GlassButton>
+            </a>
+          )}
+          {order.status === 'DELIVERED' && (
+            <Link
+              href={`/encordado/solicitar?brand=${encodeURIComponent(order.racketBrand)}&model=${encodeURIComponent(order.racketModel)}&string=${encodeURIComponent(order.stringName)}&tension=${order.tensionMain}`}
+            >
+              <GlassButton variant="solid">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Repetir pedido
+              </GlassButton>
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   )
 }
