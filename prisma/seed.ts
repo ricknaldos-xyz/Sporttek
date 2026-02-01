@@ -1433,9 +1433,13 @@ async function main() {
   // Link players to their sports
   const userSportPairs = [
     { userId: testUser.id, sportId: tennis.id },
+    { userId: testUser.id, sportId: padel.id },
     { userId: proPlayer.id, sportId: tennis.id },
+    { userId: proPlayer.id, sportId: padel.id },
     { userId: elitePlayer.id, sportId: tennis.id },
+    { userId: elitePlayer.id, sportId: padel.id },
     { userId: padelPlayer.id, sportId: padel.id },
+    { userId: padelPlayer.id, sportId: tennis.id },
     { userId: adminUser.id, sportId: tennis.id },
     { userId: adminUser.id, sportId: padel.id },
   ]

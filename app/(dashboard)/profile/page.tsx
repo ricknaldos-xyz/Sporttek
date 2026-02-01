@@ -7,9 +7,11 @@ export const metadata: Metadata = {
 }
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import { User, Mail, Calendar, Trophy } from 'lucide-react'
+import Link from 'next/link'
+import { User, Mail, Calendar, Trophy, ArrowRight } from 'lucide-react'
 import { formatDate } from '@/lib/date-utils'
 import { GlassCard } from '@/components/ui/glass-card'
+import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 
 async function getUserStats(userId: string) {
@@ -93,6 +95,28 @@ export default async function ProfilePage() {
           </div>
         </div>
       </GlassCard>
+
+      {/* Quick Links */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <GlassCard intensity="light" padding="md" hover="lift" asChild>
+          <Link href="/profile/player" className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold">Perfil de Jugador</p>
+              <p className="text-sm text-muted-foreground">Score, tecnicas y estadisticas</p>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground" />
+          </Link>
+        </GlassCard>
+        <GlassCard intensity="light" padding="md" hover="lift" asChild>
+          <Link href="/profile/settings" className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold">Configuracion</p>
+              <p className="text-sm text-muted-foreground">Privacidad, suscripcion y mas</p>
+            </div>
+            <ArrowRight className="h-5 w-5 text-muted-foreground" />
+          </Link>
+        </GlassCard>
+      </div>
 
       {/* Favorite Sports */}
       {user.favoriteSports.length > 0 && (

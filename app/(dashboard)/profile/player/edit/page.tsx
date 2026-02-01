@@ -22,6 +22,7 @@ export default async function EditPlayerProfilePage() {
       <ProfileSetupForm
         initialData={profile ? {
           displayName: profile.displayName,
+          bio: profile.bio,
           region: profile.region,
           city: profile.city,
           playStyle: profile.playStyle,

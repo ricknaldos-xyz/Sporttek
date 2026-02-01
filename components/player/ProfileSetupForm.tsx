@@ -14,6 +14,7 @@ import { useGeolocation } from '@/hooks/useGeolocation'
 interface ProfileSetupFormProps {
   initialData?: {
     displayName?: string | null
+    bio?: string | null
     region?: string | null
     city?: string | null
     playStyle?: string | null
@@ -51,6 +52,7 @@ export function ProfileSetupForm({ initialData, isEdit }: ProfileSetupFormProps)
 
   const [formData, setFormData] = useState({
     displayName: initialData?.displayName || '',
+    bio: initialData?.bio || '',
     region: initialData?.region || '',
     city: initialData?.city || '',
     playStyle: initialData?.playStyle || '',
@@ -80,6 +82,7 @@ export function ProfileSetupForm({ initialData, isEdit }: ProfileSetupFormProps)
     try {
       const payload = {
         displayName: formData.displayName,
+        bio: formData.bio || undefined,
         region: formData.region,
         city: formData.city,
         playStyle: formData.playStyle || undefined,
@@ -134,6 +137,22 @@ export function ProfileSetupForm({ initialData, isEdit }: ProfileSetupFormProps)
             required
             disabled={isLoading}
           />
+        </div>
+
+        {/* Bio */}
+        <div className="space-y-2">
+          <Label htmlFor="bio">Bio</Label>
+          <textarea
+            id="bio"
+            value={formData.bio}
+            onChange={(e) => updateField('bio', e.target.value)}
+            placeholder="Cuentanos sobre ti como jugador..."
+            maxLength={500}
+            disabled={isLoading}
+            rows={3}
+            className="w-full rounded-xl glass-light border border-glass px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+          />
+          <p className="text-xs text-muted-foreground text-right">{formData.bio.length}/500</p>
         </div>
 
         {/* Location */}

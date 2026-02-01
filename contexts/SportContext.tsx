@@ -55,7 +55,12 @@ export function SportProvider({ children }: { children: ReactNode }) {
         // Restore active sport from localStorage
         const savedSlug = localStorage.getItem(STORAGE_KEY)
         const saved = data.find((s) => s.slug === savedSlug)
-        setActiveSportState(saved ?? data[0] ?? null)
+        const active = saved ?? data[0] ?? null
+        setActiveSportState(active)
+        // Sync to cookie for server components
+        if (active) {
+          document.cookie = `activeSportSlug=${active.slug};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`
+        }
       } catch (error) {
         logger.error('[SportContext] Failed to fetch sports:', error)
       } finally {
@@ -70,6 +75,8 @@ export function SportProvider({ children }: { children: ReactNode }) {
   const setActiveSport = useCallback((sport: SportInfo) => {
     setActiveSportState(sport)
     localStorage.setItem(STORAGE_KEY, sport.slug)
+    // Sync to cookie so server components can read the active sport
+    document.cookie = `activeSportSlug=${sport.slug};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`
   }, [])
 
   return (
