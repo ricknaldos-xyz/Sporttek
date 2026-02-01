@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { updatePlayerProfileBestScores } from '@/lib/rankings'
 import type { SkillTier } from '@prisma/client'
 
 export async function POST(req: NextRequest) {
@@ -13,162 +14,175 @@ export async function POST(req: NextRequest) {
     const now = new Date()
     const periodStart = new Date(now.getFullYear(), now.getMonth(), 1)
 
-    // --- GLOBAL Rankings (ALL_TIME) ---
-    const profiles = await prisma.playerProfile.findMany({
-      where: { effectiveScore: { not: null } },
-      orderBy: { effectiveScore: 'desc' },
-      select: {
-        id: true,
-        effectiveScore: true,
-        country: true,
-      },
+    const sports = await prisma.sport.findMany({
+      where: { isActive: true },
+      select: { id: true, slug: true },
     })
 
-    // Fetch all existing global rankings in a single query
-    const existingGlobalRankings = await prisma.ranking.findMany({
-      where: {
-        profileId: { in: profiles.map(p => p.id) },
-        category: 'GLOBAL',
-        period: 'ALL_TIME',
-      },
-      select: { profileId: true, rank: true },
-    })
+    let totalRecomputed = 0
+    let totalCountries = 0
 
-    const globalRankMap = new Map(
-      existingGlobalRankings.map(r => [r.profileId, r.rank])
-    )
+    for (const sport of sports) {
+      // Get all ranked sport profiles for this sport
+      const profiles = await prisma.sportProfile.findMany({
+        where: {
+          sportId: sport.id,
+          effectiveScore: { not: null },
+          skillTier: { not: 'UNRANKED' },
+          profile: { visibility: { not: 'PRIVATE' } },
+        },
+        orderBy: { effectiveScore: 'desc' },
+        select: {
+          id: true,
+          profileId: true,
+          effectiveScore: true,
+          profile: { select: { country: true } },
+        },
+      })
 
-    // Batch all global ranking upserts and profile updates into a single transaction
-    const globalOperations = profiles.flatMap((profile, i) => {
-      const newRank = i + 1
-      const previousRank = globalRankMap.get(profile.id) ?? null
+      totalRecomputed += profiles.length
 
-      return [
-        prisma.ranking.upsert({
-          where: {
-            profileId_category_period_country_skillTier_ageGroup_periodStart: {
-              profileId: profile.id,
-              category: 'GLOBAL',
-              period: 'ALL_TIME',
-              // Prisma compound unique requires all fields; these are genuinely null for GLOBAL rankings
-              country: null as unknown as string,
-              skillTier: null as unknown as SkillTier,
-              ageGroup: null as unknown as string,
-              periodStart,
-            },
-          },
-          create: {
-            profileId: profile.id,
-            category: 'GLOBAL',
-            period: 'ALL_TIME',
-            rank: newRank,
-            previousRank,
-            effectiveScore: profile.effectiveScore!,
-            periodStart,
-            computedAt: now,
-          },
-          update: {
-            rank: newRank,
-            previousRank,
-            effectiveScore: profile.effectiveScore!,
-            computedAt: now,
-          },
-        }),
-        prisma.playerProfile.update({
-          where: { id: profile.id },
-          data: { globalRank: newRank },
-        }),
-      ]
-    })
+      // --- GLOBAL Rankings ---
+      const existingGlobalRankings = await prisma.ranking.findMany({
+        where: {
+          profileId: { in: profiles.map(p => p.profileId) },
+          sportId: sport.id,
+          category: 'GLOBAL',
+          period: 'ALL_TIME',
+        },
+        select: { profileId: true, rank: true },
+      })
+      const globalRankMap = new Map(existingGlobalRankings.map(r => [r.profileId, r.rank]))
 
-    await prisma.$transaction(globalOperations)
-
-    const recomputed = profiles.length
-
-    // --- COUNTRY Rankings ---
-    const countryGroups: Record<string, typeof profiles> = {}
-    for (const profile of profiles) {
-      const country = profile.country ?? 'UNKNOWN'
-      if (!countryGroups[country]) countryGroups[country] = []
-      countryGroups[country].push(profile)
-    }
-
-    const countries = Object.keys(countryGroups)
-
-    // Fetch all existing country rankings in a single query
-    const existingCountryRankings = await prisma.ranking.findMany({
-      where: {
-        profileId: { in: profiles.map(p => p.id) },
-        category: 'COUNTRY',
-        period: 'ALL_TIME',
-      },
-      select: { profileId: true, rank: true },
-    })
-
-    const countryRankMap = new Map(
-      existingCountryRankings.map(r => [r.profileId, r.rank])
-    )
-
-    // Batch all country ranking upserts and profile updates into a single transaction
-    const countryOperations = countries.flatMap(country => {
-      const countryProfiles = countryGroups[country]
-      // Already sorted by effectiveScore desc from the initial query
-
-      return countryProfiles.flatMap((profile, i) => {
-        const countryRank = i + 1
-        const previousCountryRank = countryRankMap.get(profile.id) ?? null
+      const globalOperations = profiles.flatMap((profile, i) => {
+        const newRank = i + 1
+        const previousRank = globalRankMap.get(profile.profileId) ?? null
 
         return [
           prisma.ranking.upsert({
             where: {
               profileId_category_period_country_skillTier_ageGroup_periodStart: {
-                profileId: profile.id,
-                category: 'COUNTRY',
+                profileId: profile.profileId,
+                category: 'GLOBAL',
                 period: 'ALL_TIME',
-                country,
-                // Prisma compound unique requires all fields; these are genuinely null for COUNTRY rankings
+                country: null as unknown as string,
                 skillTier: null as unknown as SkillTier,
                 ageGroup: null as unknown as string,
                 periodStart,
               },
             },
             create: {
-              profileId: profile.id,
-              category: 'COUNTRY',
+              profileId: profile.profileId,
+              sportId: sport.id,
+              category: 'GLOBAL',
               period: 'ALL_TIME',
-              country,
-              rank: countryRank,
-              previousRank: previousCountryRank,
+              rank: newRank,
+              previousRank,
               effectiveScore: profile.effectiveScore!,
               periodStart,
               computedAt: now,
             },
             update: {
-              rank: countryRank,
-              previousRank: previousCountryRank,
+              rank: newRank,
+              previousRank,
               effectiveScore: profile.effectiveScore!,
               computedAt: now,
             },
           }),
-          prisma.playerProfile.update({
+          prisma.sportProfile.update({
             where: { id: profile.id },
-            data: { countryRank },
+            data: { globalRank: newRank },
           }),
         ]
       })
-    })
 
-    await prisma.$transaction(countryOperations)
+      await prisma.$transaction(globalOperations)
+
+      // --- COUNTRY Rankings ---
+      const countryGroups: Record<string, typeof profiles> = {}
+      for (const profile of profiles) {
+        const country = profile.profile.country ?? 'UNKNOWN'
+        if (!countryGroups[country]) countryGroups[country] = []
+        countryGroups[country].push(profile)
+      }
+
+      const countries = Object.keys(countryGroups)
+      totalCountries += countries.length
+
+      const existingCountryRankings = await prisma.ranking.findMany({
+        where: {
+          profileId: { in: profiles.map(p => p.profileId) },
+          sportId: sport.id,
+          category: 'COUNTRY',
+          period: 'ALL_TIME',
+        },
+        select: { profileId: true, rank: true },
+      })
+      const countryRankMap = new Map(existingCountryRankings.map(r => [r.profileId, r.rank]))
+
+      const countryOperations = countries.flatMap(country => {
+        const countryProfiles = countryGroups[country]
+        return countryProfiles.flatMap((profile, i) => {
+          const countryRank = i + 1
+          const previousCountryRank = countryRankMap.get(profile.profileId) ?? null
+
+          return [
+            prisma.ranking.upsert({
+              where: {
+                profileId_category_period_country_skillTier_ageGroup_periodStart: {
+                  profileId: profile.profileId,
+                  category: 'COUNTRY',
+                  period: 'ALL_TIME',
+                  country,
+                  skillTier: null as unknown as SkillTier,
+                  ageGroup: null as unknown as string,
+                  periodStart,
+                },
+              },
+              create: {
+                profileId: profile.profileId,
+                sportId: sport.id,
+                category: 'COUNTRY',
+                period: 'ALL_TIME',
+                country,
+                rank: countryRank,
+                previousRank: previousCountryRank,
+                effectiveScore: profile.effectiveScore!,
+                periodStart,
+                computedAt: now,
+              },
+              update: {
+                rank: countryRank,
+                previousRank: previousCountryRank,
+                effectiveScore: profile.effectiveScore!,
+                computedAt: now,
+              },
+            }),
+            prisma.sportProfile.update({
+              where: { id: profile.id },
+              data: { countryRank },
+            }),
+          ]
+        })
+      })
+
+      await prisma.$transaction(countryOperations)
+    }
+
+    // Sync PlayerProfile with best sport scores
+    await updatePlayerProfileBestScores()
 
     logger.info('Rankings recomputed', {
       adminId: session.user.id,
-      recomputed,
-      countries: countries.length,
+      recomputed: totalRecomputed,
+      sports: sports.length,
+      countries: totalCountries,
     })
 
     return NextResponse.json({
-      recomputed,
-      countries: countries.length,
+      recomputed: totalRecomputed,
+      sports: sports.length,
+      countries: totalCountries,
     })
   } catch (error) {
     logger.error('Error recomputing rankings:', error)

@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
       where: {
         profile: { userId: { in: profileIds } },
         sportId: sport.id,
-        period: 'MONTHLY',
+        period: 'ALL_TIME',
         category: 'COUNTRY',
       },
       select: {

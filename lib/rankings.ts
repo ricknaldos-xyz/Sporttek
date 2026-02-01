@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { SkillTier } from '@prisma/client'
+import { logger } from '@/lib/logger'
 
 const DECAY_GRACE_DAYS = 30
 const DECAY_RATE_PER_DAY = 0.005
@@ -28,7 +29,6 @@ export function calculateDecay(compositeScore: number, lastScoreUpdate: Date | n
  * Called by daily cron job.
  */
 export async function computeAllRankings(): Promise<void> {
-  // Get all active sports
   const sports = await prisma.sport.findMany({
     where: { isActive: true },
     select: { id: true, slug: true },
@@ -38,11 +38,13 @@ export async function computeAllRankings(): Promise<void> {
     await computeSportRankings(sport.id)
   }
 
-  // Also update PlayerProfile with best sport score (backwards compatibility)
   await updatePlayerProfileBestScores()
 }
 
 async function computeSportRankings(sportId: string): Promise<void> {
+  const now = new Date()
+  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1)
+
   // 1. Apply decay to all SportProfiles for this sport
   const sportProfiles = await prisma.sportProfile.findMany({
     where: {
@@ -109,39 +111,53 @@ async function computeSportRankings(sportId: string): Promise<void> {
       )
     )
 
-    // Create ranking records for the period
-    const periodStart = new Date()
-    periodStart.setHours(0, 0, 0, 0)
+    // Fetch existing country rankings for previousRank tracking
+    const existingCountryRankings = await prisma.ranking.findMany({
+      where: {
+        profileId: { in: countryProfiles.map(cp => cp.profileId) },
+        sportId,
+        category: 'COUNTRY',
+        period: 'ALL_TIME',
+      },
+      select: { profileId: true, rank: true },
+    })
+    const countryPrevRankMap = new Map(existingCountryRankings.map(r => [r.profileId, r.rank]))
 
-    const rankingData = countryProfiles.map((p, index) => ({
-      profileId: p.profileId,
-      sportId,
-      category: 'COUNTRY' as const,
-      period: 'ALL_TIME' as const,
-      country,
-      rank: index + 1,
-      effectiveScore: p.effectiveScore!,
-      periodStart,
-    }))
+    // Upsert ranking records
+    for (const [index, p] of countryProfiles.entries()) {
+      const newRank = index + 1
+      const previousRank = countryPrevRankMap.get(p.profileId) ?? null
 
-    for (const data of rankingData) {
       await prisma.ranking.upsert({
         where: {
           profileId_category_period_country_skillTier_ageGroup_periodStart: {
-            profileId: data.profileId,
-            category: data.category,
-            period: data.period,
-            country: data.country,
+            profileId: p.profileId,
+            category: 'COUNTRY',
+            period: 'ALL_TIME',
+            country,
             skillTier: null as unknown as SkillTier,
             ageGroup: null as unknown as string,
-            periodStart: data.periodStart,
+            periodStart,
           },
         },
-        create: data,
-        update: {
-          rank: data.rank,
-          effectiveScore: data.effectiveScore,
+        create: {
+          profileId: p.profileId,
           sportId,
+          category: 'COUNTRY',
+          period: 'ALL_TIME',
+          country,
+          rank: newRank,
+          previousRank,
+          effectiveScore: p.effectiveScore!,
+          periodStart,
+          computedAt: now,
+        },
+        update: {
+          rank: newRank,
+          previousRank,
+          effectiveScore: p.effectiveScore!,
+          sportId,
+          computedAt: now,
         },
       })
     }
@@ -158,9 +174,14 @@ async function computeSportRankings(sportId: string): Promise<void> {
       },
     },
     orderBy: { effectiveScore: 'desc' },
-    select: { id: true },
+    select: {
+      id: true,
+      profileId: true,
+      effectiveScore: true,
+    },
   })
 
+  // Update globalRank on SportProfile
   await prisma.$transaction(
     globalProfiles.map((gp, i) =>
       prisma.sportProfile.update({
@@ -169,13 +190,65 @@ async function computeSportRankings(sportId: string): Promise<void> {
       })
     )
   )
+
+  // Fetch existing global rankings for previousRank tracking
+  const existingGlobalRankings = await prisma.ranking.findMany({
+    where: {
+      profileId: { in: globalProfiles.map(gp => gp.profileId) },
+      sportId,
+      category: 'GLOBAL',
+      period: 'ALL_TIME',
+    },
+    select: { profileId: true, rank: true },
+  })
+  const globalPrevRankMap = new Map(existingGlobalRankings.map(r => [r.profileId, r.rank]))
+
+  // Save global ranking records to Ranking table
+  const globalRankingOps = globalProfiles.map((gp, index) => {
+    const newRank = index + 1
+    const previousRank = globalPrevRankMap.get(gp.profileId) ?? null
+
+    return prisma.ranking.upsert({
+      where: {
+        profileId_category_period_country_skillTier_ageGroup_periodStart: {
+          profileId: gp.profileId,
+          category: 'GLOBAL',
+          period: 'ALL_TIME',
+          country: null as unknown as string,
+          skillTier: null as unknown as SkillTier,
+          ageGroup: null as unknown as string,
+          periodStart,
+        },
+      },
+      create: {
+        profileId: gp.profileId,
+        sportId,
+        category: 'GLOBAL',
+        period: 'ALL_TIME',
+        rank: newRank,
+        previousRank,
+        effectiveScore: gp.effectiveScore!,
+        periodStart,
+        computedAt: now,
+      },
+      update: {
+        rank: newRank,
+        previousRank,
+        effectiveScore: gp.effectiveScore!,
+        sportId,
+        computedAt: now,
+      },
+    })
+  })
+
+  await prisma.$transaction(globalRankingOps)
 }
 
 /**
  * Sync PlayerProfile with the best sport's effective score.
  * Called after per-sport rankings are computed.
  */
-async function updatePlayerProfileBestScores(): Promise<void> {
+export async function updatePlayerProfileBestScores(): Promise<void> {
   const profiles = await prisma.playerProfile.findMany({
     where: {
       sportProfiles: {

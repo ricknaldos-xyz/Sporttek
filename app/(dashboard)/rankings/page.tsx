@@ -1,16 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
-import { TierBadge } from '@/components/player/TierBadge'
 import { RankingHero } from '@/components/rankings/RankingHero'
 import { ImprovementPath } from '@/components/rankings/ImprovementPath'
 import { TopPodium } from '@/components/rankings/TopPodium'
 import { CategoryExplainer } from '@/components/rankings/CategoryExplainer'
 import { RankingTable, type RankingEntry } from '@/components/rankings/RankingTable'
-import { Trophy, Medal, ChevronLeft, ChevronRight, Loader2, AlertTriangle, Search, X } from 'lucide-react'
+import { RankingFilters } from '@/components/rankings/RankingFilters'
+import { TrendingPlayers } from '@/components/rankings/TrendingPlayers'
+import { Trophy, ChevronLeft, ChevronRight, Loader2, AlertTriangle, Search } from 'lucide-react'
 import { useSport } from '@/contexts/SportContext'
 import { useSession } from 'next-auth/react'
 import type { SkillTier } from '@prisma/client'
@@ -40,15 +40,6 @@ interface MyPosition {
   totalInTier: number
 }
 
-const CATEGORY_FILTERS: { value: string; label: string }[] = [
-  { value: '', label: 'Todos' },
-  { value: 'PRIMERA_A,PRIMERA_B', label: '1ra' },
-  { value: 'SEGUNDA_A,SEGUNDA_B', label: '2da' },
-  { value: 'TERCERA_A,TERCERA_B', label: '3ra' },
-  { value: 'CUARTA_A,CUARTA_B', label: '4ta' },
-  { value: 'QUINTA_A,QUINTA_B', label: '5ta' },
-]
-
 export default function RankingsPage() {
   const { activeSport } = useSport()
   const { data: session } = useSession()
@@ -59,6 +50,7 @@ export default function RankingsPage() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [categoryFilter, setCategoryFilter] = useState('')
+  const [periodFilter, setPeriodFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
 
@@ -112,7 +104,7 @@ export default function RankingsPage() {
     }
   }
 
-  const isFiltered = categoryFilter !== ''
+  const isFiltered = categoryFilter !== '' || debouncedSearch !== ''
   const podiumPlayers = rankings.slice(0, 3)
   const listPlayers = isFiltered ? rankings : rankings.slice(3)
 
@@ -130,28 +122,23 @@ export default function RankingsPage() {
       {/* Improvement path for ranked users */}
       <ImprovementPath />
 
-      {myPosition?.skillTier === 'UNRANKED' && (
-        <CategoryExplainer currentTier={myPosition?.skillTier} />
-      )}
+      {/* Trending players */}
+      <TrendingPlayers />
 
-      {/* Top 3 Podium (only when showing "Todos" unfiltered on page 1) */}
+      {/* Top 3 Podium (only when showing unfiltered on page 1) */}
       {!isFiltered && page === 1 && !loading && !error && (
         <TopPodium players={podiumPlayers} />
       )}
 
-      {/* Category filter tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {CATEGORY_FILTERS.map((filter) => (
-          <GlassButton
-            key={filter.value}
-            variant={categoryFilter === filter.value ? 'solid' : 'outline'}
-            size="sm"
-            onClick={() => { setCategoryFilter(filter.value); setPage(1) }}
-          >
-            {filter.label}
-          </GlassButton>
-        ))}
-      </div>
+      {/* Filters + Search */}
+      <RankingFilters
+        tierFilter={categoryFilter}
+        onTierChange={(tier) => { setCategoryFilter(tier); setPage(1) }}
+        periodFilter={periodFilter}
+        onPeriodChange={setPeriodFilter}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
       {/* Error State */}
       {error && !loading && (
@@ -166,29 +153,6 @@ export default function RankingsPage() {
           </GlassCard>
         </div>
       )}
-
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Buscar jugador..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          aria-label="Buscar jugador"
-          className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-glass-light border border-glass text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-        />
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => setSearchQuery('')}
-            aria-label="Limpiar busqueda"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
 
       {/* Empty search results */}
       {!error && !loading && rankings.length === 0 && debouncedSearch && (
@@ -251,9 +215,7 @@ export default function RankingsPage() {
       )}
 
       {/* Category explainer */}
-      {myPosition?.skillTier !== 'UNRANKED' && (
-        <CategoryExplainer currentTier={myPosition?.skillTier} />
-      )}
+      <CategoryExplainer currentTier={myPosition?.skillTier} />
     </div>
   )
 }
