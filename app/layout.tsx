@@ -42,6 +42,12 @@ export const metadata: Metadata = {
     title: 'SportTek - Analisis Deportivo con IA',
     description: 'Mejora tu tecnica deportiva con analisis de video impulsado por IA',
   },
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_APP_URL || 'https://sporttek.xyz',
+    languages: {
+      'es-PE': process.env.NEXT_PUBLIC_APP_URL || 'https://sporttek.xyz',
+    },
+  },
 }
 
 export default function RootLayout({

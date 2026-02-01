@@ -29,9 +29,34 @@ import { FAQSection } from '@/components/landing/FAQSection'
 import { CTASection } from '@/components/landing/CTASection'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'SportTek',
+  applicationCategory: 'SportsApplication',
+  operatingSystem: 'Web',
+  description:
+    'Plataforma integral para tenis y padel: analisis de video con IA, rankings nacionales, torneos, coaches certificados, matchmaking y comunidad.',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://sporttek.xyz',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'PEN',
+  },
+  author: {
+    '@type': 'Organization',
+    name: 'SportTek',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://sporttek.xyz',
+  },
+}
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <LandingHeader />
       <main>
         <HeroSection />
