@@ -45,6 +45,8 @@ export async function retrieveRelevantChunks(
   const vectorStr = `[${queryEmbedding.join(',')}]`
 
   // Build WHERE conditions dynamically
+  // Safety: paramIdx is only incremented by integer literals below, never by user input.
+  // All user-supplied values are passed as parameterized $N placeholders, not interpolated.
   const conditions: string[] = []
   const params: unknown[] = [vectorStr, limit]
   let paramIdx = 3 // $1 = vector, $2 = limit

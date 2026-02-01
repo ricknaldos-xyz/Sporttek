@@ -31,7 +31,7 @@ import {
   Video,
   Trophy,
 } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/date-utils'
 import { ExerciseItem } from './exercise-item'
 import { CoachCTA } from '@/components/coach/CoachCTA'
 

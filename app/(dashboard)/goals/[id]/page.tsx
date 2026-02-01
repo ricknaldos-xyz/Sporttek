@@ -15,7 +15,7 @@ import {
   Dumbbell,
   TrendingUp,
 } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/date-utils'
 import { GoalRoadmap } from '@/components/goals/GoalRoadmap'
 import { AbandonGoalButton } from './AbandonGoalButton'
 

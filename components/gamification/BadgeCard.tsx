@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { BadgeDefinition } from '@/lib/badges'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/date-utils'
 import { GlassCard } from '@/components/ui/glass-card'
 
 interface BadgeCardProps {

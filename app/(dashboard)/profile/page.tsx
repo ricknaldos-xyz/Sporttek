@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { User, Mail, Calendar, Trophy } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/date-utils'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
 

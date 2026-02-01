@@ -12,7 +12,7 @@ import { Dumbbell, Calendar, CheckCircle, ArrowRight } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 async function getTrainingPlans(userId: string) {

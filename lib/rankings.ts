@@ -67,13 +67,15 @@ async function computeSportRankings(sportId: string): Promise<void> {
   })
 
   // Update effective scores with decay
-  for (const sp of sportProfiles) {
-    const effectiveScore = calculateDecay(sp.compositeScore!, sp.lastScoreUpdate)
-    await prisma.sportProfile.update({
-      where: { id: sp.id },
-      data: { effectiveScore },
+  await prisma.$transaction(
+    sportProfiles.map((sp) => {
+      const effectiveScore = calculateDecay(sp.compositeScore!, sp.lastScoreUpdate)
+      return prisma.sportProfile.update({
+        where: { id: sp.id },
+        data: { effectiveScore },
+      })
     })
-  }
+  )
 
   // 2. Compute country rankings
   const countries = [...new Set(sportProfiles.map((sp) => sp.profile.country).filter(Boolean))] as string[]
@@ -98,12 +100,14 @@ async function computeSportRankings(sportId: string): Promise<void> {
     })
 
     // Update country rank on each sport profile
-    for (let i = 0; i < countryProfiles.length; i++) {
-      await prisma.sportProfile.update({
-        where: { id: countryProfiles[i].id },
-        data: { countryRank: i + 1 },
-      })
-    }
+    await prisma.$transaction(
+      countryProfiles.map((cp, i) =>
+        prisma.sportProfile.update({
+          where: { id: cp.id },
+          data: { countryRank: i + 1 },
+        })
+      )
+    )
 
     // Create ranking records for the period
     const periodStart = new Date()
@@ -157,12 +161,14 @@ async function computeSportRankings(sportId: string): Promise<void> {
     select: { id: true },
   })
 
-  for (let i = 0; i < globalProfiles.length; i++) {
-    await prisma.sportProfile.update({
-      where: { id: globalProfiles[i].id },
-      data: { globalRank: i + 1 },
-    })
-  }
+  await prisma.$transaction(
+    globalProfiles.map((gp, i) =>
+      prisma.sportProfile.update({
+        where: { id: gp.id },
+        data: { globalRank: i + 1 },
+      })
+    )
+  )
 }
 
 /**
@@ -195,19 +201,21 @@ async function updatePlayerProfileBestScores(): Promise<void> {
     },
   })
 
-  for (const profile of profiles) {
-    const best = profile.sportProfiles[0]
-    if (!best) continue
-
-    await prisma.playerProfile.update({
-      where: { id: profile.id },
-      data: {
-        effectiveScore: best.effectiveScore,
-        compositeScore: best.compositeScore,
-        skillTier: best.skillTier,
-        globalRank: best.globalRank,
-        countryRank: best.countryRank,
-      },
-    })
-  }
+  await prisma.$transaction(
+    profiles
+      .filter((profile) => profile.sportProfiles[0])
+      .map((profile) => {
+        const best = profile.sportProfiles[0]
+        return prisma.playerProfile.update({
+          where: { id: profile.id },
+          data: {
+            effectiveScore: best.effectiveScore,
+            compositeScore: best.compositeScore,
+            skillTier: best.skillTier,
+            globalRank: best.globalRank,
+            countryRank: best.countryRank,
+          },
+        })
+      })
+  )
 }

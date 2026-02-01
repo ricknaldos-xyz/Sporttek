@@ -20,35 +20,43 @@ async function callEmbedApi(text: string, retryCount = 0): Promise<number[]> {
   const apiKey = getApiKey()
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${EMBEDDING_MODEL}:embedContent?key=${apiKey}`
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: `models/${EMBEDDING_MODEL}`,
-      content: { parts: [{ text }] },
-      outputDimensionality: OUTPUT_DIMENSIONS,
-    }),
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 15_000)
 
-  if (!response.ok) {
-    // Retry on 429 (rate limit) with exponential backoff
-    if (response.status === 429 && retryCount < MAX_RETRIES) {
-      const backoffMs = Math.pow(2, retryCount + 1) * 5000 // 10s, 20s, 40s
-      logger.warn(`Embedding rate limited (429), retrying in ${backoffMs / 1000}s (attempt ${retryCount + 1}/${MAX_RETRIES})`)
-      await delay(backoffMs)
-      return callEmbedApi(text, retryCount + 1)
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: `models/${EMBEDDING_MODEL}`,
+        content: { parts: [{ text }] },
+        outputDimensionality: OUTPUT_DIMENSIONS,
+      }),
+      signal: controller.signal,
+    })
+
+    if (!response.ok) {
+      // Retry on 429 (rate limit) with exponential backoff
+      if (response.status === 429 && retryCount < MAX_RETRIES) {
+        const backoffMs = Math.pow(2, retryCount + 1) * 5000 // 10s, 20s, 40s
+        logger.warn(`Embedding rate limited (429), retrying in ${backoffMs / 1000}s (attempt ${retryCount + 1}/${MAX_RETRIES})`)
+        await delay(backoffMs)
+        return callEmbedApi(text, retryCount + 1)
+      }
+
+      if (response.status === 429) {
+        throw new Error('Cuota de la API de embeddings agotada. Intenta de nuevo en unos minutos.')
+      }
+
+      const errorText = await response.text()
+      throw new Error(`Error al generar embeddings (${response.status}): ${errorText.substring(0, 200)}`)
     }
 
-    if (response.status === 429) {
-      throw new Error('Cuota de la API de embeddings agotada. Intenta de nuevo en unos minutos.')
-    }
-
-    const errorText = await response.text()
-    throw new Error(`Error al generar embeddings (${response.status}): ${errorText.substring(0, 200)}`)
+    const data = await response.json()
+    return data.embedding.values
+  } finally {
+    clearTimeout(timeout)
   }
-
-  const data = await response.json()
-  return data.embedding.values
 }
 
 export async function generateEmbedding(text: string): Promise<number[]> {

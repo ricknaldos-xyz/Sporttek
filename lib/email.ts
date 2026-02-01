@@ -40,7 +40,7 @@ export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
 
     return data
   } catch (error) {
-    logger.error('Failed to send email:', error)
+    logger.error('Failed to send email', { to: to.slice(0, 3) + '***', subject, error })
     throw error
   }
 }

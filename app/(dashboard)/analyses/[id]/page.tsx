@@ -34,7 +34,7 @@ import {
   Dumbbell,
   Loader2,
 } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/date-utils'
 import { RetryAnalysisButton } from '@/components/analysis/RetryAnalysisButton'
 import { ScoreContext } from '@/components/analysis/ScoreContext'
 import { SeverityExplainer } from '@/components/analysis/SeverityExplainer'

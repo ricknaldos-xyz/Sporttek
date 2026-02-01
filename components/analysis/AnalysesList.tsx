@@ -7,7 +7,7 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { Video, ArrowRight, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, Loader2, AlertCircle, ArrowUpDown } from 'lucide-react'
-import { formatRelativeTime } from '@/lib/utils'
+import { formatRelativeTime } from '@/lib/date-utils'
 import { getScoreBorderColor, STATUS_LABELS, STATUS_VARIANTS } from '@/lib/analysis-constants'
 import { ScoreRing } from '@/components/analysis/ScoreRing'
 

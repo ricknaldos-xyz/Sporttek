@@ -46,11 +46,16 @@ export function containsBannedWords(text: string): boolean {
   return BANNED_WORDS.some((word) => lower.includes(word))
 }
 
+const BANNED_WORDS_COMPILED = BANNED_WORDS.map((word) => ({
+  regex: new RegExp(word, 'gi'),
+  replacement: '*'.repeat(word.length),
+}))
+
 export function sanitizeText(text: string): string {
   let result = text
-  for (const word of BANNED_WORDS) {
-    const regex = new RegExp(word, 'gi')
-    result = result.replace(regex, '*'.repeat(word.length))
+  for (const { regex, replacement } of BANNED_WORDS_COMPILED) {
+    regex.lastIndex = 0
+    result = result.replace(regex, replacement)
   }
   return result
 }

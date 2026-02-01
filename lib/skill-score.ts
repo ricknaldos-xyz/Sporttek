@@ -5,6 +5,7 @@ import { SkillTier } from '@prisma/client'
 const DEFAULT_WEIGHT = 0.6
 export const MIN_TECHNIQUES_FOR_RANKING = 5
 const MAX_RECENT_ANALYSES = 3
+const SCORE_SCALE_FACTOR = 10
 
 // Category thresholds (0-100 scale) — Peruvian tennis categories
 const TIER_THRESHOLDS: { min: number; tier: SkillTier }[] = [
@@ -206,17 +207,19 @@ export async function recalculateSkillScore(userId: string): Promise<void> {
     }>()
 
     for (const analysis of analyses) {
+      if (analysis.overallScore === null || analysis.overallScore === undefined) continue
+      const scaledScore = analysis.overallScore * SCORE_SCALE_FACTOR
       const existing = techniqueMap.get(analysis.techniqueId)
       if (existing) {
         if (existing.scores.length < MAX_RECENT_ANALYSES) {
-          existing.scores.push(analysis.overallScore! * 10) // Convert 0-10 to 0-100
+          existing.scores.push(scaledScore)
         }
       } else {
         techniqueMap.set(analysis.techniqueId, {
           techniqueId: analysis.techniqueId,
           slug: analysis.technique.slug,
           weight: analysis.technique.weight,
-          scores: [analysis.overallScore! * 10],
+          scores: [scaledScore],
           lastAnalysisId: analysis.id,
           lastAnalyzedAt: analysis.createdAt,
         })

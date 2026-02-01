@@ -30,7 +30,11 @@ export async function processDocument(documentId: string): Promise<void> {
       // Local file
       const { readFile } = await import('fs/promises')
       const path = await import('path')
-      const filePath = path.join(process.cwd(), 'public', document.fileUrl)
+      const uploadsBase = path.resolve(process.cwd(), 'public', 'uploads')
+      const filePath = path.resolve(process.cwd(), 'public', document.fileUrl)
+      if (!filePath.startsWith(uploadsBase)) {
+        throw new Error('Ruta de archivo no permitida')
+      }
       pdfBuffer = await readFile(filePath)
     } else {
       // Remote URL (Vercel Blob)

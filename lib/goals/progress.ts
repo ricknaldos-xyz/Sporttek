@@ -55,8 +55,8 @@ export async function updateGoalProgress(
     return
   }
 
-  if (analysis.overallScore === null || analysis.overallScore === undefined) {
-    logger.debug(`[goals/progress] Analysis ${analysisId} has no overallScore, skipping goal update`)
+  if (analysis.overallScore === null || analysis.overallScore === undefined || !Number.isFinite(analysis.overallScore)) {
+    logger.debug(`[goals/progress] Analysis ${analysisId} has no valid overallScore, skipping goal update`)
     return
   }
 
@@ -95,7 +95,7 @@ export async function updateGoalProgress(
       await prisma.$transaction(async (tx) => {
         // 3a. Determine baseline and current scores
         const isFirstAnalysis = goal.baselineScore === null
-        const baselineScore = isFirstAnalysis ? score : goal.baselineScore!
+        const baselineScore = isFirstAnalysis ? score : (goal.baselineScore ?? score)
         const currentScore = score
 
         // 3a. Create GoalAnalysis link record (upsert for idempotency)
@@ -166,10 +166,11 @@ export async function updateGoalProgress(
 
             // Convert analysis score to 0-100 for comparison
             const scoreOn100 = currentScore * 10
+            const profileScore = profile?.compositeScore ?? 0
             // Use whichever is higher: profile composite or this analysis score
             const effectiveScore = Math.max(
-              scoreOn100,
-              profile?.compositeScore ?? 0
+              Number.isFinite(scoreOn100) ? scoreOn100 : 0,
+              Number.isFinite(profileScore) ? profileScore : 0
             )
 
             const targetThreshold = TIER_THRESHOLDS[goal.targetTier]
@@ -189,8 +190,8 @@ export async function updateGoalProgress(
         progressPercent = Math.max(0, Math.min(100, progressPercent))
 
         // 3f. Mark roadmap steps as completed
-        let roadmap = goal.roadmap as RoadmapStep[] | null
-        if (roadmap && Array.isArray(roadmap)) {
+        let roadmap = Array.isArray(goal.roadmap) ? (goal.roadmap as unknown as RoadmapStep[]) : null
+        if (roadmap) {
           const firstUncompletedAnalysis = roadmap.find(
             (step) => step.type === 'analysis' && !step.completed
           )
@@ -275,8 +276,8 @@ export async function linkTrainingPlanToGoal(
     })
 
     // Update roadmap: find first uncompleted "training" step
-    let roadmap = goal.roadmap as RoadmapStep[] | null
-    if (roadmap && Array.isArray(roadmap)) {
+    let roadmap = Array.isArray(goal.roadmap) ? (goal.roadmap as unknown as RoadmapStep[]) : null
+    if (roadmap) {
       const firstUncompletedTraining = roadmap.find(
         (step) => step.type === 'training' && !step.completed
       )

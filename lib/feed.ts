@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { FeedItemType } from '@prisma/client'
+import { FeedItemType, Prisma } from '@prisma/client'
 
 /**
  * Create a feed item for a player's activity.
@@ -36,7 +36,7 @@ export async function createFeedItem({
       description,
       referenceId,
       referenceType,
-      metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : undefined,
+      metadata: metadata ? (metadata as Prisma.InputJsonValue) : undefined,
     },
   })
 }
