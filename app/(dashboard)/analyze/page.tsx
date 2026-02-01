@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Loader2,
   Upload,
+  Video,
   X,
   Check,
   Sparkles,
@@ -22,6 +23,7 @@ import { useSport } from '@/contexts/SportContext'
 import { VideoGuidelines } from '@/components/upload/VideoGuidelines'
 import { VideoRequirements } from '@/components/upload/VideoRequirements'
 import { DetectionConfirmation } from '@/components/analyze/DetectionConfirmation'
+import { compressVideoIfNeeded } from '@/lib/video-compress'
 
 interface Sport {
   id: string
@@ -92,6 +94,7 @@ export default function AnalyzePage() {
   const [autoDetectMode, setAutoDetectMode] = useState(false)
   const [detectionResult, setDetectionResult] = useState<DetectionResponse | null>(null)
   const [uploadProgress, setUploadProgress] = useState('')
+  const [uploadPercent, setUploadPercent] = useState(0)
   const [processingStage, setProcessingStage] = useState(0)
   const [uploadedMediaItems, setUploadedMediaItems] = useState<
     Array<{ url: string; type: string; filename: string; size: number }>
@@ -260,12 +263,30 @@ export default function AnalyzePage() {
       size: number
     }> = []
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      setCurrentUploadingFile(file.name)
-      setUploadProgress(files.length > 1 ? `Subiendo ${i + 1} de ${files.length} — ${file.name}` : 'Subiendo...')
+    const totalSize = files.reduce((sum, f) => sum + f.size, 0)
+    let uploadedSize = 0
 
+    for (let i = 0; i < files.length; i++) {
+      let file = files[i]
+      setCurrentUploadingFile(file.name)
+
+      // Compress large videos before upload
       const isVideo = file.type.startsWith('video/')
+      if (isVideo && file.size > 20 * 1024 * 1024) {
+        setUploadProgress(`Comprimiendo ${file.name}...`)
+        try {
+          const compressed = await compressVideoIfNeeded(file)
+          if (compressed !== file) {
+            const savedMB = ((file.size - compressed.size) / 1024 / 1024).toFixed(1)
+            logger.info(`Compressed ${file.name}: ${savedMB}MB saved`)
+          }
+          file = compressed
+        } catch {
+          // Compression failed, continue with original
+        }
+      }
+
+      setUploadProgress(files.length > 1 ? `Subiendo ${i + 1} de ${files.length} — ${file.name}` : `Subiendo ${file.name}...`)
 
       // Generate unique filename
       const timestamp = Date.now()
@@ -276,10 +297,24 @@ export default function AnalyzePage() {
       try {
         // Use client-side upload directly to Vercel Blob (bypasses server size limit)
         const { upload } = await import('@vercel/blob/client')
+
+        // Simulate progress based on file position since Vercel Blob doesn't expose progress
+        const fileProgressInterval = setInterval(() => {
+          setUploadPercent((prev) => {
+            const fileTarget = ((uploadedSize + file.size) / totalSize) * 100
+            const increment = (fileTarget - prev) * 0.1
+            return Math.min(prev + Math.max(increment, 0.5), fileTarget - 1)
+          })
+        }, 300)
+
         const blob = await upload(uniqueName, file, {
           access: 'public',
           handleUploadUrl: '/api/upload/token',
         })
+
+        clearInterval(fileProgressInterval)
+        uploadedSize += file.size
+        setUploadPercent(Math.round((uploadedSize / totalSize) * 100))
 
         mediaItems.push({
           url: blob.url,
@@ -295,6 +330,7 @@ export default function AnalyzePage() {
 
     setUploadProgress('')
     setCurrentUploadingFile('')
+    setUploadPercent(0)
     return mediaItems
   }
 
@@ -900,7 +936,7 @@ export default function AnalyzePage() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               className={cn(
-                'border-2 border-dashed rounded-xl p-4 sm:p-8 text-center transition-all duration-[var(--duration-normal)] mt-4',
+                'border-2 border-dashed rounded-xl p-6 sm:p-8 md:p-12 text-center transition-all duration-[var(--duration-normal)] mt-4',
                 isDragging
                   ? 'border-primary bg-primary/5 scale-[1.03]'
                   : 'border-glass hover:border-primary/50 hover:glass-ultralight'
@@ -910,8 +946,16 @@ export default function AnalyzePage() {
                 type="file"
                 id="file-upload"
                 className="hidden"
-                accept=".mp4,.mov,.webm,.avi,.jpg,.jpeg,.png,.heic"
+                accept="video/*,image/*"
                 multiple
+                onChange={handleFileChange}
+              />
+              <input
+                type="file"
+                id="camera-capture"
+                className="hidden"
+                accept="video/*"
+                capture="environment"
                 onChange={handleFileChange}
               />
               <label htmlFor="file-upload" className="cursor-pointer">
@@ -925,7 +969,29 @@ export default function AnalyzePage() {
                   Videos (max 100MB) o imagenes (max 10MB) — Hasta 5 archivos
                 </p>
               </label>
+              <label
+                htmlFor="camera-capture"
+                className="inline-flex items-center gap-2 mt-3 px-4 py-2.5 glass-primary border-glass rounded-xl cursor-pointer text-sm font-medium text-primary hover:shadow-glass transition-all sm:hidden"
+              >
+                <Video className="h-4 w-4" />
+                Grabar con camara
+              </label>
             </div>
+
+            {uploading && (
+              <div className="mt-4 glass-ultralight border-glass rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium">{uploadProgress}</p>
+                  <span className="text-sm font-semibold text-primary">{uploadPercent}%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div
+                    className="bg-primary h-full rounded-full transition-all duration-300"
+                    style={{ width: `${uploadPercent}%` }}
+                  />
+                </div>
+              </div>
+            )}
 
             {files.length > 0 && (
               <div className="mt-4 space-y-2">
@@ -960,16 +1026,24 @@ export default function AnalyzePage() {
                           {file.name}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                          {(file.size / 1024 / 1024).toFixed(1)} MB
                           {uploading && currentUploadingFile === file.name && (
-                            <span className="ml-2 text-primary">Subiendo...</span>
+                            <span className="ml-2 text-primary">{uploadPercent}%</span>
                           )}
                         </p>
+                        {uploading && currentUploadingFile === file.name && (
+                          <div className="w-full bg-muted rounded-full h-1.5 mt-1.5">
+                            <div
+                              className="bg-primary h-full rounded-full transition-all duration-300"
+                              style={{ width: `${uploadPercent}%` }}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                     <button
                       onClick={() => removeFile(index)}
-                      className="p-1.5 hover:glass-light rounded-lg transition-colors"
+                      className="p-2.5 hover:glass-light rounded-lg transition-colors flex-shrink-0"
                       disabled={uploading}
                     >
                       <X className="h-4 w-4" />

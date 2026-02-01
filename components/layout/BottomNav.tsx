@@ -44,7 +44,7 @@ export function BottomNav() {
               href={tab.href}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'relative flex flex-col items-center justify-center gap-1 w-full h-full text-[10px] font-medium transition-colors',
+                'relative flex flex-col items-center justify-center gap-1 w-full h-full text-[11px] font-medium transition-colors',
                 tab.primary && !isActive
                   ? 'text-primary'
                   : isActive ? 'text-primary' : 'text-muted-foreground'
