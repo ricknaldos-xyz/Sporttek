@@ -1,5 +1,7 @@
 'use client'
 
+import { GlassInput } from '@/components/ui/glass-input'
+
 interface SchedulePickerProps {
   date: string
   onDateChange: (value: string) => void
@@ -16,9 +18,9 @@ export function SchedulePicker({ date, onDateChange }: SchedulePickerProps) {
       <label className="block text-sm font-medium mb-1">
         Fecha preferida de recojo
       </label>
-      <input
+      <GlassInput
         type="date"
-        className="glass-input w-full"
+        className="w-full"
         min={minDate}
         value={date}
         onChange={(e) => onDateChange(e.target.value)}

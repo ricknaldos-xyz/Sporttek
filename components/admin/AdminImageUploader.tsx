@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { GlassInput } from '@/components/ui/glass-input'
 import { GlassButton } from '@/components/ui/glass-button'
 import { Plus, X } from 'lucide-react'
 import Image from 'next/image'
@@ -45,6 +46,7 @@ export default function AdminImageUploader({ images, onAdd, onRemove }: AdminIma
               <button
                 type="button"
                 onClick={() => onRemove(url)}
+                aria-label="Eliminar imagen"
                 className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <X className="h-3 w-3" />
@@ -57,13 +59,13 @@ export default function AdminImageUploader({ images, onAdd, onRemove }: AdminIma
       )}
 
       <div className="flex gap-2">
-        <input
+        <GlassInput
           type="url"
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="URL de la imagen"
-          className="glass-input flex-1"
+          className="flex-1"
         />
         <GlassButton
           type="button"

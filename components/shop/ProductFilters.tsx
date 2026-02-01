@@ -1,6 +1,7 @@
 'use client'
 
 import { GlassButton } from '@/components/ui/glass-button'
+import { GlassSelect } from '@/components/ui/glass-input'
 
 interface ProductFiltersProps {
   selectedCategory: string
@@ -52,17 +53,17 @@ export function ProductFilters({
       {/* Sort dropdown */}
       <div className="flex items-center gap-2">
         <label className="text-sm text-muted-foreground">Ordenar por:</label>
-        <select
+        <GlassSelect
           value={selectedSort}
           onChange={(e) => onSortChange(e.target.value)}
-          className="glass-input text-sm py-1.5 px-3 rounded-xl"
+          className="text-sm py-1.5 px-3"
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
           ))}
-        </select>
+        </GlassSelect>
       </div>
     </div>
   )

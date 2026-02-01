@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
+import { GlassInput, GlassSelect, GlassToggle } from '@/components/ui/glass-input'
 import { Save, Loader2 } from 'lucide-react'
 
 interface WorkshopFormData {
@@ -92,39 +93,39 @@ export default function AdminWorkshopForm({ initialData, onSubmit, loading }: Ad
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Nombre *</label>
-            <input
+            <GlassInput
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Telefono</label>
-            <input
+            <GlassInput
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1">Direccion *</label>
-            <input
+            <GlassInput
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Distrito *</label>
-            <select
+            <GlassSelect
               value={district}
               onChange={(e) => setDistrict(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               required
             >
               <option value="">Seleccionar distrito</option>
@@ -133,45 +134,40 @@ export default function AdminWorkshopForm({ initialData, onSubmit, loading }: Ad
                   {d}
                 </option>
               ))}
-            </select>
+            </GlassSelect>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Ciudad</label>
-            <input
+            <GlassInput
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Latitud</label>
-            <input
+            <GlassInput
               type="number"
               step="any"
               value={latitude}
               onChange={(e) => setLatitude(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Longitud</label>
-            <input
+            <GlassInput
               type="number"
               step="any"
               value={longitude}
               onChange={(e) => setLongitude(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
           <div className="flex items-center gap-2">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isPartner}
-                onChange={(e) => setIsPartner(e.target.checked)}
-                className="rounded"
-              />
+            <label className="flex items-center gap-2">
+              <GlassToggle checked={isPartner} onCheckedChange={setIsPartner} aria-label="Taller asociado" />
               <span className="text-sm font-medium">Taller asociado (partner)</span>
             </label>
           </div>
@@ -184,12 +180,12 @@ export default function AdminWorkshopForm({ initialData, onSubmit, loading }: Ad
           {DAYS.map((day) => (
             <div key={day.key} className="flex items-center gap-3">
               <span className="w-24 text-sm font-medium">{day.label}</span>
-              <input
+              <GlassInput
                 type="text"
                 placeholder="ej: 9:00-18:00"
                 value={hours[day.key] || ''}
                 onChange={(e) => updateHour(day.key, e.target.value)}
-                className="glass-input flex-1"
+                className="flex-1"
               />
             </div>
           ))}

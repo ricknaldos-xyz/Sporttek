@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { ChevronDown, Dumbbell, Lightbulb } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
@@ -40,7 +40,10 @@ export function IssueAccordion({ issues }: IssueAccordionProps) {
     })
   }
 
-  const allExpanded = issues.length > 0 && issues.every(i => expandedIds.has(i.id))
+  const allExpanded = useMemo(
+    () => issues.length > 0 && issues.every(i => expandedIds.has(i.id)),
+    [issues, expandedIds]
+  )
 
   const toggleAll = () => {
     if (allExpanded) {

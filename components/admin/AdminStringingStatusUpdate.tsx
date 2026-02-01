@@ -6,38 +6,13 @@ import { GlassButton } from '@/components/ui/glass-button'
 import { STRINGING_STATUS_FLOW } from '@/lib/stringing'
 import { Loader2 } from 'lucide-react'
 import { StringingOrderStatus } from '@prisma/client'
+import { STRINGING_STATUS_LABELS, STRINGING_STATUS_VARIANTS } from '@/lib/stringing-constants'
 
 interface AdminStringingStatusUpdateProps {
   currentStatus: StringingOrderStatus
   deliveryMode: string
   onUpdate: (newStatus: string) => Promise<void>
   loading: boolean
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING_PAYMENT: 'Pendiente de pago',
-  CONFIRMED: 'Confirmado',
-  PICKUP_SCHEDULED: 'Recojo programado',
-  RECEIVED_AT_WORKSHOP: 'Recibido en taller',
-  IN_PROGRESS: 'En proceso',
-  STRINGING_COMPLETED: 'Encordado completado',
-  READY_FOR_PICKUP: 'Listo para recoger',
-  OUT_FOR_DELIVERY: 'En camino',
-  DELIVERED: 'Entregado',
-  STRINGING_CANCELLED: 'Cancelado',
-}
-
-const STATUS_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'destructive'> = {
-  PENDING_PAYMENT: 'warning',
-  CONFIRMED: 'primary',
-  PICKUP_SCHEDULED: 'default',
-  RECEIVED_AT_WORKSHOP: 'default',
-  IN_PROGRESS: 'primary',
-  STRINGING_COMPLETED: 'success',
-  READY_FOR_PICKUP: 'success',
-  OUT_FOR_DELIVERY: 'primary',
-  DELIVERED: 'success',
-  STRINGING_CANCELLED: 'destructive',
 }
 
 export default function AdminStringingStatusUpdate({
@@ -66,8 +41,8 @@ export default function AdminStringingStatusUpdate({
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Estado actual:</span>
-        <GlassBadge variant={STATUS_VARIANTS[currentStatus] || 'default'}>
-          {STATUS_LABELS[currentStatus] || currentStatus}
+        <GlassBadge variant={STRINGING_STATUS_VARIANTS[currentStatus] || 'default'}>
+          {STRINGING_STATUS_LABELS[currentStatus] || currentStatus}
         </GlassBadge>
       </div>
 
@@ -88,7 +63,7 @@ export default function AdminStringingStatusUpdate({
                 ) : confirming === status ? (
                   'Confirmar'
                 ) : (
-                  STATUS_LABELS[status] || status
+                  STRINGING_STATUS_LABELS[status] || status
                 )}
               </GlassButton>
             ))}

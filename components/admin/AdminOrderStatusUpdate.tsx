@@ -4,31 +4,12 @@ import { useState } from 'react'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { GlassButton } from '@/components/ui/glass-button'
 import { Loader2 } from 'lucide-react'
+import { ORDER_STATUS_LABELS, ORDER_STATUS_VARIANTS } from '@/lib/order-constants'
 
 interface AdminOrderStatusUpdateProps {
   currentStatus: string
   onUpdate: (newStatus: string) => Promise<void>
   loading: boolean
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING_PAYMENT: 'Pendiente de pago',
-  PAID: 'Pagado',
-  PROCESSING: 'En proceso',
-  SHIPPED: 'Enviado',
-  DELIVERED: 'Entregado',
-  CANCELLED: 'Cancelado',
-  REFUNDED: 'Reembolsado',
-}
-
-const STATUS_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'destructive'> = {
-  PENDING_PAYMENT: 'warning',
-  PAID: 'primary',
-  PROCESSING: 'default',
-  SHIPPED: 'primary',
-  DELIVERED: 'success',
-  CANCELLED: 'destructive',
-  REFUNDED: 'destructive',
 }
 
 const NEXT_STATUSES: Record<string, string[]> = {
@@ -63,8 +44,8 @@ export default function AdminOrderStatusUpdate({
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Estado actual:</span>
-        <GlassBadge variant={STATUS_VARIANTS[currentStatus] || 'default'}>
-          {STATUS_LABELS[currentStatus] || currentStatus}
+        <GlassBadge variant={ORDER_STATUS_VARIANTS[currentStatus] || 'default'}>
+          {ORDER_STATUS_LABELS[currentStatus] || currentStatus}
         </GlassBadge>
       </div>
 
@@ -85,7 +66,7 @@ export default function AdminOrderStatusUpdate({
                 ) : confirming === status ? (
                   'Confirmar'
                 ) : (
-                  STATUS_LABELS[status] || status
+                  ORDER_STATUS_LABELS[status] || status
                 )}
               </GlassButton>
             ))}

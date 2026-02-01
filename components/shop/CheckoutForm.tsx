@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { GlassButton } from '@/components/ui/glass-button'
+import { GlassInput, GlassSelect, GlassTextarea } from '@/components/ui/glass-input'
 import { Loader2 } from 'lucide-react'
 
 const LIMA_DISTRICTS = [
@@ -73,11 +74,10 @@ export function CheckoutForm({ onSubmit, loading }: CheckoutFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="text-sm font-medium block mb-1">Nombre completo</label>
-        <input
+        <GlassInput
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="glass-input w-full"
           placeholder="Tu nombre completo"
           required
           minLength={2}
@@ -86,11 +86,10 @@ export function CheckoutForm({ onSubmit, loading }: CheckoutFormProps) {
 
       <div>
         <label className="text-sm font-medium block mb-1">Telefono</label>
-        <input
+        <GlassInput
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="glass-input w-full"
           placeholder="+51 999 999 999"
           required
           minLength={6}
@@ -99,10 +98,10 @@ export function CheckoutForm({ onSubmit, loading }: CheckoutFormProps) {
 
       <div>
         <label className="text-sm font-medium block mb-1">Direccion de envio</label>
-        <textarea
+        <GlassTextarea
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className="glass-input w-full min-h-[60px]"
+          className="min-h-[60px]"
           placeholder="Calle, numero, departamento, referencia"
           required
           minLength={5}
@@ -111,10 +110,9 @@ export function CheckoutForm({ onSubmit, loading }: CheckoutFormProps) {
 
       <div>
         <label className="text-sm font-medium block mb-1">Distrito</label>
-        <select
+        <GlassSelect
           value={district}
           onChange={(e) => setDistrict(e.target.value)}
-          className="glass-input w-full"
           required
         >
           <option value="">Selecciona un distrito</option>
@@ -123,15 +121,15 @@ export function CheckoutForm({ onSubmit, loading }: CheckoutFormProps) {
               {d}
             </option>
           ))}
-        </select>
+        </GlassSelect>
       </div>
 
       <div>
         <label className="text-sm font-medium block mb-1">Notas de envio (opcional)</label>
-        <textarea
+        <GlassTextarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="glass-input w-full min-h-[60px]"
+          className="min-h-[60px]"
           placeholder="Indicaciones adicionales para la entrega"
           maxLength={500}
         />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { GlassSelect } from '@/components/ui/glass-input'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { logger } from '@/lib/logger'
 
@@ -42,8 +43,8 @@ export function CoverageChecker({ district, onDistrictChange }: CoverageCheckerP
         </div>
       ) : (
         <>
-          <select
-            className="glass-input w-full"
+          <GlassSelect
+            className="w-full"
             value={district}
             onChange={(e) => onDistrictChange(e.target.value)}
           >
@@ -53,7 +54,7 @@ export function CoverageChecker({ district, onDistrictChange }: CoverageCheckerP
                 {d}
               </option>
             ))}
-          </select>
+          </GlassSelect>
           {district && (
             <div className="mt-2">
               {isCovered ? (

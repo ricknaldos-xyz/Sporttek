@@ -1,5 +1,7 @@
 'use client'
 
+import { GlassInput, GlassTextarea } from '@/components/ui/glass-input'
+
 interface RacketInfoFormProps {
   brand: string
   model: string
@@ -14,9 +16,9 @@ export function RacketInfoForm({ brand, model, notes, onChange }: RacketInfoForm
         <label className="block text-sm font-medium mb-1">
           Marca de la Raqueta *
         </label>
-        <input
+        <GlassInput
           type="text"
-          className="glass-input w-full"
+          className="w-full"
           placeholder="Ej: Wilson, Babolat, Head"
           value={brand}
           onChange={(e) => onChange('brand', e.target.value)}
@@ -27,9 +29,9 @@ export function RacketInfoForm({ brand, model, notes, onChange }: RacketInfoForm
         <label className="block text-sm font-medium mb-1">
           Modelo *
         </label>
-        <input
+        <GlassInput
           type="text"
-          className="glass-input w-full"
+          className="w-full"
           placeholder="Ej: Pro Staff 97, Pure Aero, Speed MP"
           value={model}
           onChange={(e) => onChange('model', e.target.value)}
@@ -40,8 +42,8 @@ export function RacketInfoForm({ brand, model, notes, onChange }: RacketInfoForm
         <label className="block text-sm font-medium mb-1">
           Notas adicionales (opcional)
         </label>
-        <textarea
-          className="glass-input w-full min-h-[80px] resize-y"
+        <GlassTextarea
+          className="w-full min-h-[80px] resize-y"
           placeholder="Ej: Tiene grip nuevo, protector de marco, etc."
           maxLength={500}
           value={notes}

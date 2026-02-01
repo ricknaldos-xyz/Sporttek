@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
+import { GlassInput, GlassTextarea, GlassSelect, GlassToggle } from '@/components/ui/glass-input'
 import { Save, Loader2, Plus, X } from 'lucide-react'
 
 interface ProductFormData {
@@ -140,51 +141,51 @@ export default function AdminProductForm({ initialData, onSubmit, loading }: Adm
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Nombre *</label>
-            <input
+            <GlassInput
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Slug</label>
-            <input
+            <GlassInput
               type="text"
               value={slug}
               onChange={(e) => {
                 setSlug(e.target.value)
                 setSlugManuallyEdited(true)
               }}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1">Descripcion *</label>
-            <textarea
+            <GlassTextarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               rows={4}
               required
             />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-1">Descripcion corta</label>
-            <input
+            <GlassInput
               type="text"
               value={shortDesc}
               onChange={(e) => setShortDesc(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Categoria *</label>
-            <select
+            <GlassSelect
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               required
             >
               {CATEGORIES.map((c) => (
@@ -192,25 +193,25 @@ export default function AdminProductForm({ initialData, onSubmit, loading }: Adm
                   {c.label}
                 </option>
               ))}
-            </select>
+            </GlassSelect>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Marca *</label>
-            <input
+            <GlassInput
               type="text"
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Modelo</label>
-            <input
+            <GlassInput
               type="text"
               value={model}
               onChange={(e) => setModel(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
         </div>
@@ -221,56 +222,56 @@ export default function AdminProductForm({ initialData, onSubmit, loading }: Adm
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Precio (S/) *</label>
-            <input
+            <GlassInput
               type="number"
               step="0.01"
               min="0"
               value={priceDisplay}
               onChange={(e) => setPriceDisplay(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Precio anterior (S/)</label>
-            <input
+            <GlassInput
               type="number"
               step="0.01"
               min="0"
               value={comparePriceDisplay}
               onChange={(e) => setComparePriceDisplay(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Costo (S/)</label>
-            <input
+            <GlassInput
               type="number"
               step="0.01"
               min="0"
               value={costDisplay}
               onChange={(e) => setCostDisplay(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Stock *</label>
-            <input
+            <GlassInput
               type="number"
               min="0"
               value={stock}
               onChange={(e) => setStock(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">SKU</label>
-            <input
+            <GlassInput
               type="text"
               value={sku}
               onChange={(e) => setSku(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
         </div>
@@ -284,19 +285,19 @@ export default function AdminProductForm({ initialData, onSubmit, loading }: Adm
         <div className="space-y-2">
           {attributes.map((attr, idx) => (
             <div key={idx} className="flex gap-2 items-center">
-              <input
+              <GlassInput
                 type="text"
                 placeholder="Clave (ej: peso)"
                 value={attr.key}
                 onChange={(e) => updateAttribute(idx, 'key', e.target.value)}
-                className="glass-input flex-1"
+                className="flex-1"
               />
-              <input
+              <GlassInput
                 type="text"
                 placeholder="Valor (ej: 300g)"
                 value={attr.value}
                 onChange={(e) => updateAttribute(idx, 'value', e.target.value)}
-                className="glass-input flex-1"
+                className="flex-1"
               />
               <button
                 type="button"
@@ -318,22 +319,12 @@ export default function AdminProductForm({ initialData, onSubmit, loading }: Adm
         <h3 className="text-lg font-semibold mb-4">Estado y SEO</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-                className="rounded"
-              />
+            <label className="flex items-center gap-2">
+              <GlassToggle checked={isActive} onCheckedChange={setIsActive} aria-label="Activo" />
               <span className="text-sm font-medium">Activo</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="rounded"
-              />
+            <label className="flex items-center gap-2">
+              <GlassToggle checked={isFeatured} onCheckedChange={setIsFeatured} aria-label="Destacado" />
               <span className="text-sm font-medium">Destacado</span>
             </label>
           </div>
@@ -341,19 +332,19 @@ export default function AdminProductForm({ initialData, onSubmit, loading }: Adm
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
             <label className="block text-sm font-medium mb-1">Meta titulo</label>
-            <input
+            <GlassInput
               type="text"
               value={metaTitle}
               onChange={(e) => setMetaTitle(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Meta descripcion</label>
-            <textarea
+            <GlassTextarea
               value={metaDescription}
               onChange={(e) => setMetaDescription(e.target.value)}
-              className="glass-input w-full"
+              className="w-full"
               rows={2}
             />
           </div>

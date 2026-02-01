@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { GlassButton } from '@/components/ui/glass-button'
 import { formatPrice } from '@/lib/shop'
@@ -35,7 +36,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   ACCESSORIES: 'Accesorios',
 }
 
-export default function AdminProductTable({ products, onEdit, onToggleActive }: AdminProductTableProps) {
+const AdminProductTable = React.memo(function AdminProductTable({ products, onEdit, onToggleActive }: AdminProductTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -119,4 +120,6 @@ export default function AdminProductTable({ products, onEdit, onToggleActive }: 
       </table>
     </div>
   )
-}
+})
+
+export default AdminProductTable

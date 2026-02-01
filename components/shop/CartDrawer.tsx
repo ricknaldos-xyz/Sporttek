@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { GlassButton } from '@/components/ui/glass-button'
 import { CartItemRow } from './CartItemRow'
@@ -35,16 +35,16 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const [shippingCents, setShippingCents] = useState(0)
   const [totalCents, setTotalCents] = useState(0)
 
-  useEffect(() => {
-    if (open) {
-      fetchCart()
-    }
-  }, [open])
+  const fetchControllerRef = useRef<AbortController | null>(null)
 
-  async function fetchCart() {
+  const fetchCart = useCallback(async () => {
+    fetchControllerRef.current?.abort()
+    const controller = new AbortController()
+    fetchControllerRef.current = controller
+
     setLoading(true)
     try {
-      const res = await fetch('/api/shop/cart')
+      const res = await fetch('/api/shop/cart', { signal: controller.signal })
       if (res.ok) {
         const data = await res.json()
         setItems(data.items)
@@ -52,14 +52,24 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
         setShippingCents(data.shippingCents)
         setTotalCents(data.totalCents)
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return
       logger.error('Failed to fetch cart')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  async function handleQuantityChange(itemId: string, quantity: number) {
+  useEffect(() => {
+    if (open) {
+      fetchCart()
+    }
+    return () => {
+      fetchControllerRef.current?.abort()
+    }
+  }, [open, fetchCart])
+
+  const handleQuantityChange = useCallback(async (itemId: string, quantity: number) => {
     try {
       const res = await fetch(`/api/shop/cart/items/${itemId}`, {
         method: 'PATCH',
@@ -75,9 +85,9 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
     } catch {
       toast.error('Error al actualizar cantidad')
     }
-  }
+  }, [fetchCart])
 
-  async function handleRemove(itemId: string) {
+  const handleRemove = useCallback(async (itemId: string) => {
     try {
       const res = await fetch(`/api/shop/cart/items/${itemId}`, {
         method: 'DELETE',
@@ -90,7 +100,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
     } catch {
       toast.error('Error al eliminar item')
     }
-  }
+  }, [fetchCart])
 
   if (!open) return null
 

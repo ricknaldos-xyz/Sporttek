@@ -1,8 +1,10 @@
 'use client'
 
+import React from 'react'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { GlassButton } from '@/components/ui/glass-button'
 import { formatPrice } from '@/lib/shop'
+import { ORDER_STATUS_LABELS, ORDER_STATUS_VARIANTS } from '@/lib/order-constants'
 import { Eye } from 'lucide-react'
 
 interface Order {
@@ -20,27 +22,7 @@ interface AdminOrderTableProps {
   onViewDetail: (id: string) => void
 }
 
-const STATUS_VARIANTS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'destructive'> = {
-  PENDING_PAYMENT: 'warning',
-  PAID: 'primary',
-  PROCESSING: 'default',
-  SHIPPED: 'primary',
-  DELIVERED: 'success',
-  CANCELLED: 'destructive',
-  REFUNDED: 'destructive',
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING_PAYMENT: 'Pendiente de pago',
-  PAID: 'Pagado',
-  PROCESSING: 'En proceso',
-  SHIPPED: 'Enviado',
-  DELIVERED: 'Entregado',
-  CANCELLED: 'Cancelado',
-  REFUNDED: 'Reembolsado',
-}
-
-export default function AdminOrderTable({ orders, onViewDetail }: AdminOrderTableProps) {
+const AdminOrderTable = React.memo(function AdminOrderTable({ orders, onViewDetail }: AdminOrderTableProps) {
   return (
     <>
       {/* Mobile card view */}
@@ -49,12 +31,15 @@ export default function AdminOrderTable({ orders, onViewDetail }: AdminOrderTabl
           <div
             key={order.id}
             className="p-4 glass-light border-glass rounded-xl space-y-2 cursor-pointer"
+            role="button"
+            tabIndex={0}
             onClick={() => onViewDetail(order.id)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onViewDetail(order.id) } }}
           >
             <div className="flex items-center justify-between">
               <span className="font-mono text-sm font-semibold">{order.orderNumber}</span>
-              <GlassBadge variant={STATUS_VARIANTS[order.status] || 'default'}>
-                {STATUS_LABELS[order.status] || order.status}
+              <GlassBadge variant={ORDER_STATUS_VARIANTS[order.status] || 'default'}>
+                {ORDER_STATUS_LABELS[order.status] || order.status}
               </GlassBadge>
             </div>
             <div className="text-sm">
@@ -102,8 +87,8 @@ export default function AdminOrderTable({ orders, onViewDetail }: AdminOrderTabl
               <td className="p-3">{order._count.items}</td>
               <td className="p-3 font-medium">{formatPrice(order.totalCents)}</td>
               <td className="p-3">
-                <GlassBadge variant={STATUS_VARIANTS[order.status] || 'default'}>
-                  {STATUS_LABELS[order.status] || order.status}
+                <GlassBadge variant={ORDER_STATUS_VARIANTS[order.status] || 'default'}>
+                  {ORDER_STATUS_LABELS[order.status] || order.status}
                 </GlassBadge>
               </td>
               <td className="p-3">
@@ -125,4 +110,6 @@ export default function AdminOrderTable({ orders, onViewDetail }: AdminOrderTabl
       </div>
     </>
   )
-}
+})
+
+export default AdminOrderTable

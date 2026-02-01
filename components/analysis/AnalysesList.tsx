@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { GlassCard } from '@/components/ui/glass-card'
@@ -118,18 +118,18 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
   const end = Math.min(page * ITEMS_PER_PAGE, filtered.length)
 
   // Reset page on filter change
-  const handleSportFilter = (slug: string) => {
+  const handleSportFilter = useCallback((slug: string) => {
     setSportFilter(slug)
     setPage(1)
-  }
-  const handleStatusFilter = (status: string) => {
+  }, [])
+  const handleStatusFilter = useCallback((status: string) => {
     setStatusFilter(status)
     setPage(1)
-  }
-  const handleSort = (sort: SortOption) => {
+  }, [])
+  const handleSort = useCallback((sort: SortOption) => {
     setSortBy(sort)
     setPage(1)
-  }
+  }, [])
 
   return (
     <div className="space-y-4">
@@ -266,7 +266,7 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
                     </p>
                     <div className="flex items-center gap-3 mt-2 text-sm flex-wrap">
                       <GlassBadge
-                        variant={(STATUS_VARIANTS[analysis.status] ?? 'default') as any}
+                        variant={(STATUS_VARIANTS[analysis.status] ?? 'default') as 'default' | 'primary' | 'success' | 'warning' | 'destructive'}
                         size="sm"
                       >
                         {STATUS_LABELS[analysis.status] ?? analysis.status}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import { GlassInput, GlassToggle } from '@/components/ui/glass-input'
 
 interface TensionInputProps {
   tensionMain: number
@@ -41,9 +42,9 @@ export function TensionInput({
           Tension principales (lbs) *
         </label>
         <div className="relative">
-          <input
+          <GlassInput
             type="number"
-            className="glass-input w-full pr-12"
+            className="w-full pr-12"
             min={30}
             max={80}
             value={tensionMain}
@@ -79,17 +80,16 @@ export function TensionInput({
         </div>
       </div>
 
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
+      <label className="flex items-center gap-2">
+        <GlassToggle
           checked={sameTension}
-          onChange={(e) => {
-            onSameTensionChange(e.target.checked)
-            if (e.target.checked && onCrossChange) {
+          onCheckedChange={(checked) => {
+            onSameTensionChange(checked)
+            if (checked && onCrossChange) {
               onCrossChange(undefined)
             }
           }}
-          className="rounded border-glass"
+          aria-label="Misma tension para cruzadas"
         />
         <span className="text-sm">Misma tension para cruzadas</span>
       </label>
@@ -100,9 +100,9 @@ export function TensionInput({
             Tension cruzadas (lbs)
           </label>
           <div className="relative">
-            <input
+            <GlassInput
               type="number"
-              className="glass-input w-full pr-12"
+              className="w-full pr-12"
               min={30}
               max={80}
               value={tensionCross ?? tensionMain}

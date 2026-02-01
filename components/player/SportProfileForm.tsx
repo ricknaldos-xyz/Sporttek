@@ -88,14 +88,14 @@ export function SportProfileForm({
                 className="w-full h-11 rounded-xl glass-light border border-glass px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Selecciona...</option>
-                {(field.options as string[]).map((opt) => (
+                {field.options.filter((opt): opt is string => typeof opt === 'string').map((opt) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
             )}
             {field.type === 'toggle' && (
               <div className="flex gap-2">
-                {(field.options as { value: string; label: string }[]).map((opt) => (
+                {field.options.filter((opt): opt is { value: string; label: string } => typeof opt === 'object' && opt !== null).map((opt) => (
                   <button
                     key={opt.value}
                     type="button"

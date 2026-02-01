@@ -8,22 +8,29 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
+    const controller = new AbortController()
+
     async function fetchCount() {
       try {
-        const res = await fetch('/api/notifications?unreadOnly=true&limit=1')
+        const res = await fetch('/api/notifications?unreadOnly=true&limit=1', {
+          signal: controller.signal,
+        })
         if (res.ok) {
           const data = await res.json()
           setUnreadCount(data.unreadCount ?? 0)
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return
       }
     }
 
     fetchCount()
 
     const interval = setInterval(fetchCount, 60000)
-    return () => clearInterval(interval)
+    return () => {
+      controller.abort()
+      clearInterval(interval)
+    }
   }, [])
 
   return (

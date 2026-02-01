@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { getCategoryLabel, SEVERITY_CONFIG, type Severity } from '@/lib/analysis-constants'
 import {
@@ -27,7 +28,7 @@ function getBarColor(score: number): string {
   return '#ef4444' // red-500
 }
 
-export function CategoryBreakdown({ issues }: CategoryBreakdownProps) {
+export const CategoryBreakdown = React.memo(function CategoryBreakdown({ issues }: CategoryBreakdownProps) {
   if (issues.length === 0) return null
 
   // Group by category and compute a "health score"
@@ -73,4 +74,4 @@ export function CategoryBreakdown({ issues }: CategoryBreakdownProps) {
       </div>
     </GlassCard>
   )
-}
+})

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Search, X } from 'lucide-react'
+import { GlassInput } from '@/components/ui/glass-input'
 
 interface SearchBarProps {
   value: string
@@ -16,6 +17,12 @@ export function SearchBar({ value, onChange, placeholder = 'Buscar productos...'
   useEffect(() => {
     setLocalValue(value)
   }, [value])
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   function handleChange(newValue: string) {
     setLocalValue(newValue)
@@ -35,16 +42,17 @@ export function SearchBar({ value, onChange, placeholder = 'Buscar productos...'
   return (
     <div className="relative">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-      <input
+      <GlassInput
         type="text"
         value={localValue}
         onChange={(e) => handleChange(e.target.value)}
-        className="glass-input w-full pl-10 pr-10"
+        className="pl-10 pr-10"
         placeholder={placeholder}
       />
       {localValue && (
         <button
           onClick={handleClear}
+          aria-label="Limpiar busqueda"
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="h-4 w-4" />
