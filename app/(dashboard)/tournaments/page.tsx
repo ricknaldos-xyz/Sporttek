@@ -8,6 +8,7 @@ import { logger } from '@/lib/logger'
 import { formatDate } from '@/lib/date-utils'
 import { Trophy, Calendar, MapPin, Users, Loader2, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { useSport } from '@/contexts/SportContext'
 
 interface Tournament {
@@ -45,6 +46,8 @@ export default function TournamentsPage() {
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('')
   const { activeSport } = useSport()
+  const { data: session } = useSession()
+  const canCreate = session?.user?.role === 'ADMIN' || session?.user?.role === 'COACH'
 
   useEffect(() => {
     const controller = new AbortController()
@@ -78,12 +81,14 @@ export default function TournamentsPage() {
           <Trophy className="h-7 w-7 text-yellow-500" />
           <h1 className="text-2xl font-bold">Torneos</h1>
         </div>
-        <GlassButton variant="solid" size="sm" asChild>
-          <Link href="/tournaments/create">
-            <Plus className="h-4 w-4 mr-2" />
-            Crear torneo
-          </Link>
-        </GlassButton>
+        {canCreate && (
+          <GlassButton variant="solid" size="sm" asChild>
+            <Link href="/tournaments/create">
+              <Plus className="h-4 w-4 mr-2" />
+              Crear torneo
+            </Link>
+          </GlassButton>
+        )}
       </div>
 
       {/* Tabs */}

@@ -30,6 +30,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'COACH') {
+      return NextResponse.json({ error: 'Solo administradores y coaches pueden crear torneos' }, { status: 403 })
+    }
+
     const { success } = await tournamentLimiter.check(session.user.id)
     if (!success) {
       return NextResponse.json(
