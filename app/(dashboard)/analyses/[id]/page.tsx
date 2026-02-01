@@ -32,6 +32,7 @@ import {
   CheckCircle,
   Target,
   Dumbbell,
+  Loader2,
 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { RetryAnalysisButton } from '@/components/analysis/RetryAnalysisButton'
@@ -44,6 +45,7 @@ import { IssueAccordion } from '@/components/analysis/IssueAccordion'
 import { ShareButton } from '@/components/analysis/ShareButton'
 import { MediaPreview } from '@/components/analysis/MediaPreview'
 import { ProcessingPoller } from '@/components/analysis/ProcessingPoller'
+import { ScrollToTop } from '@/components/ui/ScrollToTop'
 
 async function getAnalysis(id: string, userId: string) {
   return prisma.analysis.findFirst({
@@ -78,8 +80,28 @@ export default async function AnalysisDetailPage({
 
   if (!analysis) notFound()
 
+  // Compute global average score for this technique across all users
+  const avgResult = await prisma.analysis.aggregate({
+    where: {
+      techniqueId: analysis.technique.id,
+      status: 'COMPLETED',
+      overallScore: { not: null },
+    },
+    _avg: { overallScore: true },
+  })
+  const globalAverage = avgResult._avg.overallScore ?? undefined
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+        <Link href="/analyses" className="hover:text-foreground transition-colors">Mis Analisis</Link>
+        <span>/</span>
+        <span>{analysis.technique.sport.name}</span>
+        <span>/</span>
+        <span className="text-foreground">{analysis.technique.name}</span>
+      </div>
+
       {/* Header */}
       <div className="flex items-center gap-4">
         <GlassButton variant="ghost" size="icon" asChild>
@@ -107,7 +129,7 @@ export default async function AnalysisDetailPage({
         <>
           <ProcessingPoller analysisId={analysis.id} />
           <GlassCard intensity="light" padding="md" className="bg-warning/5 border-warning/20 flex items-center gap-3">
-            <div className="w-5 h-5 border-2 border-warning border-t-transparent rounded-full animate-spin" />
+            <Loader2 className="h-5 w-5 animate-spin text-warning" />
             <p className="text-warning">
               Tu analisis esta siendo procesado. Esto puede tomar unos segundos.
             </p>
@@ -141,11 +163,9 @@ export default async function AnalysisDetailPage({
             <ScoreContext
               score={analysis.overallScore}
               previousScore={analysis.previousAnalysis?.overallScore ?? undefined}
+              averageScore={globalAverage}
             />
           )}
-
-          {/* Category Breakdown */}
-          <CategoryBreakdown issues={analysis.issues} />
 
           {/* Summary */}
           {analysis.summary && (
@@ -188,6 +208,9 @@ export default async function AnalysisDetailPage({
             )}
           </div>
 
+          {/* Category Breakdown */}
+          <CategoryBreakdown issues={analysis.issues} />
+
           {/* Issues */}
           {analysis.issues.length > 0 && (
             <div className="space-y-4">
@@ -227,8 +250,9 @@ export default async function AnalysisDetailPage({
                   Genera tu Plan de Entrenamiento
                 </h3>
                 <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                  Basado en los {analysis.issues.length} problemas detectados, podemos crear un plan
-                  personalizado de ejercicios para mejorar tu tecnica
+                  {analysis.issues.length > 0
+                    ? `Basado en los ${analysis.issues.length} problemas detectados, podemos crear un plan personalizado de ejercicios para mejorar tu tecnica`
+                    : 'Basado en tu analisis, podemos crear un plan personalizado de ejercicios para mejorar tu tecnica'}
                 </p>
                 <GlassButton variant="solid" asChild>
                   <Link href={`/training/generate?analysisId=${analysis.id}`}>
@@ -240,6 +264,8 @@ export default async function AnalysisDetailPage({
           </GlassCard>
         </>
       )}
+
+      <ScrollToTop />
     </div>
   )
 }

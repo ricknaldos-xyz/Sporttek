@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, Dumbbell } from 'lucide-react'
+import { ChevronDown, Dumbbell, Lightbulb } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { getCategoryLabel, SEVERITY_CONFIG, type Severity } from '@/lib/analysis-constants'
@@ -70,6 +70,7 @@ export function IssueAccordion({ issues }: IssueAccordionProps) {
             {/* Header - always visible */}
             <button
               onClick={() => toggleExpand(issue.id)}
+              aria-expanded={isExpanded}
               className="w-full flex items-center gap-3 p-4 text-left hover:bg-glass-light/30 transition-colors rounded-xl"
             >
               {/* Number circle */}
@@ -82,7 +83,7 @@ export function IssueAccordion({ issues }: IssueAccordionProps) {
 
               {/* Title + category */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm">{issue.title}</h3>
+                <h3 className="font-semibold text-sm truncate">{issue.title}</h3>
                 <span className="text-xs text-muted-foreground">
                   {categoryIcon} {categoryLabel}
                 </span>
@@ -95,28 +96,37 @@ export function IssueAccordion({ issues }: IssueAccordionProps) {
 
               {/* Expand icon */}
               <ChevronDown className={cn(
-                'h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0',
+                'h-5 w-5 text-muted-foreground transition-transform duration-200 flex-shrink-0',
                 isExpanded && 'rotate-180'
               )} />
             </button>
 
             {/* Expanded content */}
-            {isExpanded && (
+            <div className={cn(
+              'overflow-hidden transition-all duration-300 ease-out',
+              isExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+            )}>
               <div className="px-4 pb-4 pt-0 space-y-4 border-t border-glass ml-11">
                 <p className="text-muted-foreground text-sm pt-4">{issue.description}</p>
 
                 <div className="glass-ultralight border-glass rounded-xl p-4">
-                  <h4 className="font-medium text-sm mb-2">Como corregirlo:</h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Lightbulb className="h-4 w-4 text-primary" />
+                    <h4 className="font-medium text-sm">Como corregirlo</h4>
+                  </div>
                   <p className="text-sm text-muted-foreground">{issue.correction}</p>
                 </div>
 
                 {issue.drills.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-sm mb-2">Ejercicios recomendados:</h4>
+                  <div className="bg-primary/5 border border-primary/10 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Dumbbell className="h-4 w-4 text-primary" />
+                      <h4 className="font-medium text-sm">Ejercicios recomendados</h4>
+                    </div>
                     <ul className="space-y-1">
                       {issue.drills.map((drill, i) => (
                         <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <Dumbbell className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary" />
+                          <span className="text-primary mt-0.5">•</span>
                           {drill}
                         </li>
                       ))}
@@ -124,7 +134,7 @@ export function IssueAccordion({ issues }: IssueAccordionProps) {
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </GlassCard>
         )
       })}

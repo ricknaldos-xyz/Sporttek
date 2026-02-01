@@ -54,7 +54,7 @@ export function RetryAnalysisButton({
         return
       }
 
-      toast.success('Analisis reintentado exitosamente')
+      toast.success('Reintento iniciado. Tu analisis esta siendo procesado...')
       router.refresh()
     } catch {
       toast.error('Algo salio mal')

@@ -21,10 +21,10 @@ interface CategoryBreakdownProps {
 }
 
 function getBarColor(score: number): string {
-  if (score >= 8) return '#22c55e'
-  if (score >= 6) return '#eab308'
-  if (score >= 4) return '#f97316'
-  return '#ef4444'
+  if (score >= 9) return '#10b981' // emerald-500
+  if (score >= 7) return '#22c55e' // green-500
+  if (score >= 5) return '#eab308' // yellow-500
+  return '#ef4444' // red-500
 }
 
 export function CategoryBreakdown({ issues }: CategoryBreakdownProps) {
@@ -57,10 +57,11 @@ export function CategoryBreakdown({ issues }: CategoryBreakdownProps) {
             <YAxis
               type="category"
               dataKey="category"
-              width={120}
+              width={140}
               tick={{ fontSize: 13, fill: 'hsl(var(--muted-foreground))' }}
               axisLine={false}
               tickLine={false}
+              tickFormatter={(value: string) => value.length > 15 ? value.slice(0, 15) + '...' : value}
             />
             <Bar dataKey="score" radius={[0, 6, 6, 0]} barSize={20}>
               {data.map((entry, index) => (

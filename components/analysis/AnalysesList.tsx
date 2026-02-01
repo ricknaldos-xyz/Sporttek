@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { Video, ArrowRight, TrendingUp, TrendingDown, ChevronLeft, ChevronRight, Loader2, AlertCircle, ArrowUpDown } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/utils'
-import { getScoreBorderColor } from '@/lib/analysis-constants'
+import { getScoreBorderColor, STATUS_LABELS, STATUS_VARIANTS } from '@/lib/analysis-constants'
 import { ScoreRing } from '@/components/analysis/ScoreRing'
 
 interface AnalysisItem {
@@ -30,9 +31,7 @@ interface AnalysesListProps {
 
 const STATUS_FILTERS = [
   { value: '', label: 'Todos' },
-  { value: 'COMPLETED', label: 'Completado' },
-  { value: 'PROCESSING', label: 'Procesando' },
-  { value: 'FAILED', label: 'Error' },
+  ...Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label })),
 ]
 
 const SORT_OPTIONS = [
@@ -52,10 +51,23 @@ const QUICK_START_TECHNIQUES = [
 ]
 
 export function AnalysesList({ analyses }: AnalysesListProps) {
-  const [sportFilter, setSportFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [sortBy, setSortBy] = useState<SortOption>('recent')
-  const [page, setPage] = useState(1)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  const [sportFilter, setSportFilter] = useState(searchParams.get('sport') || '')
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '')
+  const [sortBy, setSortBy] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'recent')
+  const [page, setPage] = useState(Number(searchParams.get('page')) || 1)
+
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (sportFilter) params.set('sport', sportFilter)
+    if (statusFilter) params.set('status', statusFilter)
+    if (sortBy !== 'recent') params.set('sort', sortBy)
+    if (page > 1) params.set('page', String(page))
+    const query = params.toString()
+    router.replace(query ? `?${query}` : '', { scroll: false })
+  }, [sportFilter, statusFilter, sortBy, page, router])
 
   // Extract unique sports
   const sports = useMemo(() => {
@@ -122,7 +134,7 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
   return (
     <div className="space-y-4">
       {/* Compact filter bar — single row */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-wrap">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {/* Sport filters (only if multiple sports) */}
         {sports.length > 1 && (
           <>
@@ -140,6 +152,7 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
                 variant={sportFilter === sport.slug ? 'solid' : 'outline'}
                 size="sm"
                 onClick={() => handleSportFilter(sport.slug)}
+                aria-label={`Filtrar por ${sport.name}`}
                 className="h-7 px-3 text-xs rounded-full"
               >
                 {sport.slug === 'tennis' ? '🎾' : '🏅'} {sport.name}
@@ -156,6 +169,7 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
             variant={statusFilter === filter.value ? 'solid' : 'ghost'}
             size="sm"
             onClick={() => handleStatusFilter(filter.value)}
+            aria-label={`Filtrar por estado: ${filter.label}`}
             className="h-7 px-3 text-xs rounded-full"
           >
             {filter.label}
@@ -163,7 +177,8 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
         ))}
 
         {/* Sort dropdown */}
-        <div className="ml-auto flex-shrink-0">
+        <div className="flex items-center gap-2 pl-3 ml-auto border-l border-glass">
+          <span className="text-xs text-muted-foreground whitespace-nowrap">Ordenar:</span>
           <div className="flex items-center gap-1">
             <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
             {SORT_OPTIONS.map((opt) => (
@@ -172,6 +187,7 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
                 variant={sortBy === opt.value ? 'solid' : 'ghost'}
                 size="sm"
                 onClick={() => handleSort(opt.value)}
+                aria-label={`Ordenar por ${opt.label}`}
                 className="h-7 px-3 text-xs rounded-full"
               >
                 {opt.label}
@@ -183,7 +199,7 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
 
       {/* Stats summary */}
       {stats && (
-        <div className="text-sm text-muted-foreground">
+        <div className="glass-ultralight border-glass rounded-lg px-3 py-2 text-sm text-muted-foreground">
           {stats.count} analisis completados &bull; Promedio: {stats.avg.toFixed(1)}/10 &bull; Mejor: {stats.best.toFixed(1)}/10
         </div>
       )}
@@ -226,7 +242,7 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
                     )}
                     {/* Delta indicator next to mini ring */}
                     {scoreDelta !== null && scoreDelta !== 0 && (
-                      <div className={`flex items-center gap-0.5 text-xs font-medium ${scoreDelta > 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                      <div className={`hidden sm:flex items-center gap-0.5 text-xs font-medium ${scoreDelta > 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                         {scoreDelta > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                         {scoreDelta > 0 ? '+' : ''}{scoreDelta.toFixed(1)}
                       </div>
@@ -250,24 +266,10 @@ export function AnalysesList({ analyses }: AnalysesListProps) {
                     </p>
                     <div className="flex items-center gap-3 mt-2 text-sm flex-wrap">
                       <GlassBadge
-                        variant={
-                          analysis.status === 'COMPLETED'
-                            ? 'success'
-                            : analysis.status === 'PROCESSING'
-                            ? 'warning'
-                            : analysis.status === 'FAILED'
-                            ? 'destructive'
-                            : 'default'
-                        }
+                        variant={(STATUS_VARIANTS[analysis.status] ?? 'default') as any}
                         size="sm"
                       >
-                        {analysis.status === 'COMPLETED'
-                          ? 'Completado'
-                          : analysis.status === 'PROCESSING'
-                          ? 'Procesando'
-                          : analysis.status === 'FAILED'
-                          ? 'Error'
-                          : 'Pendiente'}
+                        {STATUS_LABELS[analysis.status] ?? analysis.status}
                       </GlassBadge>
                       {analysis._count.issues > 0 && (
                         <span className="text-muted-foreground text-xs">

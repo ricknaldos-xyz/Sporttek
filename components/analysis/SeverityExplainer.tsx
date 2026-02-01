@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { HelpCircle, X } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
@@ -40,6 +40,15 @@ const severityLevels = [
 export function SeverityExplainer() {
   const [isOpen, setIsOpen] = useState(false)
 
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
+
   return (
     <>
       <GlassButton
@@ -53,9 +62,9 @@ export function SeverityExplainer() {
       </GlassButton>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-all"
             onClick={() => setIsOpen(false)}
           />
           <div className="relative glass-heavy border-glass-strong rounded-2xl shadow-glass-xl max-w-md w-full mx-4 overflow-hidden">
@@ -63,6 +72,7 @@ export function SeverityExplainer() {
               <h3 className="font-semibold">Niveles de severidad</h3>
               <button
                 onClick={() => setIsOpen(false)}
+                aria-label="Cerrar"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-5 w-5" />

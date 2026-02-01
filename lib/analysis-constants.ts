@@ -30,6 +30,20 @@ export const SEVERITY_CONFIG = {
 
 export type Severity = keyof typeof SEVERITY_CONFIG
 
+export const STATUS_LABELS: Record<string, string> = {
+  COMPLETED: 'Completado',
+  PROCESSING: 'Procesando',
+  FAILED: 'Error',
+  PENDING: 'Pendiente',
+}
+
+export const STATUS_VARIANTS: Record<string, string> = {
+  COMPLETED: 'success',
+  PROCESSING: 'warning',
+  FAILED: 'destructive',
+  PENDING: 'default',
+}
+
 export function getScoreColor(score: number): string {
   if (score >= 9) return 'text-emerald-500'
   if (score >= 7) return 'text-green-500'
@@ -45,9 +59,9 @@ export function getScoreRingColor(score: number): string {
 }
 
 export function getScoreBorderColor(score: number): string {
-  if (score >= 8) return 'border-l-emerald-500'
-  if (score >= 6) return 'border-l-yellow-500'
-  if (score >= 4) return 'border-l-orange-500'
+  if (score >= 9) return 'border-l-emerald-500'
+  if (score >= 7) return 'border-l-green-500'
+  if (score >= 5) return 'border-l-yellow-500'
   return 'border-l-red-500'
 }
 

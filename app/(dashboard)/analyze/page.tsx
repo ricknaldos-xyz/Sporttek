@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger'
 import { GlassCard } from '@/components/ui/glass-card'
 import { toast } from 'sonner'
 import {
+  ArrowRight,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -97,6 +98,7 @@ export default function AnalyzePage() {
   >([])
   const [isDragging, setIsDragging] = useState(false)
   const [processingElapsed, setProcessingElapsed] = useState(0)
+  const [analysisComplete, setAnalysisComplete] = useState<string | null>(null)
   const processingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const [initialStepApplied, setInitialStepApplied] = useState(false)
   const [currentUploadingFile, setCurrentUploadingFile] = useState<string>('')
@@ -161,6 +163,16 @@ export default function AnalyzePage() {
     }
   }, [selectedTechnique, selectedSport])
 
+  // Route guard during uploading/processing
+  useEffect(() => {
+    if (!processing && !uploading) return
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [processing, uploading])
+
   // Processing timer
   useEffect(() => {
     if (processing) {
@@ -194,11 +206,11 @@ export default function AnalyzePage() {
       const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024 // 100MB video, 10MB image
 
       if (!isVideo && !isImage) {
-        toast.error(`${file.name} no es un formato valido`)
+        toast.error(`${file.name}: formato no soportado. Usa MP4, MOV, WebM, JPG o PNG`)
         return false
       }
       if (file.size > maxSize) {
-        toast.error(`${file.name} es muy grande`)
+        toast.error(`${file.name} excede el limite (${isVideo ? '100MB' : '10MB'}). Tamaño: ${(file.size / 1024 / 1024).toFixed(1)}MB`)
         return false
       }
       return true
@@ -368,8 +380,7 @@ export default function AnalyzePage() {
       }
 
       setProcessingStage(2)
-      toast.success('Analisis completado!')
-      router.push(`/analyses/${analysis.id}`)
+      setAnalysisComplete(analysis.id)
     } catch (error) {
       toast.error('Error al procesar el analisis')
       setProcessing(false)
@@ -419,8 +430,7 @@ export default function AnalyzePage() {
       }
 
       setProcessingStage(2)
-      toast.success('Analisis completado!')
-      router.push(`/analyses/${analysis.id}`)
+      setAnalysisComplete(analysis.id)
     } catch (error) {
       toast.error('Error al procesar el analisis')
       setUploading(false)
@@ -566,11 +576,29 @@ export default function AnalyzePage() {
               )
             })}
           </div>
-          <p className="text-sm text-muted-foreground text-center mt-6">
-            {processingElapsed >= 30
-              ? 'Tomando mas tiempo de lo esperado, por favor espera...'
-              : 'Esto puede tomar unos segundos...'}
-          </p>
+          {analysisComplete ? (
+            <div className="text-center space-y-4 mt-6">
+              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
+                <Check className="h-8 w-8 text-green-500" />
+              </div>
+              <p className="text-lg font-semibold">Analisis completado!</p>
+              <GlassButton variant="solid" onClick={() => router.push(`/analyses/${analysisComplete}`)}>
+                Ver resultados
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </GlassButton>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground text-center mt-6">
+                {processingElapsed > 30
+                  ? 'Tomando mas tiempo de lo esperado, por favor espera...'
+                  : 'Esto puede tomar unos segundos...'}
+              </p>
+              <p className="text-xs text-muted-foreground/60 text-center mt-2 tabular-nums">
+                {processingElapsed}s
+              </p>
+            </>
+          )}
         </GlassCard>
       </div>
     )
@@ -664,6 +692,10 @@ export default function AnalyzePage() {
               <div className="flex justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
+            ) : sports.length === 0 ? (
+              <div className="flex justify-center py-12">
+                <p className="text-muted-foreground">No hay deportes disponibles</p>
+              </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {sports.map((sport) => (
@@ -727,6 +759,12 @@ export default function AnalyzePage() {
                   </div>
                 </button>
 
+                {techniques.length === 0 && !loadingTechniques && (
+                  <p className="text-muted-foreground text-center py-4">
+                    No hay tecnicas disponibles para este deporte. Usa la deteccion automatica.
+                  </p>
+                )}
+
                 {techniques.map((technique) => (
                   <button
                     key={technique.id}
@@ -743,7 +781,8 @@ export default function AnalyzePage() {
                   >
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium">{technique.name}</h3>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-muted-foreground mr-1">Dificultad</span>
                         {Array.from({ length: 5 }).map((_, i) => (
                           <div
                             key={i}
@@ -837,7 +876,7 @@ export default function AnalyzePage() {
               className={cn(
                 'border-2 border-dashed rounded-xl p-4 sm:p-8 text-center transition-all duration-[var(--duration-normal)] mt-4',
                 isDragging
-                  ? 'border-primary bg-primary/5 scale-[1.02]'
+                  ? 'border-primary bg-primary/5 scale-[1.03]'
                   : 'border-glass hover:border-primary/50 hover:glass-ultralight'
               )}
             >
@@ -845,7 +884,7 @@ export default function AnalyzePage() {
                 type="file"
                 id="file-upload"
                 className="hidden"
-                accept="video/*,image/*"
+                accept=".mp4,.mov,.webm,.avi,.jpg,.jpeg,.png,.heic"
                 multiple
                 onChange={handleFileChange}
               />

@@ -50,9 +50,9 @@ function getScoreLabel(score: number): { label: string; color: string; descripti
     }
   }
   return {
-    label: 'Necesita trabajo',
+    label: 'En progreso',
     color: 'text-red-500',
-    description: 'Enfocate en los fundamentos basicos',
+    description: 'Sigue practicando para mejorar tu tecnica',
   }
 }
 
@@ -78,7 +78,7 @@ export function ScoreContext({ score, averageScore, previousScore, benchmarkScor
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className={cn("grid gap-4", previousDifference !== null ? "grid-cols-2" : "grid-cols-1")}>
         {/* Comparison to average */}
         <div className="glass-ultralight border-glass rounded-xl p-3">
           <p className="text-xs text-muted-foreground mb-1">vs Promedio</p>

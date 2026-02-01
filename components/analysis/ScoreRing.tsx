@@ -6,7 +6,7 @@ import { getScoreRingColor, getScoreLabel } from '@/lib/analysis-constants'
 import { getTechniqueTier, getTechniqueTierLabel } from '@/lib/skill-score'
 
 const SIZE_CONFIG = {
-  sm: { px: 60, strokeWidth: 5, scoreClass: 'text-xl', denomClass: 'text-[10px]' },
+  sm: { px: 60, strokeWidth: 5, scoreClass: 'text-xl', denomClass: 'text-[11px]' },
   md: { px: 120, strokeWidth: 8, scoreClass: 'text-3xl', denomClass: 'text-xs' },
   lg: { px: 160, strokeWidth: 10, scoreClass: 'text-4xl', denomClass: 'text-sm' },
 } as const
@@ -36,7 +36,7 @@ export function ScoreRing({ score, size = 'md' }: ScoreRingProps) {
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="relative" style={{ width: px, height: px }}>
+      <div className="relative" style={{ width: px, height: px }} aria-label={`Puntuacion: ${score.toFixed(1)} de 10`}>
         <svg width={px} height={px} className="-rotate-90">
           {/* Background track */}
           <circle

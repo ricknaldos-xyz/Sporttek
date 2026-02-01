@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react'
 
 interface MediaItem {
   id: string
@@ -24,6 +24,16 @@ export function MediaLightbox({ items, currentIndex, onClose, onNavigate }: Medi
   const hasPrev = currentIndex > 0
   const hasNext = currentIndex < items.length - 1
   const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [mediaError, setMediaError] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    modalRef.current?.focus()
+  }, [])
+
+  useEffect(() => {
+    setMediaError(false)
+  }, [currentIndex])
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.touches[0].clientX)
@@ -32,7 +42,8 @@ export function MediaLightbox({ items, currentIndex, onClose, onNavigate }: Medi
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStart === null) return
     const diff = touchStart - e.changedTouches[0].clientX
-    const threshold = 50
+    // Use 60px threshold to reduce accidental swipes on small screens
+    const threshold = 60
     if (diff > threshold && hasNext) onNavigate(currentIndex + 1)
     if (diff < -threshold && hasPrev) onNavigate(currentIndex - 1)
     setTouchStart(null)
@@ -54,13 +65,14 @@ export function MediaLightbox({ items, currentIndex, onClose, onNavigate }: Medi
   }, [handleKeyDown])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div ref={modalRef} tabIndex={-1} role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+        aria-label="Cerrar"
+        className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-colors"
       >
         <X className="h-6 w-6" />
       </button>
@@ -69,7 +81,8 @@ export function MediaLightbox({ items, currentIndex, onClose, onNavigate }: Medi
       {hasPrev && (
         <button
           onClick={() => onNavigate(currentIndex - 1)}
-          className="absolute left-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          aria-label="Anterior"
+          className="absolute left-4 z-10 p-2 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-colors"
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
@@ -77,7 +90,8 @@ export function MediaLightbox({ items, currentIndex, onClose, onNavigate }: Medi
       {hasNext && (
         <button
           onClick={() => onNavigate(currentIndex + 1)}
-          className="absolute right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          aria-label="Siguiente"
+          className="absolute right-4 z-10 p-2 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-colors"
         >
           <ChevronRight className="h-6 w-6" />
         </button>
@@ -90,24 +104,44 @@ export function MediaLightbox({ items, currentIndex, onClose, onNavigate }: Medi
         onTouchEnd={handleTouchEnd}
       >
         {item.type === 'VIDEO' ? (
-          <video
-            src={item.url}
-            controls
-            autoPlay
-            muted
-            playsInline
-            className="w-full max-h-[85vh] rounded-xl bg-black"
-          />
-        ) : (
-          <div className="relative w-full aspect-video">
-            <Image
+          mediaError ? (
+            <div className="w-full h-64 flex items-center justify-center glass-ultralight rounded-xl">
+              <div className="text-center text-muted-foreground">
+                <AlertTriangle className="h-8 w-8 mx-auto mb-2" />
+                <p className="text-sm">No se pudo cargar el video</p>
+              </div>
+            </div>
+          ) : (
+            <video
               src={item.url}
-              alt={item.filename}
-              fill
-              className="object-contain rounded-xl"
-              sizes="(max-width: 1024px) 100vw, 1024px"
+              controls
+              muted
+              playsInline
+              className="w-full max-h-[85vh] rounded-xl bg-black"
+              onError={() => setMediaError(true)}
             />
-          </div>
+          )
+        ) : (
+          mediaError ? (
+            <div className="w-full h-64 flex items-center justify-center glass-ultralight rounded-xl">
+              <div className="text-center text-muted-foreground">
+                <AlertTriangle className="h-8 w-8 mx-auto mb-2" />
+                <p className="text-sm">No se pudo cargar la imagen</p>
+              </div>
+            </div>
+          ) : (
+            <div className="relative w-full flex items-center justify-center" style={{ maxHeight: '85vh' }}>
+              <Image
+                src={item.url}
+                alt={item.filename}
+                width={1200}
+                height={800}
+                className="object-contain rounded-xl max-h-[85vh] w-auto h-auto"
+                sizes="(max-width: 1024px) 100vw, 1024px"
+                onError={() => setMediaError(true)}
+              />
+            </div>
+          )
         )}
 
         {/* Info bar */}

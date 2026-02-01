@@ -63,6 +63,7 @@ export function VideoGuidelines() {
     <div className="glass-ultralight border-glass rounded-xl overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
         className="w-full flex items-center justify-between p-4 hover:glass-light transition-all duration-[var(--duration-normal)]"
       >
         <div className="flex items-center gap-3">
