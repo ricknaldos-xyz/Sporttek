@@ -71,9 +71,24 @@ export default function CourtDetailPage() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  const startTimeOptions = generateTimeOptions(7, 21)
+  // Parse operating hours from court data, fall back to 7-22
+  const defaultStart = 7
+  const defaultEnd = 22
+  let opStart = defaultStart
+  let opEnd = defaultEnd
+  if (court?.operatingHours) {
+    const firstHours = Object.values(court.operatingHours)[0]
+    if (firstHours) {
+      const match = firstHours.match(/(\d{1,2}):\d{2}\s*-\s*(\d{1,2}):\d{2}/)
+      if (match) {
+        opStart = parseInt(match[1])
+        opEnd = parseInt(match[2])
+      }
+    }
+  }
+  const startTimeOptions = generateTimeOptions(opStart, opEnd - 1)
   const endTimeOptions = startTime
-    ? generateTimeOptions(parseInt(startTime.split(':')[0]) + 1, 22)
+    ? generateTimeOptions(parseInt(startTime.split(':')[0]) + 1, opEnd)
     : []
 
   useEffect(() => {

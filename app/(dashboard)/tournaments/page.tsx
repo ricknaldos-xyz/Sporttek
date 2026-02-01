@@ -5,6 +5,7 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { logger } from '@/lib/logger'
+import { formatDate } from '@/lib/date-utils'
 import { Trophy, Calendar, MapPin, Users, Loader2, Plus } from 'lucide-react'
 import Link from 'next/link'
 
@@ -129,11 +130,7 @@ export default function TournamentsPage() {
                     <div className="flex flex-wrap gap-4 mt-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {new Date(t.startDate).toLocaleDateString('es-PE', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                        {formatDate(t.startDate, 'medium')}
                       </span>
                       {t.city && (
                         <span className="flex items-center gap-1">

@@ -14,6 +14,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { SidebarSportSelector } from '@/components/layout/SidebarSportSelector'
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import { getNavigationSections } from '@/lib/navigation'
 import { useSport } from '@/contexts/SportContext'
 
@@ -125,9 +126,11 @@ export default function DashboardLayout({
           <div className="lg:pl-64">
             <Header onMenuClick={() => setMobileMenuOpen(true)} />
             <main id="main-content" className="p-4 lg:p-6 pb-20 lg:pb-6">
-              <OnboardingWrapper>
-                {children}
-              </OnboardingWrapper>
+              <ErrorBoundary>
+                <OnboardingWrapper>
+                  {children}
+                </OnboardingWrapper>
+              </ErrorBoundary>
             </main>
           </div>
 

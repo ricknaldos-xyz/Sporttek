@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { TierBadge } from '@/components/player/TierBadge'
 import { logger } from '@/lib/logger'
+import { formatDate } from '@/lib/date-utils'
 import { Loader2, Trophy, Calendar, TrendingUp, TrendingDown } from 'lucide-react'
 import type { SkillTier } from '@prisma/client'
 
@@ -111,7 +112,7 @@ export default function MatchesPage() {
                     {match.playedAt && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1 justify-center mt-1">
                         <Calendar className="h-3 w-3" />
-                        {new Date(match.playedAt).toLocaleDateString('es-PE')}
+                        {formatDate(match.playedAt, 'short')}
                       </p>
                     )}
                   </div>

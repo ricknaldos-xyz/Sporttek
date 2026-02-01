@@ -7,12 +7,7 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { ArrowLeft, Loader2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
-
-const DISTRICTS = [
-  'Miraflores', 'San Isidro', 'San Borja', 'Surco', 'La Molina',
-  'Barranco', 'San Miguel', 'Magdalena', 'Jesus Maria', 'Pueblo Libre',
-  'Ate', 'La Victoria', 'Chorrillos', 'Lince',
-]
+import { DISTRICTS } from '@/lib/constants'
 
 const SURFACE_OPTIONS = [
   { value: 'HARD', label: 'Dura' },

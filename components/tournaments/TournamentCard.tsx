@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
+import { formatDate } from '@/lib/date-utils'
 import { Calendar, MapPin, Users } from 'lucide-react'
 
 interface TournamentCardProps {
@@ -58,11 +59,7 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              {new Date(tournament.startDate).toLocaleDateString('es-PE', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}
+              {formatDate(tournament.startDate, 'medium')}
             </span>
             {tournament.city && (
               <span className="flex items-center gap-1">

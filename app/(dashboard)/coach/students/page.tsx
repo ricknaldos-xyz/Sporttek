@@ -240,7 +240,7 @@ export default function CoachStudentsPage() {
 
             {/* Search results */}
             {!selectedPlayer && searchResults.length > 0 && (
-              <div className="max-h-48 overflow-y-auto space-y-1 mb-4">
+              <div className="max-h-60 sm:max-h-72 overflow-y-auto space-y-1 mb-4">
                 {searchResults.map((player) => {
                   const pName = player.displayName || player.user.name || 'Jugador'
                   return (

@@ -7,6 +7,7 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { TierBadge } from '@/components/player/TierBadge'
+import { formatDate } from '@/lib/date-utils'
 import { Flag, Check, X, Loader2, Clock, Swords, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import type { SkillTier } from '@prisma/client'
@@ -192,7 +193,7 @@ export default function ChallengesPage() {
                       {challenge.proposedDate && (
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {new Date(challenge.proposedDate).toLocaleDateString('es-PE')}
+                          {formatDate(challenge.proposedDate, 'short')}
                           {challenge.proposedTime && ` ${challenge.proposedTime}`}
                         </span>
                       )}

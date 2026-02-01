@@ -263,13 +263,16 @@ export default function ProviderWorkshopDetailPage() {
                       value={hours[day.key]}
                       onChange={(e) => handleHourChange(day.key, e.target.value)}
                       className="flex-1"
-                      placeholder="Ej: 09:00-18:00 (vacio = cerrado)"
+                      placeholder="08:00 - 18:00"
+                      pattern="\d{2}:\d{2}\s*-\s*\d{2}:\d{2}"
+                      title="Formato: HH:MM - HH:MM"
                     />
                   </div>
                 ))}
               </div>
+              <p className="text-xs text-muted-foreground mt-1">Formato: HH:MM - HH:MM (ej: 08:00 - 18:00)</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Formato: HH:MM-HH:MM. Dejar vacio si esta cerrado ese dia.
+                Dejar vacio si esta cerrado ese dia.
               </p>
             </div>
           </div>

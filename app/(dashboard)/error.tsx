@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
-import { AlertTriangle } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
-import { logger } from '@/lib/logger'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
 
 export default function DashboardError({
   error,
@@ -13,19 +11,16 @@ export default function DashboardError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  useEffect(() => {
-    logger.error('Dashboard error:', error)
-  }, [error])
-
   return (
-    <div className="flex items-center justify-center py-16">
-      <GlassCard intensity="medium" padding="xl" className="max-w-md text-center">
-        <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive opacity-70" />
-        <h2 className="text-xl font-bold mb-2">Algo salio mal</h2>
-        <p className="text-muted-foreground mb-6">
-          Ocurrio un error al cargar esta pagina.
+    <div className="flex items-center justify-center min-h-[400px] p-6">
+      <GlassCard intensity="light" padding="lg" className="max-w-md w-full text-center">
+        <AlertTriangle className="h-10 w-10 text-amber-500 mx-auto mb-4" />
+        <h2 className="font-semibold text-xl mb-2">Algo salio mal</h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          Ocurrio un error inesperado. Intenta de nuevo.
         </p>
         <GlassButton variant="solid" onClick={reset}>
+          <RefreshCw className="h-4 w-4 mr-2" />
           Intentar de nuevo
         </GlassButton>
       </GlassCard>

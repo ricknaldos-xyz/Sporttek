@@ -8,12 +8,7 @@ import { GlassButton } from '@/components/ui/glass-button'
 import { logger } from '@/lib/logger'
 import { ArrowLeft, Loader2, Save, Calendar } from 'lucide-react'
 import { toast } from 'sonner'
-
-const DISTRICTS = [
-  'Miraflores', 'San Isidro', 'San Borja', 'Surco', 'La Molina',
-  'Barranco', 'San Miguel', 'Magdalena', 'Jesus Maria', 'Pueblo Libre',
-  'Ate', 'La Victoria', 'Chorrillos', 'Lince',
-]
+import { DISTRICTS } from '@/lib/constants'
 
 const SURFACE_OPTIONS = [
   { value: 'HARD', label: 'Dura' },

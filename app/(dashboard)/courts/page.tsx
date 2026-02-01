@@ -9,12 +9,7 @@ import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { MapPin, Phone, ChevronLeft, ChevronRight, Search, AlertTriangle, X } from 'lucide-react'
 import { toast } from 'sonner'
-
-const DISTRICTS = [
-  'Miraflores', 'San Isidro', 'San Borja', 'Surco', 'La Molina',
-  'Barranco', 'San Miguel', 'Magdalena', 'Jesus Maria', 'Pueblo Libre',
-  'Ate', 'La Victoria', 'Chorrillos', 'Lince',
-]
+import { DISTRICTS } from '@/lib/constants'
 
 const SURFACE_LABELS: Record<string, string> = {
   HARD: 'Dura',

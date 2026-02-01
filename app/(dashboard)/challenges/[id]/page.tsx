@@ -9,6 +9,7 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { TierBadge } from '@/components/player/TierBadge'
+import { formatDate } from '@/lib/date-utils'
 import { Flag, Clock, MapPin, MessageSquare, Check, X, Loader2, ArrowLeft, Swords } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -196,12 +197,7 @@ export default function ChallengeDetailPage() {
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>
-                {new Date(challenge.proposedDate).toLocaleDateString('es-PE', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {formatDate(challenge.proposedDate, 'long')}
                 {challenge.proposedTime && ` a las ${challenge.proposedTime}`}
               </span>
             </div>
@@ -220,11 +216,11 @@ export default function ChallengeDetailPage() {
           )}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>
-              Creado el {new Date(challenge.createdAt).toLocaleDateString('es-PE')}
+              Creado el {formatDate(challenge.createdAt, 'medium')}
             </span>
             <span>|</span>
             <span>
-              Expira el {new Date(challenge.expiresAt).toLocaleDateString('es-PE')}
+              Expira el {formatDate(challenge.expiresAt, 'medium')}
             </span>
           </div>
         </div>

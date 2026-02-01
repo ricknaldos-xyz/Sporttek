@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
@@ -9,12 +9,28 @@ import { GlassInput } from '@/components/ui/glass-input'
 import { GlassCard } from '@/components/ui/glass-card'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Loader2, User, GraduationCap } from 'lucide-react'
+import { Loader2, User, GraduationCap, CheckCircle2, Circle } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [accountType, setAccountType] = useState<'PLAYER' | 'COACH'>('PLAYER')
+  const [password, setPassword] = useState('')
+  const [passwordChecks, setPasswordChecks] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+  })
+
+  useEffect(() => {
+    setPasswordChecks({
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+    })
+  }, [password])
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -154,11 +170,30 @@ export default function RegisterPage() {
               placeholder="••••••••"
               required
               disabled={isLoading}
+              value={password}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
             />
+            {password && (
+              <div className="space-y-1 mt-2">
+                {[
+                  { key: 'length', label: 'Minimo 8 caracteres' },
+                  { key: 'uppercase', label: 'Una letra mayuscula' },
+                  { key: 'lowercase', label: 'Una letra minuscula' },
+                  { key: 'number', label: 'Un numero' },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex items-center gap-2 text-xs">
+                    {passwordChecks[key as keyof typeof passwordChecks]
+                      ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                      : <Circle className="h-3.5 w-3.5 text-muted-foreground" />
+                    }
+                    <span className={passwordChecks[key as keyof typeof passwordChecks] ? 'text-emerald-500' : 'text-muted-foreground'}>
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Minimo 8 caracteres, una mayuscula, una minuscula y un numero
-          </p>
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirmar contrasena</Label>
