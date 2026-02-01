@@ -8,6 +8,7 @@ import { GlassButton } from '@/components/ui/glass-button'
 import { ArrowLeft, Loader2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { DISTRICTS } from '@/lib/constants'
+import { useSport } from '@/contexts/SportContext'
 
 const SURFACE_OPTIONS = [
   { value: 'HARD', label: 'Dura' },
@@ -54,6 +55,7 @@ const EMPTY_FORM: FormData = {
 
 export default function NewCourtPage() {
   const router = useRouter()
+  const { activeSport } = useSport()
   const [form, setForm] = useState<FormData>(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
 
@@ -85,6 +87,7 @@ export default function NewCourtPage() {
         amenities: form.amenities
           ? form.amenities.split(',').map((a) => a.trim()).filter(Boolean)
           : [],
+        sportSlug: activeSport?.slug || 'tennis',
       }
       const res = await fetch('/api/provider/courts', {
         method: 'POST',

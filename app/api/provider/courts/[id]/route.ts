@@ -26,6 +26,7 @@ const updateCourtSchema = z.object({
   amenities: z.array(z.string()).optional(),
   isActive: z.boolean().optional(),
   operatingHours: z.record(z.string(), z.string()).optional(),
+  sportSlug: z.string().optional(),
 })
 
 // GET - Get a single court owned by current user
@@ -106,9 +107,19 @@ export async function PATCH(
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
     }
 
+    const { sportSlug, ...updateData } = parsed.data
+    let sportId: string | undefined
+    if (sportSlug) {
+      const sport = await prisma.sport.findUnique({ where: { slug: sportSlug }, select: { id: true } })
+      sportId = sport?.id
+    }
+
     const court = await prisma.court.update({
       where: { id },
-      data: parsed.data,
+      data: {
+        ...updateData,
+        ...(sportId && { sportId }),
+      },
     })
 
     return NextResponse.json(court)

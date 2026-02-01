@@ -98,6 +98,7 @@ export async function PATCH(
             player2Id: challenge.challengedId,
             venue: challenge.proposedVenue,
             playedAt: challenge.proposedDate,
+            sportId: challenge.sportId,
           },
         },
       },

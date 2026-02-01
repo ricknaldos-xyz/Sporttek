@@ -12,6 +12,7 @@ import {
   DollarSign,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useSport } from '@/contexts/SportContext'
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'Pendiente',
@@ -72,6 +73,7 @@ function getExpirationLabel(expiresAt: string | null): { label: string; expired:
 }
 
 export default function BookingsPage() {
+  const { activeSport } = useSport()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 10, total: 0, totalPages: 0 })
   const [loading, setLoading] = useState(true)
@@ -94,6 +96,7 @@ export default function BookingsPage() {
       if (statusFilter) params.set('status', statusFilter)
       params.set('page', String(page))
       params.set('limit', '10')
+      params.set('sport', activeSport?.slug || 'tennis')
 
       const res = await fetch(`/api/courts/bookings?${params}`)
       if (res.ok) {
@@ -106,7 +109,7 @@ export default function BookingsPage() {
     } finally {
       setLoading(false)
     }
-  }, [statusFilter, page])
+  }, [statusFilter, page, activeSport?.slug])
 
   useEffect(() => {
     fetchBookings()

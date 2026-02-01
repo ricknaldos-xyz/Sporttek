@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') as BookingStatus | null
+    const sportSlug = searchParams.get('sport')
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')))
     const skip = (page - 1) * limit
@@ -23,6 +24,13 @@ export async function GET(request: NextRequest) {
 
     if (status) {
       where.status = status
+    }
+
+    if (sportSlug) {
+      const sport = await prisma.sport.findUnique({ where: { slug: sportSlug }, select: { id: true } })
+      if (sport) {
+        where.court = { OR: [{ sportId: sport.id }, { sportId: null }] }
+      }
     }
 
     const [bookings, total] = await Promise.all([

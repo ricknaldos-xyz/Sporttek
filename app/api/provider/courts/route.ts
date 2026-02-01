@@ -26,6 +26,7 @@ const createCourtSchema = z.object({
   amenities: z.array(z.string()).optional().default([]),
   isActive: z.boolean().optional().default(true),
   operatingHours: z.record(z.string(), z.string()).optional(),
+  sportSlug: z.string().optional(),
 })
 
 // GET - List courts owned by current user
@@ -97,10 +98,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const { sportSlug, ...courtData } = parsed.data
+    let sportId: string | undefined
+    if (sportSlug) {
+      const sport = await prisma.sport.findUnique({ where: { slug: sportSlug }, select: { id: true } })
+      sportId = sport?.id
+    }
+
     const court = await prisma.court.create({
       data: {
-        ...parsed.data,
+        ...courtData,
         ownerId: session.user.id,
+        ...(sportId && { sportId }),
       },
     })
 

@@ -63,6 +63,10 @@ export default function RankingsPage() {
   }, [searchQuery])
 
   useEffect(() => {
+    setPage(1)
+  }, [activeSport?.slug])
+
+  useEffect(() => {
     fetchRankings()
     fetchMyPosition()
   }, [page, categoryFilter, activeSport?.slug, debouncedSearch])

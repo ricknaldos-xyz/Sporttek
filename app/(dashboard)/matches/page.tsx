@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { TierBadge } from '@/components/player/TierBadge'
 import { logger } from '@/lib/logger'
 import { formatDate } from '@/lib/date-utils'
 import { Loader2, Trophy, Calendar, TrendingUp, TrendingDown } from 'lucide-react'
 import type { SkillTier } from '@prisma/client'
+import { useSport } from '@/contexts/SportContext'
 
 interface MatchPlayer {
   userId: string
@@ -35,23 +36,26 @@ interface Match {
 export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
+  const { activeSport } = useSport()
+
+  const fetchMatches = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/matches?sport=${activeSport?.slug || 'tennis'}`)
+      if (res.ok) {
+        const data = await res.json()
+        setMatches(data)
+      }
+    } catch {
+      logger.error('Failed to fetch matches')
+    } finally {
+      setLoading(false)
+    }
+  }, [activeSport?.slug])
 
   useEffect(() => {
-    async function fetchMatches() {
-      try {
-        const res = await fetch('/api/matches')
-        if (res.ok) {
-          const data = await res.json()
-          setMatches(data)
-        }
-      } catch {
-        logger.error('Failed to fetch matches')
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchMatches()
-  }, [])
+  }, [fetchMatches])
 
   if (loading) {
     return (

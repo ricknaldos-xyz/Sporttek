@@ -12,6 +12,7 @@ const createMatchSchema = z.object({
   sets: z.array(z.object({ p1: z.number(), p2: z.number() })).optional(),
   venue: z.string().optional(),
   playedAt: z.string().optional(),
+  sportSlug: z.string().optional(),
 })
 
 // POST - Register a match result
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { opponentUserId, score, sets, venue, playedAt } = validated.data
+    const { opponentUserId, score, sets, venue, playedAt, sportSlug } = validated.data
 
     const [myProfile, opponentProfile] = await Promise.all([
       prisma.playerProfile.findUnique({ where: { userId: session.user.id }, select: { id: true } }),
@@ -51,6 +52,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
     }
 
+    const sport = sportSlug
+      ? await prisma.sport.findUnique({
+          where: { slug: sportSlug },
+          select: { id: true },
+        })
+      : null
+
     const match = await prisma.match.create({
       data: {
         player1Id: myProfile.id,
@@ -60,6 +68,7 @@ export async function POST(request: NextRequest) {
         venue,
         playedAt: playedAt ? new Date(playedAt) : new Date(),
         player1Confirmed: true,
+        ...(sport ? { sportId: sport.id } : {}),
       },
     })
 
@@ -93,11 +102,23 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')))
     const skip = (page - 1) * limit
 
-    const where = {
+    const sportSlug = searchParams.get('sport') || 'tennis'
+    const sport = await prisma.sport.findUnique({
+      where: { slug: sportSlug },
+      select: { id: true },
+    })
+
+    const where: Record<string, unknown> = {
       OR: [
         { player1Id: profile.id },
         { player2Id: profile.id },
       ],
+    }
+
+    if (sport) {
+      where.AND = [
+        { OR: [{ sportId: sport.id }, { sportId: null }] },
+      ]
     }
     const include = {
       player1: {
