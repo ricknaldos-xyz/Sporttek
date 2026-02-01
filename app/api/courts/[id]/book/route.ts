@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { createNotification } from '@/lib/notifications'
-import { validateId } from '@/lib/validation'
+import { sanitizeZodError, validateId } from '@/lib/validation'
 import { z } from 'zod'
 
 const bookingSchema = z.object({
@@ -34,7 +34,7 @@ export async function POST(
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0].message },
+        { error: sanitizeZodError(parsed.error) },
         { status: 400 }
       )
     }

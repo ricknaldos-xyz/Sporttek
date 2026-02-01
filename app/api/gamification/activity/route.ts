@@ -69,12 +69,21 @@ export async function POST(request: NextRequest) {
     // Also update streak (best-effort, don't crash if it fails)
     try {
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || ''
-      await fetch(`${baseUrl}/api/gamification/streak`, {
-        method: 'POST',
-        headers: {
-          Cookie: request.headers.get('cookie') || '',
-        },
-      })
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10_000)
+      try {
+        await fetch(`${baseUrl}/api/gamification/streak`, {
+          method: 'POST',
+          headers: {
+            Cookie: request.headers.get('cookie') || '',
+          },
+          signal: controller.signal,
+        })
+        clearTimeout(timeout)
+      } catch (err) {
+        clearTimeout(timeout)
+        throw err
+      }
     } catch (streakError) {
       logger.error('Failed to update streak:', streakError)
     }

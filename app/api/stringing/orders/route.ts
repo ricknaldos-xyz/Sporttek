@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { sanitizeZodError } from '@/lib/validation'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import {
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     if (!validated.success) {
       return NextResponse.json(
-        { error: validated.error.issues[0].message },
+        { error: sanitizeZodError(validated.error) },
         { status: 400 }
       )
     }

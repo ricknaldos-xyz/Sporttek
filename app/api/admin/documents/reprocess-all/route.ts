@@ -41,18 +41,25 @@ export async function POST() {
 
     const results: Array<{ name: string; status: string; error?: string }> = []
 
-    // Process each document sequentially
-    for (const doc of documents) {
-      logger.debug(`[reprocess] Processing: ${doc.originalName}`)
-      try {
-        await processDocument(doc.id)
-        results.push({ name: doc.originalName, status: 'OK' })
-        logger.debug(`[reprocess] ✓ ${doc.originalName} completed`)
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : String(error)
-        results.push({ name: doc.originalName, status: 'ERROR', error: errorMsg })
-        logger.error(`[reprocess] ✗ ${doc.originalName} failed:`, errorMsg)
-      }
+    // Process documents in parallel batches of 5
+    const BATCH_SIZE = 5
+    for (let i = 0; i < documents.length; i += BATCH_SIZE) {
+      const batch = documents.slice(i, i + BATCH_SIZE)
+      const batchResults = await Promise.all(
+        batch.map(async (doc) => {
+          logger.debug(`[reprocess] Processing: ${doc.originalName}`)
+          try {
+            await processDocument(doc.id)
+            logger.debug(`[reprocess] ${doc.originalName} completed`)
+            return { name: doc.originalName, status: 'OK' } as const
+          } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : String(error)
+            logger.error(`[reprocess] ${doc.originalName} failed:`, errorMsg)
+            return { name: doc.originalName, status: 'ERROR', error: errorMsg } as const
+          }
+        })
+      )
+      results.push(...batchResults)
     }
 
     const successful = results.filter(r => r.status === 'OK').length

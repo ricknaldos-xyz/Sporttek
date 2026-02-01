@@ -163,13 +163,21 @@ export async function POST(
           if (item.url.startsWith('/uploads/')) {
             buffer = await readFile(path.join(process.cwd(), 'public', item.url))
           } else {
-            const response = await fetch(item.url)
-            if (!response.ok) {
-              logger.error(`[process] Failed to download file: ${item.url}, status: ${response.status}`)
-              failedFiles++
-              continue
+            const controller = new AbortController()
+            const timeout = setTimeout(() => controller.abort(), 30_000)
+            try {
+              const response = await fetch(item.url, { signal: controller.signal })
+              clearTimeout(timeout)
+              if (!response.ok) {
+                logger.error(`[process] Failed to download file: ${item.url}, status: ${response.status}`)
+                failedFiles++
+                continue
+              }
+              buffer = Buffer.from(await response.arrayBuffer())
+            } catch (err) {
+              clearTimeout(timeout)
+              throw err
             }
-            buffer = Buffer.from(await response.arrayBuffer())
           }
 
           logger.debug(`[process] File loaded, size: ${buffer.length} bytes`)

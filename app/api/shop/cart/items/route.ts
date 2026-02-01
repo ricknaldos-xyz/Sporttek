@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
+import { sanitizeZodError } from '@/lib/validation'
 
 const addItemSchema = z.object({
   productId: z.string().min(1),
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Datos invalidos', details: parsed.error.flatten() },
+        { error: 'Datos invalidos', details: sanitizeZodError(parsed.error) },
         { status: 400 }
       )
     }
@@ -121,7 +122,11 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    const activeItems = updatedCart!.items.filter((item) => item.product.isActive)
+    if (!updatedCart) {
+      return NextResponse.json({ error: 'Error al actualizar carrito' }, { status: 500 })
+    }
+
+    const activeItems = updatedCart.items.filter((item) => item.product.isActive)
     const subtotalCents = activeItems.reduce(
       (sum, item) => sum + item.product.priceCents * item.quantity,
       0
@@ -129,7 +134,7 @@ export async function POST(request: NextRequest) {
     const shippingCents = activeItems.length > 0 ? 1500 : 0
 
     return NextResponse.json({
-      id: updatedCart!.id,
+      id: updatedCart.id,
       items: activeItems,
       subtotalCents,
       shippingCents,
