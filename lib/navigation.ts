@@ -20,12 +20,12 @@ import {
   BarChart3,
   UserCheck,
   Building2,
-  ClipboardList,
   Inbox,
   AlertTriangle,
   CalendarDays,
   FileText,
   Settings,
+  Award,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -35,31 +35,37 @@ export interface NavItem {
   tourId: string
 }
 
-export const sportNavigation: NavItem[] = [
+// CORE — Always visible, primary actions
+export const coreNavigation: NavItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard' },
   { name: 'Nuevo Analisis', href: '/analyze', icon: Video, tourId: 'new-analysis' },
   { name: 'Mis Analisis', href: '/analyses', icon: History, tourId: 'analyses' },
   { name: 'Entrenamiento', href: '/training', icon: Dumbbell, tourId: 'training' },
   { name: 'Objetivos', href: '/goals', icon: Target, tourId: 'goals' },
 ]
 
-export const competitionNavigation: NavItem[] = [
+// DISCOVER — Competition and community
+export const discoverNavigation: NavItem[] = [
   { name: 'Rankings', href: '/rankings', icon: Trophy, tourId: 'rankings' },
   { name: 'Matchmaking', href: '/matchmaking', icon: Swords, tourId: 'matchmaking' },
-  { name: 'Desafios', href: '/challenges', icon: Flag, tourId: 'challenges' },
   { name: 'Torneos', href: '/tournaments', icon: Medal, tourId: 'tournaments' },
+  { name: 'Desafios', href: '/challenges', icon: Flag, tourId: 'challenges' },
   { name: 'Partidos', href: '/matches', icon: CircleDot, tourId: 'matches' },
+  { name: 'Comunidad', href: '/community', icon: Users, tourId: 'community' },
+  { name: 'Badges', href: '/badges', icon: Award, tourId: 'badges' },
 ]
 
-export const globalNavigation: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard' },
-  { name: 'Comunidad', href: '/community', icon: Users, tourId: 'community' },
-  { name: 'Notificaciones', href: '/notifications', icon: Bell, tourId: 'notifications' },
+// SERVICES — Marketplace and services
+export const servicesNavigation: NavItem[] = [
+  { name: 'Coaches', href: '/marketplace', icon: GraduationCap, tourId: 'coaches' },
   { name: 'Canchas', href: '/courts', icon: MapPin, tourId: 'courts' },
   { name: 'Tienda', href: '/tienda', icon: ShoppingBag, tourId: 'shop' },
   { name: 'Encordado', href: '/encordado', icon: Wrench, tourId: 'stringing' },
 ]
 
-export const profileNavigation: NavItem[] = [
+// ACCOUNT — Profile and notifications
+export const accountNavigation: NavItem[] = [
+  { name: 'Notificaciones', href: '/notifications', icon: Bell, tourId: 'notifications' },
   { name: 'Mi Perfil', href: '/profile', icon: User, tourId: 'profile' },
 ]
 
@@ -98,6 +104,7 @@ export const adminNavigation: NavItem[] = [
 export interface NavSection {
   items: NavItem[]
   label?: string
+  collapsible?: boolean
 }
 
 interface SessionUser {
@@ -111,16 +118,23 @@ interface SessionUser {
 export function getNavigationSections(user: SessionUser | undefined, sportLabel: string): NavSection[] {
   const sections: NavSection[] = []
 
-  // Sport section: available if user has player or coach profile
+  // Core section: primary actions (always visible for players/coaches)
   if (user?.hasPlayerProfile || user?.hasCoachProfile) {
-    sections.push({ items: sportNavigation, label: sportLabel })
+    sections.push({ items: coreNavigation, label: sportLabel })
+  } else {
+    // Minimal core for users without sport profile
+    sections.push({
+      items: [
+        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard' },
+      ],
+    })
   }
 
-  // Competition: available to all authenticated users
-  sections.push({ items: competitionNavigation, label: 'Competencia' })
+  // Discover: competition and community (collapsible)
+  sections.push({ items: discoverNavigation, label: 'Descubrir', collapsible: true })
 
-  // General
-  sections.push({ items: globalNavigation, label: 'General' })
+  // Services: marketplace (collapsible)
+  sections.push({ items: servicesNavigation, label: 'Servicios', collapsible: true })
 
   // Coach management
   if (user?.hasCoachProfile) {
@@ -143,11 +157,11 @@ export function getNavigationSections(user: SessionUser | undefined, sportLabel:
 
   // Admin
   if (user?.role === 'ADMIN') {
-    sections.push({ items: adminNavigation, label: 'Administracion' })
+    sections.push({ items: adminNavigation, label: 'Administracion', collapsible: true })
   }
 
-  // Profile (always last)
-  sections.push({ items: profileNavigation })
+  // Account (always last)
+  sections.push({ items: accountNavigation })
 
   return sections
 }

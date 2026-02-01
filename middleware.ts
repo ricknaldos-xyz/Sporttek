@@ -23,6 +23,14 @@ export default auth((req) => {
     return NextResponse.redirect(new URL('/dashboard', req.nextUrl))
   }
 
+  // Force onboarding: redirect new users without sport to onboarding
+  if (isLoggedIn && pathname === '/dashboard') {
+    const hasSport = (req.auth as { user?: { hasSport?: boolean } })?.user?.hasSport
+    if (hasSport === false) {
+      return NextResponse.redirect(new URL('/onboarding/sport', req.nextUrl))
+    }
+  }
+
   // If user is not logged in and trying to access protected routes
   if (!isLoggedIn && !isPublicRoute && !isPublicPattern && !isPublicApiRoute) {
     const loginUrl = new URL('/login', req.nextUrl)

@@ -33,6 +33,10 @@ import {
   Target,
   Dumbbell,
   Loader2,
+  Share2,
+  Video,
+  Swords,
+  Users,
 } from 'lucide-react'
 import { formatDate } from '@/lib/date-utils'
 import { RetryAnalysisButton } from '@/components/analysis/RetryAnalysisButton'
@@ -46,6 +50,7 @@ import { ShareButton } from '@/components/analysis/ShareButton'
 import { MediaPreview } from '@/components/analysis/MediaPreview'
 import { ProcessingPoller } from '@/components/analysis/ProcessingPoller'
 import { ScrollToTop } from '@/components/ui/ScrollToTop'
+import { ShopRecommendations } from '@/components/analysis/ShopRecommendations'
 
 async function getAnalysis(id: string, userId: string) {
   return prisma.analysis.findFirst({
@@ -262,6 +267,55 @@ export default async function AnalysisDetailPage({
               </>
             )}
           </GlassCard>
+
+          {/* Contextual Shop Recommendations */}
+          <ShopRecommendations sportName={analysis.technique.sport.name} techniqueName={analysis.technique.name} />
+
+          {/* Post-Analysis Next Steps */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Siguiente paso</h2>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <GlassCard intensity="ultralight" padding="md" hover="lift" asChild>
+                <Link href="/analyze">
+                  <div className="flex items-center gap-3">
+                    <div className="glass-light border-glass rounded-xl p-2">
+                      <Video className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Analizar otra tecnica</p>
+                      <p className="text-xs text-muted-foreground">Sigue mejorando</p>
+                    </div>
+                  </div>
+                </Link>
+              </GlassCard>
+              <GlassCard intensity="ultralight" padding="md" hover="lift" asChild>
+                <Link href="/matchmaking">
+                  <div className="flex items-center gap-3">
+                    <div className="glass-light border-glass rounded-xl p-2">
+                      <Swords className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Buscar rival</p>
+                      <p className="text-xs text-muted-foreground">Pon a prueba tu nivel</p>
+                    </div>
+                  </div>
+                </Link>
+              </GlassCard>
+              <GlassCard intensity="ultralight" padding="md" hover="lift" asChild>
+                <Link href="/rankings">
+                  <div className="flex items-center gap-3">
+                    <div className="glass-light border-glass rounded-xl p-2">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Ver tu ranking</p>
+                      <p className="text-xs text-muted-foreground">Revisa tu posicion</p>
+                    </div>
+                  </div>
+                </Link>
+              </GlassCard>
+            </div>
+          </div>
         </>
       )}
 

@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Trophy, Bell, ShoppingBag, User } from 'lucide-react'
+import { LayoutDashboard, Trophy, Bell, Video, User } from 'lucide-react'
 
 const tabs = [
   { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Rankings', href: '/rankings', icon: Trophy },
+  { name: 'Analizar', href: '/analyze', icon: Video, primary: true },
   { name: 'Avisos', href: '/notifications', icon: Bell },
-  { name: 'Tienda', href: '/tienda', icon: ShoppingBag },
   { name: 'Perfil', href: '/profile', icon: User },
 ]
 
@@ -45,18 +45,29 @@ export function BottomNav() {
               aria-current={isActive ? 'page' : undefined}
               className={cn(
                 'relative flex flex-col items-center justify-center gap-1 w-full h-full text-[10px] font-medium transition-colors',
-                isActive ? 'text-primary' : 'text-muted-foreground'
+                tab.primary && !isActive
+                  ? 'text-primary'
+                  : isActive ? 'text-primary' : 'text-muted-foreground'
               )}
             >
               <span className="relative">
-                <tab.icon className={cn('h-5 w-5', isActive && 'text-primary')} />
+                {tab.primary ? (
+                  <span className={cn(
+                    'flex items-center justify-center w-10 h-10 -mt-4 rounded-full shadow-glass',
+                    isActive ? 'glass-primary border-glass shadow-glass-glow' : 'glass-primary border-glass'
+                  )}>
+                    <tab.icon className="h-5 w-5 text-primary" />
+                  </span>
+                ) : (
+                  <tab.icon className={cn('h-5 w-5', isActive && 'text-primary')} />
+                )}
                 {tab.href === '/notifications' && unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[16px] h-4 rounded-full bg-destructive text-[10px] text-white flex items-center justify-center px-1">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </span>
-              <span>{tab.name}</span>
+              <span className={tab.primary ? '-mt-1' : ''}>{tab.name}</span>
               {isActive && <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-primary" />}
             </Link>
           )

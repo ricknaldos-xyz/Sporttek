@@ -27,12 +27,19 @@ interface Coach {
 export default function MarketplacePage() {
   const [coaches, setCoaches] = useState<Coach[]>([])
   const [loading, setLoading] = useState(true)
+  const [cityFilter, setCityFilter] = useState('')
+  const [minRating, setMinRating] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [sortBy, setSortBy] = useState<'rating' | 'price' | 'experience'>('rating')
 
   useEffect(() => {
     const controller = new AbortController()
     async function fetchCoaches() {
+      setLoading(true)
       try {
-        const res = await fetch('/api/marketplace/coaches', { signal: controller.signal })
+        const params = new URLSearchParams()
+        if (cityFilter) params.set('city', cityFilter)
+        const res = await fetch(`/api/marketplace/coaches?${params}`, { signal: controller.signal })
         if (res.ok) {
           const data = await res.json()
           setCoaches(data.coaches)
@@ -46,7 +53,19 @@ export default function MarketplacePage() {
     }
     fetchCoaches()
     return () => controller.abort()
-  }, [])
+  }, [cityFilter])
+
+  const filteredCoaches = coaches.filter((c) => {
+    if (minRating && (c.averageRating ?? 0) < parseFloat(minRating)) return false
+    if (maxPrice && c.hourlyRate && c.hourlyRate > parseFloat(maxPrice)) return false
+    return true
+  }).sort((a, b) => {
+    if (sortBy === 'rating') return (b.averageRating ?? 0) - (a.averageRating ?? 0)
+    if (sortBy === 'price') return (a.hourlyRate ?? 999) - (b.hourlyRate ?? 999)
+    return (b.yearsExperience ?? 0) - (a.yearsExperience ?? 0)
+  })
+
+  const uniqueCities = [...new Set(coaches.map(c => c.city).filter(Boolean))]
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -55,11 +74,56 @@ export default function MarketplacePage() {
         <h1 className="text-2xl font-bold">Entrenadores</h1>
       </div>
 
+      {/* Filters */}
+      <GlassCard intensity="ultralight" padding="md">
+        <div className="flex flex-wrap gap-3 items-center">
+          <select
+            value={cityFilter}
+            onChange={(e) => setCityFilter(e.target.value)}
+            className="bg-transparent border border-glass rounded-lg px-3 py-1.5 text-sm"
+          >
+            <option value="">Todas las ciudades</option>
+            {uniqueCities.map((city) => (
+              <option key={city} value={city!}>{city}</option>
+            ))}
+          </select>
+          <select
+            value={minRating}
+            onChange={(e) => setMinRating(e.target.value)}
+            className="bg-transparent border border-glass rounded-lg px-3 py-1.5 text-sm"
+          >
+            <option value="">Rating minimo</option>
+            <option value="4.5">4.5+</option>
+            <option value="4.0">4.0+</option>
+            <option value="3.5">3.5+</option>
+          </select>
+          <select
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            className="bg-transparent border border-glass rounded-lg px-3 py-1.5 text-sm"
+          >
+            <option value="">Cualquier precio</option>
+            <option value="50">Hasta S/ 50/hr</option>
+            <option value="80">Hasta S/ 80/hr</option>
+            <option value="120">Hasta S/ 120/hr</option>
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'rating' | 'price' | 'experience')}
+            className="bg-transparent border border-glass rounded-lg px-3 py-1.5 text-sm"
+          >
+            <option value="rating">Mejor valorados</option>
+            <option value="price">Menor precio</option>
+            <option value="experience">Mas experiencia</option>
+          </select>
+        </div>
+      </GlassCard>
+
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : coaches.length === 0 ? (
+      ) : filteredCoaches.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
           <div className="text-center text-muted-foreground">
             <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -69,7 +133,7 @@ export default function MarketplacePage() {
         </GlassCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {coaches.map((coach) => (
+          {filteredCoaches.map((coach) => (
             <GlassCard key={coach.id} intensity="light" padding="lg" hover="lift" asChild>
               <Link href={`/marketplace/${coach.id}`}>
                 <div className="flex items-start gap-4">

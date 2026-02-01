@@ -10,7 +10,8 @@ import { CategoryExplainer } from '@/components/rankings/CategoryExplainer'
 import { RankingTable, type RankingEntry } from '@/components/rankings/RankingTable'
 import { RankingFilters } from '@/components/rankings/RankingFilters'
 import { TrendingPlayers } from '@/components/rankings/TrendingPlayers'
-import { Trophy, ChevronLeft, ChevronRight, Loader2, AlertTriangle, Search } from 'lucide-react'
+import { Trophy, ChevronLeft, ChevronRight, Loader2, AlertTriangle, Search, Users } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useSport } from '@/contexts/SportContext'
 import { useSession } from 'next-auth/react'
 import type { SkillTier } from '@prisma/client'
@@ -38,6 +39,66 @@ interface MyPosition {
   countryRank: number | null
   totalInCountry: number
   totalInTier: number
+}
+
+interface Neighbor {
+  rank: number | null
+  userId: string
+  displayName: string | null
+  avatarUrl: string | null
+  city: string | null
+  skillTier: string
+  effectiveScore: number | null
+  isMe: boolean
+}
+
+function RankingNeighbors() {
+  const { activeSport } = useSport()
+  const [neighbors, setNeighbors] = useState<Neighbor[]>([])
+  const [myRank, setMyRank] = useState<number | null>(null)
+
+  useEffect(() => {
+    async function fetchNeighbors() {
+      try {
+        const res = await fetch(`/api/rankings/neighbors?sport=${activeSport?.slug || 'tennis'}`)
+        if (res.ok) {
+          const data = await res.json()
+          setNeighbors(data.neighbors)
+          setMyRank(data.myRank)
+        }
+      } catch {
+        // silently fail
+      }
+    }
+    fetchNeighbors()
+  }, [activeSport?.slug])
+
+  if (!myRank || neighbors.length === 0) return null
+
+  return (
+    <GlassCard intensity="light" padding="lg">
+      <div className="flex items-center gap-2 mb-4">
+        <Users className="h-5 w-5 text-primary" />
+        <h2 className="font-semibold">Mis Vecinos en el Ranking</h2>
+      </div>
+      <div className="space-y-2">
+        {neighbors.map((n) => (
+          <div
+            key={n.userId}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 rounded-xl text-sm',
+              n.isMe ? 'glass-primary border-glass font-semibold' : 'glass-ultralight'
+            )}
+          >
+            <span className="w-8 text-center font-mono text-muted-foreground">#{n.rank}</span>
+            <span className="flex-1 truncate">{n.displayName || 'Jugador'}</span>
+            {n.city && <span className="text-xs text-muted-foreground hidden sm:block">{n.city}</span>}
+            <span className="text-xs font-mono">{n.effectiveScore?.toFixed(0) || '-'}</span>
+          </div>
+        ))}
+      </div>
+    </GlassCard>
+  )
 }
 
 export default function RankingsPage() {
@@ -128,6 +189,9 @@ export default function RankingsPage() {
 
       {/* Trending players */}
       <TrendingPlayers />
+
+      {/* My neighbors in ranking */}
+      <RankingNeighbors />
 
       {/* Top 3 Podium (only when showing unfiltered on page 1) */}
       {!isFiltered && page === 1 && !loading && !error && (

@@ -541,6 +541,21 @@ export default function AnalyzePage() {
       { icon: Check, label: 'Generando resultados', activeLabel: 'Generando resultados...' },
     ]
 
+    // Micro-update messages that cycle during AI analysis stage
+    const microUpdates = [
+      'Analizando posicion del cuerpo...',
+      'Evaluando la tecnica de golpe...',
+      'Midiendo angulos de movimiento...',
+      'Comparando con patrones profesionales...',
+      'Identificando areas de mejora...',
+      'Analizando ritmo y timing...',
+      'Evaluando postura y equilibrio...',
+      'Generando recomendaciones personalizadas...',
+    ]
+    const currentMicroUpdate = processingStage === 1
+      ? microUpdates[Math.floor(processingElapsed / 4) % microUpdates.length]
+      : null
+
     return (
       <div className="max-w-2xl mx-auto py-12">
         <GlassCard intensity="medium" padding="xl">
@@ -548,7 +563,6 @@ export default function AnalyzePage() {
             {stages.map((stage, i) => {
               const isCompleted = i < processingStage
               const isActive = i === processingStage
-              const isPending = i > processingStage
 
               return (
                 <div key={i} className="flex items-center gap-4">
@@ -575,6 +589,11 @@ export default function AnalyzePage() {
                     )}>
                       {isActive ? stage.activeLabel : stage.label}
                     </p>
+                    {isActive && i === 1 && currentMicroUpdate && (
+                      <p className="text-xs text-muted-foreground mt-1 animate-pulse">
+                        {currentMicroUpdate}
+                      </p>
+                    )}
                   </div>
                   {isCompleted && (
                     <Check className="h-4 w-4 text-green-500 flex-shrink-0" />

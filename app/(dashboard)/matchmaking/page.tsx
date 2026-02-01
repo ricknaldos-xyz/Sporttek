@@ -5,7 +5,8 @@ import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { TierBadge } from '@/components/player/TierBadge'
-import { Swords, MapPin, Loader2, Send, AlertTriangle } from 'lucide-react'
+import { Swords, MapPin, Loader2, Send, AlertTriangle, Calendar } from 'lucide-react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import { useGeolocation } from '@/hooks/useGeolocation'
 import { useSport } from '@/contexts/SportContext'
@@ -30,12 +31,13 @@ export default function MatchmakingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [sendingChallenge, setSendingChallenge] = useState<string | null>(null)
+  const [tierFilter, setTierFilter] = useState('')
   const { latitude, longitude, requestLocation } = useGeolocation()
   const { activeSport } = useSport()
 
   useEffect(() => {
     fetchPlayers()
-  }, [latitude, longitude, activeSport?.slug])
+  }, [latitude, longitude, activeSport?.slug, tierFilter])
 
   async function fetchPlayers() {
     setLoading(true)
@@ -46,6 +48,7 @@ export default function MatchmakingPage() {
         params.set('lat', latitude.toString())
         params.set('lng', longitude.toString())
       }
+      if (tierFilter) params.set('skillTier', tierFilter)
       params.set('sport', activeSport?.slug || 'tennis')
 
       const res = await fetch(`/api/matchmaking/discover?${params}`)
@@ -93,6 +96,28 @@ export default function MatchmakingPage() {
           <MapPin className="h-4 w-4 mr-2" />
           {latitude ? 'GPS activo' : 'Activar GPS'}
         </GlassButton>
+      </div>
+
+      {/* Filters + info when no GPS */}
+      <div className="flex flex-wrap items-center gap-3">
+        <select
+          value={tierFilter}
+          onChange={(e) => setTierFilter(e.target.value)}
+          className="bg-transparent border border-glass rounded-lg px-3 py-1.5 text-sm"
+        >
+          <option value="">Todas las categorias</option>
+          <option value="QUINTA_B">Quinta B</option>
+          <option value="QUINTA_A">Quinta A</option>
+          <option value="CUARTA_B">Cuarta B</option>
+          <option value="CUARTA_A">Cuarta A</option>
+          <option value="TERCERA_B">Tercera B</option>
+          <option value="TERCERA_A">Tercera A</option>
+        </select>
+        {!latitude && (
+          <p className="text-xs text-muted-foreground">
+            Sin GPS: mostrando jugadores de tu region. Activa GPS para buscar por distancia.
+          </p>
+        )}
       </div>
 
       {error ? (
@@ -181,6 +206,24 @@ export default function MatchmakingPage() {
             </GlassCard>
           ))}
         </div>
+      )}
+
+      {/* Quick action: book a court after finding a rival */}
+      {!loading && players.length > 0 && (
+        <GlassCard intensity="ultralight" padding="md">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-medium text-sm">Reserva una cancha</p>
+                <p className="text-xs text-muted-foreground">Encontraste un rival, ahora reserva donde jugar</p>
+              </div>
+            </div>
+            <GlassButton variant="outline" size="sm" asChild>
+              <Link href="/courts">Ver canchas</Link>
+            </GlassButton>
+          </div>
+        </GlassCard>
       )}
     </div>
   )

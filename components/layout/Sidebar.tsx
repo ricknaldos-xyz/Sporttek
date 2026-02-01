@@ -1,29 +1,47 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import { GlassButton } from '@/components/ui/glass-button'
-import { Target, Video, ChevronRight } from 'lucide-react'
+import { Target, Video, ChevronRight, ChevronDown, Flame } from 'lucide-react'
 import { SidebarSportSelector } from '@/components/layout/SidebarSportSelector'
-import { getNavigationSections, type NavItem } from '@/lib/navigation'
+import { getNavigationSections, type NavItem, type NavSection } from '@/lib/navigation'
 import { useSport } from '@/contexts/SportContext'
+import { SidebarStreak } from '@/components/layout/SidebarStreak'
 
-function NavSection({ items, label }: { items: NavItem[]; label?: string }) {
+function NavSectionComponent({ section, defaultOpen = true }: { section: NavSection; defaultOpen?: boolean }) {
   const pathname = usePathname()
+  const [open, setOpen] = useState(defaultOpen)
 
-  if (items.length === 0) return null
+  if (section.items.length === 0) return null
+
+  const hasActiveItem = section.items.some(
+    (item) => pathname === item.href || pathname.startsWith(item.href + '/')
+  )
+
+  // Auto-open if an item in this section is active
+  const isOpen = open || hasActiveItem
 
   return (
     <div>
-      {label && (
-        <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
-          {label}
-        </p>
+      {section.label && (
+        <button
+          onClick={() => section.collapsible && setOpen(!isOpen)}
+          className={cn(
+            'w-full flex items-center justify-between px-3 mb-1 text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold',
+            section.collapsible && 'hover:text-muted-foreground cursor-pointer'
+          )}
+        >
+          <span>{section.label}</span>
+          {section.collapsible && (
+            <ChevronDown className={cn('h-3 w-3 transition-transform', !isOpen && '-rotate-90')} />
+          )}
+        </button>
       )}
-      {items.map((item) => {
+      {isOpen && section.items.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
         return (
           <Link
@@ -66,17 +84,21 @@ export function Sidebar() {
         <span className="text-xl font-bold">SportTek</span>
       </div>
 
-      {/* Sport Selector */}
-      <div className="pt-4">
+      {/* Sport Selector + Streak */}
+      <div className="pt-4 px-3 space-y-2">
         <SidebarSportSelector />
+        <SidebarStreak />
       </div>
 
       {/* Navigation */}
-      <nav role="navigation" aria-label="Navegacion principal" className="flex-1 px-3 py-2 space-y-4 overflow-y-auto">
+      <nav role="navigation" aria-label="Navegacion principal" className="flex-1 px-3 py-2 space-y-3 overflow-y-auto">
         {sections.map((section, idx) => (
           <React.Fragment key={idx}>
             {idx > 0 && <hr className="border-glass mx-2" />}
-            <NavSection items={section.items} label={section.label} />
+            <NavSectionComponent
+              section={section}
+              defaultOpen={!section.collapsible}
+            />
           </React.Fragment>
         ))}
       </nav>
