@@ -12,11 +12,27 @@ import { toast } from 'sonner'
 import { DISTRICTS } from '@/lib/constants'
 import { useSport } from '@/contexts/SportContext'
 
-const SURFACE_LABELS: Record<string, string> = {
+const SURFACES_BY_SPORT: Record<string, { value: string; label: string }[]> = {
+  tennis: [
+    { value: 'HARD', label: 'Dura' },
+    { value: 'CLAY', label: 'Arcilla' },
+    { value: 'GRASS', label: 'Cesped' },
+    { value: 'SYNTHETIC', label: 'Sintetica' },
+  ],
+  padel: [
+    { value: 'ARTIFICIAL_GRASS', label: 'Cesped artificial' },
+    { value: 'CONCRETE', label: 'Hormigon' },
+    { value: 'SYNTHETIC', label: 'Moqueta' },
+  ],
+}
+
+const ALL_SURFACE_LABELS: Record<string, string> = {
   HARD: 'Dura',
   CLAY: 'Arcilla',
   GRASS: 'Cesped',
   SYNTHETIC: 'Sintetica',
+  ARTIFICIAL_GRASS: 'Cesped artificial',
+  CONCRETE: 'Hormigon',
 }
 
 const COURT_TYPE_LABELS: Record<string, string> = {
@@ -61,6 +77,13 @@ export default function CourtsPage() {
   const [courtType, setCourtType] = useState('')
   const [page, setPage] = useState(1)
   const { activeSport } = useSport()
+
+  const surfaceOptions = SURFACES_BY_SPORT[activeSport?.slug || 'tennis'] || SURFACES_BY_SPORT.tennis
+
+  // Reset surface filter when sport changes
+  useEffect(() => {
+    setSurface('')
+  }, [activeSport?.slug])
 
   const hasActiveFilters = district !== '' || surface !== '' || courtType !== ''
 
@@ -143,8 +166,8 @@ export default function CourtsPage() {
             aria-label="Filtrar por superficie"
           >
             <option value="">Toda superficie</option>
-            {Object.entries(SURFACE_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
+            {surfaceOptions.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
             ))}
           </select>
           <select
@@ -245,7 +268,7 @@ export default function CourtsPage() {
                   {/* Badges */}
                   <div className="flex flex-wrap gap-2">
                     <GlassBadge variant="primary" size="sm">
-                      {SURFACE_LABELS[court.surface] || court.surface}
+                      {ALL_SURFACE_LABELS[court.surface] || court.surface}
                     </GlassBadge>
                     <GlassBadge variant="default" size="sm">
                       {COURT_TYPE_LABELS[court.courtType] || court.courtType}

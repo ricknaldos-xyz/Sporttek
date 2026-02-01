@@ -1569,18 +1569,21 @@ async function main() {
       type: 'TIER_PROMOTION' as const,
       title: 'Ascendio a 2da A',
       description: 'Maria Fernandez alcanzo la categoria 2da A en Tenis',
+      sportId: tennis.id,
     },
     {
       profileId: profileByUser[proPlayer.id],
       type: 'STREAK_MILESTONE' as const,
       title: 'Racha de 7 dias',
       description: 'Carlos Mendoza lleva 7 dias consecutivos de entrenamiento',
+      sportId: tennis.id,
     },
     {
       profileId: profileByUser[testUser.id],
       type: 'ANALYSIS_COMPLETED' as const,
       title: 'Analisis completado',
       description: 'TestPlayer completo un analisis de Saque',
+      sportId: tennis.id,
     },
   ]
 
