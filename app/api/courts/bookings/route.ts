@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { getCulqiClient } from '@/lib/culqi'
 import { BookingStatus } from '@prisma/client'
 
 // GET - List user's bookings
@@ -33,10 +34,13 @@ export async function GET(request: NextRequest) {
         include: {
           court: {
             select: {
+              id: true,
               name: true,
               address: true,
               district: true,
               surface: true,
+              hourlyRate: true,
+              currency: true,
             },
           },
         },
@@ -93,9 +97,29 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
+    let refundCulqiId: string | undefined
+
+    // If booking is confirmed and paid, attempt refund
+    if (booking.status === 'CONFIRMED' && booking.culqiChargeId) {
+      try {
+        const culqi = getCulqiClient()
+        const refund = await culqi.refunds.createRefund({
+          amount: booking.totalCents || booking.estimatedTotalCents || 0,
+          charge_id: booking.culqiChargeId,
+          reason: 'solicitud_del_comprador',
+        })
+        refundCulqiId = refund.id
+      } catch (refundError) {
+        logger.error('Culqi refund failed for court booking:', refundError)
+      }
+    }
+
     const updated = await prisma.courtBooking.update({
       where: { id: bookingId },
-      data: { status: 'CANCELLED' },
+      data: {
+        status: 'CANCELLED',
+        ...(refundCulqiId && { refundCulqiId }),
+      },
     })
 
     return NextResponse.json(updated)

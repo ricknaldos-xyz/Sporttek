@@ -84,16 +84,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate active status before transaction
-    for (const item of cart.items) {
-      if (!item.product.isActive) {
-        return NextResponse.json(
-          { error: `El producto "${item.product.name}" ya no esta disponible` },
-          { status: 400 }
-        )
-      }
-    }
-
     // Calculate totals
     const subtotalCents = cart.items.reduce(
       (sum, item) => sum + item.product.priceCents * item.quantity,
@@ -113,13 +103,14 @@ export async function POST(request: NextRequest) {
               where: {
                 id: item.product.id,
                 stock: { gte: item.quantity },
+                isActive: true,
               },
               data: {
                 stock: { decrement: item.quantity },
               },
             })
             if (updated.count === 0) {
-              throw new Error(`Stock insuficiente para "${item.product.name}"`)
+              throw new Error(`Producto "${item.product.name}" no disponible o sin stock suficiente`)
             }
           }
 

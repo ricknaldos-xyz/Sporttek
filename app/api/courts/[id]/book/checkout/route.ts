@@ -60,14 +60,22 @@ export async function POST(
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
     }
 
-    if (booking.status !== 'PENDING_PAYMENT') {
+    if (booking.status !== 'PENDING_PAYMENT' && booking.status !== 'PENDING') {
       return NextResponse.json(
         { error: 'Esta reserva no esta pendiente de pago' },
         { status: 400 }
       )
     }
 
-    if (!booking.totalCents || booking.totalCents <= 0) {
+    if (booking.expiresAt && new Date(booking.expiresAt) < new Date()) {
+      return NextResponse.json(
+        { error: 'La reserva ha expirado' },
+        { status: 400 }
+      )
+    }
+
+    const chargeAmount = booking.totalCents || booking.estimatedTotalCents
+    if (!chargeAmount || chargeAmount <= 0) {
       return NextResponse.json(
         { error: 'El monto de la reserva no es valido' },
         { status: 400 }
@@ -78,7 +86,7 @@ export async function POST(
     try {
       const culqi = getCulqiClient()
       const charge = await culqi.charges.createCharge({
-        amount: String(booking.totalCents),
+        amount: String(chargeAmount),
         currency_code: 'PEN',
         email: session.user.email!,
         source_id: tokenId,
@@ -93,8 +101,10 @@ export async function POST(
         where: { id: bookingId },
         data: {
           status: 'CONFIRMED',
+          totalCents: chargeAmount,
           culqiChargeId: charge.id,
           paidAt: new Date(),
+          expiresAt: null,
         },
       })
 

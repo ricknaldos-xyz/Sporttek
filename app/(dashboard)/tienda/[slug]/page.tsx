@@ -12,6 +12,7 @@ import { ProductAttributes } from '@/components/shop/ProductAttributes'
 import { ProductReviews } from '@/components/shop/ProductReviews'
 import { PriceDisplay } from '@/components/shop/PriceDisplay'
 import { StarRating } from '@/components/shop/StarRating'
+import { CartDrawer } from '@/components/shop/CartDrawer'
 import {
   ArrowLeft,
   Loader2,
@@ -50,6 +51,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
   const [addingToCart, setAddingToCart] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
 
   useEffect(() => {
     if (slug) fetchProduct()
@@ -84,6 +86,8 @@ export default function ProductDetailPage() {
 
       if (res.ok) {
         toast.success('Producto agregado al carrito')
+        window.dispatchEvent(new CustomEvent('cart-updated'))
+        setCartOpen(true)
       } else {
         const data = await res.json()
         toast.error(data.error || 'Error al agregar al carrito')
@@ -259,6 +263,8 @@ export default function ProductDetailPage() {
       <GlassCard intensity="light" padding="lg">
         <ProductReviews productSlug={product.slug} productId={product.id} />
       </GlassCard>
+
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   )
 }

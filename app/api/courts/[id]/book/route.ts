@@ -69,6 +69,18 @@ export async function POST(
       return NextResponse.json({ error: 'Cancha no encontrada' }, { status: 404 })
     }
 
+    // Calculate estimated total from hourly rate
+    const [startH, startM] = startTime.split(':').map(Number)
+    const [endH, endM] = endTime.split(':').map(Number)
+    const hours = (endH * 60 + endM - (startH * 60 + startM)) / 60
+
+    let estimatedTotalCents: number | null = null
+    if (court.hourlyRate) {
+      estimatedTotalCents = Math.round(court.hourlyRate * hours * 100)
+    }
+
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000)
+
     // Wrap conflict check + create in transaction to prevent TOCTOU race
     try {
       const booking = await prisma.$transaction(async (tx) => {
@@ -98,6 +110,8 @@ export async function POST(
             endTime,
             status: 'PENDING',
             notes,
+            estimatedTotalCents,
+            expiresAt,
           },
         })
       })

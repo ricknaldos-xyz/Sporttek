@@ -45,7 +45,10 @@ interface Booking {
   status: string
   notes: string | null
   confirmationNote: string | null
+  estimatedTotalCents: number | null
   totalCents: number | null
+  paidAt: string | null
+  culqiChargeId: string | null
   user: {
     id: string
     name: string | null
@@ -218,10 +221,19 @@ export default function CourtBookingsPage({ params }: { params: Promise<{ id: st
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     {booking.startTime} - {booking.endTime}
                   </span>
-                  {booking.totalCents != null && (
+                  {(booking.totalCents != null || booking.estimatedTotalCents != null) && (
                     <span className="font-medium">
-                      S/ {(booking.totalCents / 100).toFixed(2)}
+                      S/ {((booking.totalCents ?? booking.estimatedTotalCents ?? 0) / 100).toFixed(2)}
+                      {booking.totalCents == null && booking.estimatedTotalCents != null && (
+                        <span className="text-xs text-muted-foreground ml-1">(estimado)</span>
+                      )}
                     </span>
+                  )}
+                  {booking.paidAt && (
+                    <GlassBadge variant="success" size="sm">Pagado</GlassBadge>
+                  )}
+                  {booking.culqiChargeId && !booking.paidAt && (
+                    <GlassBadge variant="warning" size="sm">Pago pendiente</GlassBadge>
                   )}
                 </div>
 

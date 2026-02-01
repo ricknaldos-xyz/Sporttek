@@ -7,11 +7,14 @@ import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
+import { GlassTextarea } from '@/components/ui/glass-input'
+import AvailabilityCalendar from '@/components/courts/AvailabilityCalendar'
 import {
   ArrowLeft, MapPin, Phone, Globe, Clock, Loader2, Calendar,
-  MessageCircle, CheckCircle,
+  MessageCircle, CheckCircle, DollarSign,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 
 const SURFACE_LABELS: Record<string, string> = {
   HARD: 'Dura',
@@ -46,14 +49,6 @@ interface Court {
   operatingHours: Record<string, string> | null
 }
 
-function generateTimeOptions(start: number, end: number): string[] {
-  const times: string[] = []
-  for (let h = start; h <= end; h++) {
-    times.push(`${String(h).padStart(2, '0')}:00`)
-  }
-  return times
-}
-
 export default function CourtDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -63,33 +58,11 @@ export default function CourtDetailPage() {
   const [loading, setLoading] = useState(true)
   const [booking, setBooking] = useState(false)
 
-  // Booking form state
-  const [date, setDate] = useState('')
-  const [startTime, setStartTime] = useState('')
-  const [endTime, setEndTime] = useState('')
+  // Slot selection state
+  const [selectedDate, setSelectedDate] = useState<string>('')
+  const [selectedStart, setSelectedStart] = useState<string>('')
+  const [selectedEnd, setSelectedEnd] = useState<string>('')
   const [notes, setNotes] = useState('')
-
-  const today = new Date().toISOString().split('T')[0]
-
-  // Parse operating hours from court data, fall back to 7-22
-  const defaultStart = 7
-  const defaultEnd = 22
-  let opStart = defaultStart
-  let opEnd = defaultEnd
-  if (court?.operatingHours) {
-    const firstHours = Object.values(court.operatingHours)[0]
-    if (firstHours) {
-      const match = firstHours.match(/(\d{1,2}):\d{2}\s*-\s*(\d{1,2}):\d{2}/)
-      if (match) {
-        opStart = parseInt(match[1])
-        opEnd = parseInt(match[2])
-      }
-    }
-  }
-  const startTimeOptions = generateTimeOptions(opStart, opEnd - 1)
-  const endTimeOptions = startTime
-    ? generateTimeOptions(parseInt(startTime.split(':')[0]) + 1, opEnd)
-    : []
 
   useEffect(() => {
     const controller = new AbortController()
@@ -113,14 +86,31 @@ export default function CourtDetailPage() {
     return () => controller.abort()
   }, [courtId])
 
-  useEffect(() => {
-    setEndTime('')
-  }, [startTime])
+  const handleSlotSelect = (date: string, startTime: string, endTime: string) => {
+    setSelectedDate(date)
+    setSelectedStart(startTime)
+    setSelectedEnd(endTime)
+  }
 
-  const handleBooking = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!date || !startTime || !endTime) {
-      toast.error('Completa la fecha y horarios')
+  // Calculate estimated price
+  const estimatedPrice = (() => {
+    if (!court || !selectedStart || !selectedEnd) return 0
+    const [startH, startM] = selectedStart.split(':').map(Number)
+    const [endH, endM] = selectedEnd.split(':').map(Number)
+    const hours = (endH * 60 + endM - (startH * 60 + startM)) / 60
+    return court.hourlyRate * hours
+  })()
+
+  const durationMinutes = (() => {
+    if (!selectedStart || !selectedEnd) return 0
+    const [startH, startM] = selectedStart.split(':').map(Number)
+    const [endH, endM] = selectedEnd.split(':').map(Number)
+    return endH * 60 + endM - (startH * 60 + startM)
+  })()
+
+  const handleBooking = async () => {
+    if (!selectedDate || !selectedStart || !selectedEnd) {
+      toast.error('Selecciona fecha y horario')
       return
     }
     setBooking(true)
@@ -128,16 +118,23 @@ export default function CourtDetailPage() {
       const res = await fetch(`/api/courts/${courtId}/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, startTime, endTime, notes: notes || undefined }),
+        body: JSON.stringify({
+          date: selectedDate,
+          startTime: selectedStart,
+          endTime: selectedEnd,
+          notes: notes || undefined,
+        }),
       })
       if (res.ok) {
+        const data = await res.json()
         toast.success('Reserva creada exitosamente')
-        router.push('/courts/bookings')
+        router.push(`/courts/${courtId}/pagar?bookingId=${data.id}`)
       } else {
         const data = await res.json().catch(() => ({}))
         toast.error(data.error || 'Error al crear la reserva')
       }
-    } catch {
+    } catch (err) {
+      logger.error('Booking error:', err)
       toast.error('Error de conexion')
     } finally {
       setBooking(false)
@@ -184,10 +181,7 @@ export default function CourtDetailPage() {
         </GlassButton>
       </Link>
 
-      {/* Court name */}
-      <h1 className="text-2xl md:text-3xl font-bold">{court.name}</h1>
-
-      {/* Image */}
+      {/* Hero image */}
       {court.imageUrl && (
         <div className="relative aspect-video w-full overflow-hidden rounded-2xl">
           <Image
@@ -199,6 +193,19 @@ export default function CourtDetailPage() {
           />
         </div>
       )}
+
+      {/* Court name + badges */}
+      <div className="space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold">{court.name}</h1>
+        <div className="flex flex-wrap gap-2">
+          <GlassBadge variant="primary" size="sm">
+            {SURFACE_LABELS[court.surface] || court.surface}
+          </GlassBadge>
+          <GlassBadge variant="default" size="sm">
+            {COURT_TYPE_LABELS[court.courtType] || court.courtType}
+          </GlassBadge>
+        </div>
+      </div>
 
       {/* Info grid */}
       <GlassCard intensity="light" padding="lg">
@@ -215,23 +222,23 @@ export default function CourtDetailPage() {
             <p className="text-sm">{court.district}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Superficie</p>
-            <GlassBadge variant="primary" size="sm">
-              {SURFACE_LABELS[court.surface] || court.surface}
-            </GlassBadge>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Tipo</p>
-            <GlassBadge variant="default" size="sm">
-              {COURT_TYPE_LABELS[court.courtType] || court.courtType}
-            </GlassBadge>
-          </div>
-          <div className="space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Tarifa por hora</p>
             <p className="text-xl font-bold">
               S/ {court.hourlyRate}<span className="text-sm font-normal text-muted-foreground">/hora</span>
             </p>
           </div>
+          {court.amenities && court.amenities.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Amenidades</p>
+              <div className="flex flex-wrap gap-1">
+                {court.amenities.map((amenity) => (
+                  <GlassBadge key={amenity} variant="success" size="sm">
+                    {amenity}
+                  </GlassBadge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </GlassCard>
 
@@ -239,23 +246,6 @@ export default function CourtDetailPage() {
       {court.description && (
         <GlassCard intensity="light" padding="lg">
           <p className="text-sm text-muted-foreground">{court.description}</p>
-        </GlassCard>
-      )}
-
-      {/* Amenities */}
-      {court.amenities && court.amenities.length > 0 && (
-        <GlassCard intensity="light" padding="lg">
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            Amenidades
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {court.amenities.map((amenity) => (
-              <GlassBadge key={amenity} variant="success" size="sm">
-                {amenity}
-              </GlassBadge>
-            ))}
-          </div>
         </GlassCard>
       )}
 
@@ -312,93 +302,92 @@ export default function CourtDetailPage() {
         </GlassCard>
       )}
 
-      {/* Booking form */}
-      <GlassCard intensity="medium" padding="lg">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
-          Reservar cancha
-        </h3>
-        <form onSubmit={handleBooking} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Availability Calendar */}
+      <AvailabilityCalendar
+        courtId={courtId}
+        onSlotSelect={handleSlotSelect}
+        selectedDate={selectedDate}
+        selectedStart={selectedStart}
+        selectedEnd={selectedEnd}
+      />
+
+      {/* Booking Summary */}
+      {selectedDate && selectedStart && selectedEnd && (
+        <GlassCard intensity="medium" padding="lg">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-primary" />
+            Resumen de reserva
+          </h3>
+
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Fecha</p>
+                <p className="font-medium">
+                  {new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-PE', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Horario</p>
+                <p className="font-medium">{selectedStart} - {selectedEnd}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Duracion</p>
+                <p className="font-medium">
+                  {durationMinutes >= 60
+                    ? `${Math.floor(durationMinutes / 60)}h ${durationMinutes % 60 > 0 ? `${durationMinutes % 60}min` : ''}`
+                    : `${durationMinutes}min`
+                  }
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Precio estimado</p>
+                <p className="text-xl font-bold flex items-center gap-1">
+                  <DollarSign className="h-4 w-4" />
+                  S/ {estimatedPrice.toFixed(2)}
+                </p>
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Fecha
+                Notas (opcional)
               </label>
-              <input
-                type="date"
-                min={today}
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                className="glass-input w-full"
+              <GlassTextarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Ejemplo: Traeremos pelotas propias..."
+                rows={3}
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Hora inicio
-              </label>
-              <select
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                required
-                className="glass-input w-full min-h-[44px]"
-                aria-label="Hora de inicio"
-              >
-                <option value="">Seleccionar</option>
-                {startTimeOptions.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Hora fin
-              </label>
-              <select
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                required
-                disabled={!startTime}
-                className="glass-input w-full min-h-[44px]"
-                aria-label="Hora de fin"
-              >
-                <option value="">Seleccionar</option>
-                {endTimeOptions.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
+
+            <GlassButton
+              variant="solid"
+              size="lg"
+              className="w-full"
+              disabled={booking}
+              onClick={handleBooking}
+            >
+              {booking ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Reservando...
+                </>
+              ) : (
+                <>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Reservar y Pagar
+                </>
+              )}
+            </GlassButton>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Notas (opcional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ejemplo: Traeremos pelotas propias..."
-              rows={3}
-              className="glass-input w-full resize-none"
-            />
-          </div>
-          <GlassButton
-            type="submit"
-            variant="solid"
-            size="lg"
-            className="w-full"
-            disabled={booking}
-          >
-            {booking ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Reservando...
-              </>
-            ) : (
-              'Reservar'
-            )}
-          </GlassButton>
-        </form>
-      </GlassCard>
+        </GlassCard>
+      )}
     </div>
   )
 }

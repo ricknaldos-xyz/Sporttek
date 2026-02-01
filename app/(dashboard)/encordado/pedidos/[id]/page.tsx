@@ -1,15 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { GlassCard } from '@/components/ui/glass-card'
 import { logger } from '@/lib/logger'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { StringingStatusTracker } from '@/components/stringing/StringingStatusTracker'
 import { formatPrice } from '@/lib/shop'
-import { Loader2, Package, ArrowLeft, MessageCircle, RefreshCw } from 'lucide-react'
+import { Loader2, Package, ArrowLeft, MessageCircle, RefreshCw, XCircle } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
+import { toast } from 'sonner'
 import Link from 'next/link'
+import CulqiCheckout from '@/components/CulqiCheckout'
 
 interface Workshop {
   id: string
@@ -76,27 +78,78 @@ const STATUS_VARIANT: Record<string, 'default' | 'primary' | 'success' | 'warnin
   STRINGING_CANCELLED: 'destructive',
 }
 
+const CANCELLABLE_STATUSES = ['PENDING_PAYMENT', 'CONFIRMED']
+
 export default function PedidoDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<StringingOrderDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+
+  const fetchOrder = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/stringing/orders/${id}`)
+      if (res.ok) {
+        const data = await res.json()
+        setOrder(data)
+      }
+    } catch {
+      logger.error('Error fetching order detail')
+    } finally {
+      setLoading(false)
+    }
+  }, [id])
 
   useEffect(() => {
-    async function fetchOrder() {
-      try {
-        const res = await fetch(`/api/stringing/orders/${id}`)
-        if (res.ok) {
-          const data = await res.json()
-          setOrder(data)
-        }
-      } catch {
-        logger.error('Error fetching order detail')
-      } finally {
-        setLoading(false)
-      }
-    }
     if (id) fetchOrder()
-  }, [id])
+  }, [id, fetchOrder])
+
+  async function handleCancel() {
+    if (!order) return
+    setCancelling(true)
+    try {
+      const res = await fetch(`/api/stringing/orders/${order.id}/cancel`, {
+        method: 'POST',
+      })
+      if (res.ok) {
+        toast.success('Pedido cancelado exitosamente')
+        setShowCancelConfirm(false)
+        fetchOrder()
+      } else {
+        const err = await res.json()
+        toast.error(err.error || 'Error al cancelar el pedido')
+      }
+    } catch {
+      toast.error('Error inesperado al cancelar el pedido')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  async function handlePaymentToken(tokenId: string) {
+    if (!order) return
+    setPaymentLoading(true)
+    try {
+      const res = await fetch('/api/stringing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id, tokenId }),
+      })
+      if (res.ok) {
+        toast.success('Pago realizado exitosamente')
+        fetchOrder()
+      } else {
+        const err = await res.json()
+        toast.error(err.error || 'Error al procesar el pago')
+      }
+    } catch {
+      toast.error('Error inesperado al procesar el pago')
+    } finally {
+      setPaymentLoading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -147,6 +200,78 @@ export default function PedidoDetailPage() {
           </GlassBadge>
         </div>
       </GlassCard>
+
+      {/* Pay Now */}
+      {order.status === 'PENDING_PAYMENT' && (
+        <GlassCard intensity="medium" padding="lg">
+          <h2 className="text-lg font-semibold mb-3">Completar Pago</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Tu pedido esta pendiente de pago. Completa el pago para confirmar tu pedido.
+          </p>
+          <div className="flex justify-between items-center mb-4">
+            <span className="font-medium">Total</span>
+            <span className="font-bold text-lg">{formatPrice(order.totalCents)}</span>
+          </div>
+          <CulqiCheckout
+            amount={order.totalCents}
+            title="Encordado SportTek"
+            description={`Pedido ${order.orderNumber}`}
+            onToken={handlePaymentToken}
+            onError={(error) => toast.error(error)}
+            loading={paymentLoading}
+            disabled={paymentLoading}
+            buttonText="Pagar ahora"
+            className="w-full"
+          />
+        </GlassCard>
+      )}
+
+      {/* Cancel Order */}
+      {CANCELLABLE_STATUSES.includes(order.status) && (
+        <GlassCard intensity="light" padding="lg">
+          {showCancelConfirm ? (
+            <div className="space-y-4">
+              <p className="text-sm font-medium">
+                Estas seguro que deseas cancelar este pedido?
+                {order.status === 'CONFIRMED' && ' Si ya realizaste el pago, se procesara un reembolso.'}
+              </p>
+              <div className="flex gap-3">
+                <GlassButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCancelConfirm(false)}
+                  disabled={cancelling}
+                >
+                  No, mantener pedido
+                </GlassButton>
+                <GlassButton
+                  variant="solid"
+                  size="sm"
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {cancelling ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <XCircle className="h-4 w-4 mr-2" />
+                  )}
+                  Si, cancelar pedido
+                </GlassButton>
+              </div>
+            </div>
+          ) : (
+            <GlassButton
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCancelConfirm(true)}
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Cancelar pedido
+            </GlassButton>
+          )}
+        </GlassCard>
+      )}
 
       {/* Status Tracker */}
       <GlassCard intensity="light" padding="lg">

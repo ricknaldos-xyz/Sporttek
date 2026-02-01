@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { GlassButton } from '@/components/ui/glass-button'
 import { logger } from '@/lib/logger'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import { ProductFilters } from '@/components/shop/ProductFilters'
 import { SearchBar } from '@/components/shop/SearchBar'
 import { CartBadge } from '@/components/shop/CartBadge'
+import { CartDrawer } from '@/components/shop/CartDrawer'
 import { ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Product {
@@ -30,6 +30,7 @@ export default function TiendaPage() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [cartCount, setCartCount] = useState(0)
+  const [cartOpen, setCartOpen] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -79,6 +80,15 @@ export default function TiendaPage() {
     return () => controller.abort()
   }, [])
 
+  useEffect(() => {
+    const handler = () => {
+      setCartOpen(true)
+      setCartCount((c) => c + 1)
+    }
+    window.addEventListener('cart-updated', handler)
+    return () => window.removeEventListener('cart-updated', handler)
+  }, [])
+
   const handleCategoryChange = useCallback((cat: string) => {
     setCategory(cat)
     setPage(1)
@@ -102,7 +112,9 @@ export default function TiendaPage() {
           <ShoppingBag className="h-7 w-7 text-primary" />
           <h1 className="text-2xl font-bold">Tienda</h1>
         </div>
-        <CartBadge count={cartCount} />
+        <button onClick={() => setCartOpen(true)}>
+          <CartBadge count={cartCount} />
+        </button>
       </div>
 
       {/* Search */}
@@ -147,6 +159,8 @@ export default function TiendaPage() {
           </GlassButton>
         </div>
       )}
+
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   )
 }

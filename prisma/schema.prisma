@@ -1806,14 +1806,20 @@ model CourtBooking {
   rejectedAt       DateTime?
 
   // Payment
-  totalCents    Int?
-  culqiChargeId String?
-  paidAt        DateTime?
+  estimatedTotalCents Int?
+  totalCents          Int?
+  culqiChargeId       String?
+  refundCulqiId       String?
+  paidAt              DateTime?
+
+  // Booking expiration (unpaid bookings auto-expire)
+  expiresAt DateTime?
 
   createdAt DateTime @default(now())
 
   @@index([courtId, date])
   @@index([userId])
+  @@index([expiresAt, status])
   @@map("court_bookings")
 }
 

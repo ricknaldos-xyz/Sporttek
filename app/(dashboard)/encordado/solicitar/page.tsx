@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { StringingServiceCard } from '@/components/stringing/StringingServiceCard'
@@ -15,7 +15,9 @@ import { SchedulePicker } from '@/components/stringing/SchedulePicker'
 import { formatPrice } from '@/lib/shop'
 import { toast } from 'sonner'
 import { FloatingPriceBar } from '@/components/stringing/FloatingPriceBar'
-import { ArrowLeft, ArrowRight, Loader2, CreditCard, Check } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Loader2, Check } from 'lucide-react'
+import CulqiCheckout from '@/components/CulqiCheckout'
+import Link from 'next/link'
 
 type ServiceType = 'STANDARD' | 'EXPRESS'
 type DeliveryMode = 'HOME_PICKUP_DELIVERY' | 'WORKSHOP_DROP_PICKUP'
@@ -36,12 +38,17 @@ const STEP_LABELS = [
   'Cuerda',
   'Entrega',
   'Confirmar',
+  'Pago',
 ]
 
 export default function SolicitarEncordadoPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+  const [orderId, setOrderId] = useState<string | null>(null)
+  const [orderNumber, setOrderNumber] = useState<string | null>(null)
 
   // Step 1
   const [serviceType, setServiceType] = useState<ServiceType>('STANDARD')
@@ -69,6 +76,24 @@ export default function SolicitarEncordadoPage() {
   // Step 5
   const [contactPhone, setContactPhone] = useState('')
 
+  // Repeat order prefill from query params
+  useEffect(() => {
+    const brand = searchParams.get('brand')
+    const model = searchParams.get('model')
+    const string = searchParams.get('string')
+    const tension = searchParams.get('tension')
+
+    if (brand) setRacketBrand(brand)
+    if (model) setRacketModel(model)
+    if (string) setStringName(string)
+    if (tension) {
+      const parsed = parseInt(tension, 10)
+      if (!isNaN(parsed) && parsed >= 30 && parsed <= 80) {
+        setTensionMain(parsed)
+      }
+    }
+  }, [searchParams])
+
   const totalCents = SERVICE_PRICES[serviceType] + DELIVERY_PRICES[deliveryMode]
 
   function canGoNext(): boolean {
@@ -89,12 +114,11 @@ export default function SolicitarEncordadoPage() {
     }
   }
 
-  async function handleSubmit() {
+  async function handleCreateOrder() {
     if (!canGoNext()) return
 
     setSubmitting(true)
     try {
-      // Create order
       const orderRes = await fetch('/api/stringing/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -123,33 +147,40 @@ export default function SolicitarEncordadoPage() {
         return
       }
 
-      const { id: orderId } = await orderRes.json()
+      const data = await orderRes.json()
+      setOrderId(data.id)
+      setOrderNumber(data.orderNumber || data.id)
+      setStep(5)
+    } catch {
+      toast.error('Error inesperado al crear el pedido')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
-      // Create checkout session
-      const checkoutRes = await fetch('/api/stringing/checkout', {
+  async function handlePaymentToken(tokenId: string) {
+    if (!orderId) return
+
+    setPaymentLoading(true)
+    try {
+      const res = await fetch('/api/stringing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({ orderId, tokenId }),
       })
 
-      if (!checkoutRes.ok) {
-        const err = await checkoutRes.json()
-        toast.error(err.error || 'Error al crear sesion de pago')
-        router.push(`/encordado/pedidos/${orderId}`)
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error || 'Error al procesar el pago')
         return
       }
 
-      const { checkoutUrl } = await checkoutRes.json()
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl
-      } else {
-        toast.error('No se pudo obtener la URL de pago')
-        router.push(`/encordado/pedidos/${orderId}`)
-      }
+      toast.success('Pago realizado exitosamente')
+      router.push(`/encordado/pedidos/${orderId}`)
     } catch {
-      toast.error('Error inesperado al procesar el pedido')
+      toast.error('Error inesperado al procesar el pago')
     } finally {
-      setSubmitting(false)
+      setPaymentLoading(false)
     }
   }
 
@@ -364,43 +395,84 @@ export default function SolicitarEncordadoPage() {
             </div>
           </div>
         )}
+
+        {step === 5 && orderId && (
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold">Pago</h2>
+
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Numero de pedido</span>
+                <span className="font-mono font-medium">{orderNumber}</span>
+              </div>
+              <hr className="border-glass" />
+              <div className="flex justify-between font-bold text-lg">
+                <span>Total a pagar</span>
+                <span>{formatPrice(totalCents)}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-4 pt-4">
+              <CulqiCheckout
+                amount={totalCents}
+                title="Encordado SportTek"
+                description="Pedido de encordado"
+                onToken={handlePaymentToken}
+                onError={(error) => toast.error(error)}
+                loading={paymentLoading}
+                disabled={paymentLoading}
+                buttonText="Pagar ahora"
+                className="w-full"
+              />
+
+              <Link
+                href={`/encordado/pedidos/${orderId}`}
+                className="text-sm text-muted-foreground hover:text-foreground underline"
+              >
+                Pagar despues
+              </Link>
+            </div>
+          </div>
+        )}
       </GlassCard>
 
       {/* Navigation */}
-      <div className="flex justify-between">
-        <GlassButton
-          variant="outline"
-          onClick={() => setStep((s) => Math.max(0, s - 1))}
-          disabled={step === 0}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Atras
-        </GlassButton>
+      {step < 5 && (
+        <div className="flex justify-between">
+          <GlassButton
+            variant="outline"
+            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            disabled={step === 0}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Atras
+          </GlassButton>
 
-        {step < 4 ? (
-          <GlassButton
-            variant="solid"
-            onClick={() => setStep((s) => s + 1)}
-            disabled={!canGoNext()}
-          >
-            Siguiente
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </GlassButton>
-        ) : (
-          <GlassButton
-            variant="solid"
-            onClick={handleSubmit}
-            disabled={!canGoNext() || submitting}
-          >
-            {submitting ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <CreditCard className="h-4 w-4 mr-2" />
-            )}
-            Pagar
-          </GlassButton>
-        )}
-      </div>
+          {step < 4 ? (
+            <GlassButton
+              variant="solid"
+              onClick={() => setStep((s) => s + 1)}
+              disabled={!canGoNext()}
+            >
+              Siguiente
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </GlassButton>
+          ) : (
+            <GlassButton
+              variant="solid"
+              onClick={handleCreateOrder}
+              disabled={!canGoNext() || submitting}
+            >
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <ArrowRight className="h-4 w-4 mr-2" />
+              )}
+              Siguiente
+            </GlassButton>
+          )}
+        </div>
+      )}
 
       <FloatingPriceBar serviceType={serviceType} deliveryMode={deliveryMode} visible={step < 4} />
     </div>
