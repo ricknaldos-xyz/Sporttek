@@ -60,8 +60,23 @@ export function TensionInput({
       <div>
         <div
           ref={barRef}
-          className="relative h-3 rounded-full bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 cursor-pointer"
+          role="slider"
+          tabIndex={0}
+          aria-valuemin={30}
+          aria-valuemax={80}
+          aria-valuenow={tensionMain}
+          aria-label="Tension principal en libras"
+          className="relative h-3 rounded-full bg-gradient-to-r from-blue-500 via-yellow-500 to-red-500 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-full"
           onClick={handleBarClick}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+              e.preventDefault()
+              onMainChange(Math.min(80, tensionMain + 1))
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+              e.preventDefault()
+              onMainChange(Math.max(30, tensionMain - 1))
+            }
+          }}
         >
           {/* Recommended zone overlay */}
           <div

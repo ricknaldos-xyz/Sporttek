@@ -35,54 +35,88 @@ export interface NavItem {
   tourId: string
 }
 
+type TranslationFn = (key: string) => string
+
+// Default fallback translator (returns Spanish strings)
+const defaultT: TranslationFn = (key: string) => {
+  const defaults: Record<string, string> = {
+    dashboard: 'Dashboard', newAnalysis: 'Nuevo Analisis', myAnalyses: 'Mis Analisis',
+    training: 'Entrenamiento', goals: 'Objetivos', rankings: 'Rankings',
+    matchmaking: 'Matchmaking', tournaments: 'Torneos', challenges: 'Desafios',
+    matches: 'Partidos', community: 'Comunidad', badges: 'Badges',
+    coaches: 'Coaches', courts: 'Canchas', shop: 'Tienda', stringing: 'Encordado',
+    notifications: 'Notificaciones', profile: 'Mi Perfil',
+    coachDashboard: 'Coach Dashboard', myStudents: 'Mis Alumnos', settings: 'Configuracion',
+    requests: 'Solicitudes', myCourts: 'Mis Canchas', myWorkshops: 'Mis Talleres',
+    discover: 'Descubrir', services: 'Servicios', coachManagement: 'Gestion Coach',
+    provider: 'Proveedor', admin: 'Administracion',
+  }
+  return defaults[key] || key
+}
+
 // CORE — Always visible, primary actions
-export const coreNavigation: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard' },
-  { name: 'Nuevo Analisis', href: '/analyze', icon: Video, tourId: 'new-analysis' },
-  { name: 'Mis Analisis', href: '/analyses', icon: History, tourId: 'analyses' },
-  { name: 'Entrenamiento', href: '/training', icon: Dumbbell, tourId: 'training' },
-  { name: 'Objetivos', href: '/goals', icon: Target, tourId: 'goals' },
-]
+export function getCoreNavigation(t: TranslationFn = defaultT): NavItem[] {
+  return [
+    { name: t('dashboard'), href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard' },
+    { name: t('newAnalysis'), href: '/analyze', icon: Video, tourId: 'new-analysis' },
+    { name: t('myAnalyses'), href: '/analyses', icon: History, tourId: 'analyses' },
+    { name: t('training'), href: '/training', icon: Dumbbell, tourId: 'training' },
+    { name: t('goals'), href: '/goals', icon: Target, tourId: 'goals' },
+  ]
+}
 
 // DISCOVER — Competition and community
-export const discoverNavigation: NavItem[] = [
-  { name: 'Rankings', href: '/rankings', icon: Trophy, tourId: 'rankings' },
-  { name: 'Matchmaking', href: '/matchmaking', icon: Swords, tourId: 'matchmaking' },
-  { name: 'Torneos', href: '/tournaments', icon: Medal, tourId: 'tournaments' },
-  { name: 'Desafios', href: '/challenges', icon: Flag, tourId: 'challenges' },
-  { name: 'Partidos', href: '/matches', icon: CircleDot, tourId: 'matches' },
-  { name: 'Comunidad', href: '/community', icon: Users, tourId: 'community' },
-  { name: 'Badges', href: '/badges', icon: Award, tourId: 'badges' },
-]
+export function getDiscoverNavigation(t: TranslationFn = defaultT): NavItem[] {
+  return [
+    { name: t('rankings'), href: '/rankings', icon: Trophy, tourId: 'rankings' },
+    { name: t('matchmaking'), href: '/matchmaking', icon: Swords, tourId: 'matchmaking' },
+    { name: t('tournaments'), href: '/tournaments', icon: Medal, tourId: 'tournaments' },
+    { name: t('challenges'), href: '/challenges', icon: Flag, tourId: 'challenges' },
+    { name: t('matches'), href: '/matches', icon: CircleDot, tourId: 'matches' },
+    { name: t('community'), href: '/community', icon: Users, tourId: 'community' },
+    { name: t('badges'), href: '/badges', icon: Award, tourId: 'badges' },
+  ]
+}
 
 // SERVICES — Marketplace and services
-export const servicesNavigation: NavItem[] = [
-  { name: 'Coaches', href: '/marketplace', icon: GraduationCap, tourId: 'coaches' },
-  { name: 'Canchas', href: '/courts', icon: MapPin, tourId: 'courts' },
-  { name: 'Tienda', href: '/tienda', icon: ShoppingBag, tourId: 'shop' },
-  { name: 'Encordado', href: '/encordado', icon: Wrench, tourId: 'stringing' },
-]
+export function getServicesNavigation(t: TranslationFn = defaultT): NavItem[] {
+  return [
+    { name: t('coaches'), href: '/marketplace', icon: GraduationCap, tourId: 'coaches' },
+    { name: t('courts'), href: '/courts', icon: MapPin, tourId: 'courts' },
+    { name: t('shop'), href: '/tienda', icon: ShoppingBag, tourId: 'shop' },
+    { name: t('stringing'), href: '/encordado', icon: Wrench, tourId: 'stringing' },
+  ]
+}
 
 // ACCOUNT — Profile and notifications
-export const accountNavigation: NavItem[] = [
-  { name: 'Notificaciones', href: '/notifications', icon: Bell, tourId: 'notifications' },
-  { name: 'Mi Perfil', href: '/profile', icon: User, tourId: 'profile' },
-]
+export function getAccountNavigation(t: TranslationFn = defaultT): NavItem[] {
+  return [
+    { name: t('notifications'), href: '/notifications', icon: Bell, tourId: 'notifications' },
+    { name: t('profile'), href: '/profile', icon: User, tourId: 'profile' },
+  ]
+}
 
-export const coachNavigation: NavItem[] = [
-  { name: 'Coach Dashboard', href: '/coach/dashboard', icon: GraduationCap, tourId: 'coach-dashboard' },
-  { name: 'Mis Alumnos', href: '/coach/students', icon: Users, tourId: 'coach-students' },
-  { name: 'Configuracion', href: '/coach/settings', icon: Settings, tourId: 'coach-settings' },
-]
+export function getCoachNavigation(t: TranslationFn = defaultT): NavItem[] {
+  return [
+    { name: t('coachDashboard'), href: '/coach/dashboard', icon: GraduationCap, tourId: 'coach-dashboard' },
+    { name: t('myStudents'), href: '/coach/students', icon: Users, tourId: 'coach-students' },
+    { name: t('settings'), href: '/coach/settings', icon: Settings, tourId: 'coach-settings' },
+  ]
+}
 
-export const providerCourtNavigation: NavItem[] = [
-  { name: 'Mis Canchas', href: '/provider/courts', icon: MapPin, tourId: 'provider-courts' },
-]
+export function getProviderCourtNavigation(t: TranslationFn = defaultT): NavItem[] {
+  return [
+    { name: t('myCourts'), href: '/provider/courts', icon: MapPin, tourId: 'provider-courts' },
+  ]
+}
 
-export const providerWorkshopNavigation: NavItem[] = [
-  { name: 'Mis Talleres', href: '/provider/workshops', icon: Wrench, tourId: 'provider-workshops' },
-]
+export function getProviderWorkshopNavigation(t: TranslationFn = defaultT): NavItem[] {
+  return [
+    { name: t('myWorkshops'), href: '/provider/workshops', icon: Wrench, tourId: 'provider-workshops' },
+  ]
+}
 
+// Admin navigation stays in Spanish (admin-only, not translated)
 export const adminNavigation: NavItem[] = [
   { name: 'Dashboard', href: '/admin', icon: Shield, tourId: 'admin' },
   { name: 'Usuarios', href: '/admin/users', icon: Users, tourId: 'admin-users' },
@@ -101,6 +135,15 @@ export const adminNavigation: NavItem[] = [
   { name: 'Canchas', href: '/admin/courts', icon: MapPin, tourId: 'admin-courts' },
 ]
 
+// Keep old exports for backward compatibility
+export const coreNavigation = getCoreNavigation()
+export const discoverNavigation = getDiscoverNavigation()
+export const servicesNavigation = getServicesNavigation()
+export const accountNavigation = getAccountNavigation()
+export const coachNavigation = getCoachNavigation()
+export const providerCourtNavigation = getProviderCourtNavigation()
+export const providerWorkshopNavigation = getProviderWorkshopNavigation()
+
 export interface NavSection {
   items: NavItem[]
   label?: string
@@ -115,53 +158,64 @@ interface SessionUser {
   role?: string
 }
 
-export function getNavigationSections(user: SessionUser | undefined, sportLabel: string): NavSection[] {
+export function getNavigationSections(user: SessionUser | undefined, sportLabel: string, t?: TranslationFn): NavSection[] {
   const sections: NavSection[] = []
+
+  const core = t ? getCoreNavigation(t) : coreNavigation
+  const discover = t ? getDiscoverNavigation(t) : discoverNavigation
+  const services = t ? getServicesNavigation(t) : servicesNavigation
+  const coach = t ? getCoachNavigation(t) : coachNavigation
+  const account = t ? getAccountNavigation(t) : accountNavigation
+  const provCourts = t ? getProviderCourtNavigation(t) : providerCourtNavigation
+  const provWorkshops = t ? getProviderWorkshopNavigation(t) : providerWorkshopNavigation
 
   // Core section: primary actions (always visible for players/coaches)
   if (user?.hasPlayerProfile || user?.hasCoachProfile) {
-    sections.push({ items: coreNavigation, label: sportLabel })
+    sections.push({ items: core, label: sportLabel })
   } else {
     // Minimal core for users without sport profile
     sections.push({
       items: [
-        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard' },
+        { name: t ? t('dashboard') : 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'dashboard' },
       ],
     })
   }
 
   // Discover: competition and community (collapsible)
-  sections.push({ items: discoverNavigation, label: 'Descubrir', collapsible: true })
+  sections.push({ items: discover, label: t ? t('discover') : 'Descubrir', collapsible: true })
 
   // Services: marketplace (collapsible)
-  sections.push({ items: servicesNavigation, label: 'Servicios', collapsible: true })
+  sections.push({ items: services, label: t ? t('services') : 'Servicios', collapsible: true })
 
   // Coach management
   if (user?.hasCoachProfile) {
-    sections.push({ items: [...coachNavigation, { name: 'Solicitudes', href: '/coach/requests', icon: Inbox, tourId: 'coach-requests' }], label: 'Gestion Coach' })
+    sections.push({
+      items: [...coach, { name: t ? t('requests') : 'Solicitudes', href: '/coach/requests', icon: Inbox, tourId: 'coach-requests' }],
+      label: t ? t('coachManagement') : 'Gestion Coach',
+    })
   }
 
   // Provider management
   if (user?.isProvider) {
     const providerItems: NavItem[] = []
     if (user.providerTypes?.includes('COURT')) {
-      providerItems.push(...providerCourtNavigation)
+      providerItems.push(...provCourts)
     }
     if (user.providerTypes?.includes('WORKSHOP')) {
-      providerItems.push(...providerWorkshopNavigation)
+      providerItems.push(...provWorkshops)
     }
     if (providerItems.length > 0) {
-      sections.push({ items: providerItems, label: 'Proveedor' })
+      sections.push({ items: providerItems, label: t ? t('provider') : 'Proveedor' })
     }
   }
 
   // Admin
   if (user?.role === 'ADMIN') {
-    sections.push({ items: adminNavigation, label: 'Administracion', collapsible: true })
+    sections.push({ items: adminNavigation, label: t ? t('admin') : 'Administracion', collapsible: true })
   }
 
   // Account (always last)
-  sections.push({ items: accountNavigation })
+  sections.push({ items: account })
 
   return sections
 }

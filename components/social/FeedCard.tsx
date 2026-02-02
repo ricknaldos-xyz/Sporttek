@@ -5,6 +5,7 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { TierBadge } from '@/components/player/TierBadge'
 import { Target, Medal, Trophy, Flame } from 'lucide-react'
 import Link from 'next/link'
+import { ReportButton } from '@/components/social/ReportButton'
 import type { SkillTier, FeedItemType } from '@prisma/client'
 
 interface FeedCardProps {
@@ -40,7 +41,7 @@ export function FeedCard({ item }: FeedCardProps) {
 
   return (
     <GlassCard intensity="light" padding="md">
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-4 group">
         <Link href={`/player/${item.profile.userId}`} className="flex-shrink-0">
           <div className="relative h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
             {avatar ? (
@@ -62,6 +63,9 @@ export function FeedCard({ item }: FeedCardProps) {
               {playerName}
             </Link>
             <TierBadge tier={item.profile.skillTier} size="sm" />
+            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+              <ReportButton targetId={item.id} targetType="feed_item" ownerId={item.profile.userId} />
+            </div>
           </div>
 
           <div className="flex items-center gap-2 mt-1">

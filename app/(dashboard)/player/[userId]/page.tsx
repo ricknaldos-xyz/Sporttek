@@ -25,6 +25,7 @@ import { TierBadge } from '@/components/player/TierBadge'
 import { SkillScoreDisplay } from '@/components/player/SkillScoreDisplay'
 import { TechniqueRadarChart } from '@/components/player/TechniqueRadarChart'
 import { MapPin, Calendar, Hand, Trophy, Target } from 'lucide-react'
+import { ReportButton } from '@/components/social/ReportButton'
 
 export default async function PublicPlayerProfilePage({
   params,
@@ -58,8 +59,21 @@ export default async function PublicPlayerProfilePage({
     ? (profile.displayName || profile.user.name || 'Jugador')
     : (profile.displayName?.charAt(0) + '***')
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: displayName,
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://sporttek.xyz'}/player/${userId}`,
+    additionalType: 'https://schema.org/Athlete',
+    description: `Jugador ${profile.skillTier} en SportTek`,
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header */}
       <div className="flex items-center gap-2">
         <h1 className="text-2xl font-bold">Perfil de Jugador</h1>

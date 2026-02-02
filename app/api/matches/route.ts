@@ -146,6 +146,7 @@ export async function GET(request: NextRequest) {
         where,
         orderBy: { playedAt: 'desc' },
         include,
+        take: 100,
       })
       return NextResponse.json(matches)
     }

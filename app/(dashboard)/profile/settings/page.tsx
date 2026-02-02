@@ -14,6 +14,7 @@ import { GlassBadge } from '@/components/ui/glass-badge'
 import Link from 'next/link'
 import { SettingsForm } from './settings-form'
 import { ThemeSelector } from './theme-selector'
+import { DeleteAccountDialog } from './delete-account-dialog'
 
 async function getUserSettings(userId: string) {
   return prisma.user.findUnique({
@@ -184,9 +185,7 @@ export default async function SettingsPage() {
               Esta accion es irreversible y eliminara todos tus datos
             </p>
           </div>
-          <GlassButton variant="outline" disabled className="border-destructive/50 text-destructive hover:bg-destructive/10">
-            Eliminar
-          </GlassButton>
+          <DeleteAccountDialog />
         </div>
       </GlassCard>
     </div>

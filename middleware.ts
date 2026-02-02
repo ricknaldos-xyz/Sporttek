@@ -23,11 +23,11 @@ export default auth((req) => {
     return NextResponse.redirect(new URL('/dashboard', req.nextUrl))
   }
 
-  // Force onboarding: redirect new users without sport to onboarding
-  if (isLoggedIn && pathname === '/dashboard') {
-    const hasSport = (req.auth as { user?: { hasSport?: boolean } })?.user?.hasSport
-    if (hasSport === false) {
-      return NextResponse.redirect(new URL('/onboarding/sport', req.nextUrl))
+  // Force onboarding: redirect users who haven't completed onboarding
+  if (isLoggedIn && !pathname.startsWith('/onboarding') && !pathname.startsWith('/api/')) {
+    const user = req.auth?.user as { onboardingCompleted?: boolean } | undefined
+    if (user?.onboardingCompleted === false) {
+      return NextResponse.redirect(new URL('/onboarding', req.nextUrl))
     }
   }
 

@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
     const followingIds = await prisma.follow.findMany({
       where: { followerId: profile.id },
       select: { followingId: true },
+      take: 1000,
     }).then(follows => follows.map(f => f.followingId))
 
     const profileIds = [profile.id, ...followingIds].filter(id => !blockedIds.includes(id))

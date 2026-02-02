@@ -56,5 +56,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // DB may not be available during build
   }
 
-  return [...staticPages, ...tournamentPages, ...coachPages]
+  // Dynamic: public player profiles
+  let playerPages: MetadataRoute.Sitemap = []
+  try {
+    const players = await prisma.playerProfile.findMany({
+      where: { visibility: 'PUBLIC' },
+      select: { userId: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 500,
+    })
+    playerPages = players.map((p) => ({
+      url: `${baseUrl}/player/${p.userId}`,
+      lastModified: p.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.4,
+    }))
+  } catch {
+    // DB may not be available during build
+  }
+
+  // Dynamic: public clubs
+  let clubPages: MetadataRoute.Sitemap = []
+  try {
+    const clubs = await prisma.club.findMany({
+      where: { isPublic: true },
+      select: { slug: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 100,
+    })
+    clubPages = clubs.map((c) => ({
+      url: `${baseUrl}/community/clubs/${c.slug}`,
+      lastModified: c.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.4,
+    }))
+  } catch {
+    // DB may not be available during build
+  }
+
+  return [...staticPages, ...tournamentPages, ...coachPages, ...playerPages, ...clubPages]
 }

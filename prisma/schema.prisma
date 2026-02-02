@@ -1062,9 +1062,9 @@ model Match {
   challenge   Challenge? @relation(fields: [challengeId], references: [id])
 
   player1Id String
-  player1   PlayerProfile @relation("MatchP1", fields: [player1Id], references: [id])
+  player1   PlayerProfile @relation("MatchP1", fields: [player1Id], references: [id], onDelete: Cascade)
   player2Id String
-  player2   PlayerProfile @relation("MatchP2", fields: [player2Id], references: [id])
+  player2   PlayerProfile @relation("MatchP2", fields: [player2Id], references: [id], onDelete: Cascade)
 
   player1Result MatchResultType?
   player2Result MatchResultType?
@@ -1276,7 +1276,7 @@ model Tournament {
   imageUrl    String?
 
   organizerId String
-  organizer   PlayerProfile @relation("TournamentOrganizer", fields: [organizerId], references: [id])
+  organizer   PlayerProfile @relation("TournamentOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
   clubId      String?
   club        Club?         @relation(fields: [clubId], references: [id])
 
@@ -1317,7 +1317,7 @@ model TournamentParticipant {
   tournamentId String
   tournament   Tournament    @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   profileId    String
-  profile      PlayerProfile @relation(fields: [profileId], references: [id])
+  profile      PlayerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   seed          Int?
   eliminated    Boolean @default(false)
@@ -1418,7 +1418,7 @@ model CoachStudent {
 model CoachAssignedPlan {
   id             String       @id @default(cuid())
   coachId        String
-  coach          CoachProfile @relation(fields: [coachId], references: [id])
+  coach          CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
   studentId      String
   trainingPlanId String       @unique
   trainingPlan   TrainingPlan @relation(fields: [trainingPlanId], references: [id])

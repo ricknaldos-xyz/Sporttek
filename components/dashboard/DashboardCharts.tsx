@@ -1,11 +1,26 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ScoreChart } from '@/components/charts/ScoreChart'
-import { ActivityChart } from '@/components/charts/ActivityChart'
-import { ScoreProgressionChart } from '@/components/charts/ScoreProgressionChart'
+import dynamic from 'next/dynamic'
 import { GlassCard } from '@/components/ui/glass-card'
 import { Loader2 } from 'lucide-react'
+
+function ChartSkeleton() {
+  return <div className="h-[300px] animate-pulse rounded-xl glass-ultralight" />
+}
+
+const ScoreChart = dynamic(
+  () => import('@/components/charts/ScoreChart').then((mod) => ({ default: mod.ScoreChart })),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+)
+const ActivityChart = dynamic(
+  () => import('@/components/charts/ActivityChart').then((mod) => ({ default: mod.ActivityChart })),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+)
+const ScoreProgressionChart = dynamic(
+  () => import('@/components/charts/ScoreProgressionChart').then((mod) => ({ default: mod.ScoreProgressionChart })),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+)
 import { logger } from '@/lib/logger'
 import { useSport } from '@/contexts/SportContext'
 

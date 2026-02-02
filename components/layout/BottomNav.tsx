@@ -5,17 +5,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { LayoutDashboard, Trophy, Bell, Video, User } from 'lucide-react'
-
-const tabs = [
-  { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard, tourId: undefined },
-  { name: 'Rankings', href: '/rankings', icon: Trophy, tourId: 'rankings' },
-  { name: 'Analizar', href: '/analyze', icon: Video, primary: true, tourId: 'new-analysis' },
-  { name: 'Avisos', href: '/notifications', icon: Bell, tourId: undefined },
-  { name: 'Perfil', href: '/profile', icon: User, tourId: 'profile' },
-]
+import { useTranslations } from 'next-intl'
 
 export function BottomNav() {
   const pathname = usePathname()
+  const t = useTranslations('bottomNav')
+
+  const tabs = [
+    { name: t('home'), href: '/dashboard', icon: LayoutDashboard, tourId: undefined },
+    { name: t('rankings'), href: '/rankings', icon: Trophy, tourId: 'rankings' },
+    { name: t('analyze'), href: '/analyze', icon: Video, primary: true, tourId: 'new-analysis' },
+    { name: t('alerts'), href: '/notifications', icon: Bell, tourId: undefined },
+    { name: t('profile'), href: '/profile', icon: User, tourId: 'profile' },
+  ]
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {

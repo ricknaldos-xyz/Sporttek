@@ -1,0 +1,98 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "search": "Buscar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "or": "o",
+    "and": "y",
+    "yes": "Si",
+    "no": "No",
+    "error": "Error",
+    "success": "Exito"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "newAnalysis": "Nuevo Analisis",
+    "myAnalyses": "Mis Analisis",
+    "training": "Entrenamiento",
+    "goals": "Objetivos",
+    "rankings": "Rankings",
+    "matchmaking": "Matchmaking",
+    "tournaments": "Torneos",
+    "challenges": "Desafios",
+    "matches": "Partidos",
+    "community": "Comunidad",
+    "badges": "Badges",
+    "coaches": "Coaches",
+    "courts": "Canchas",
+    "shop": "Tienda",
+    "stringing": "Encordado",
+    "notifications": "Notificaciones",
+    "profile": "Mi Perfil",
+    "discover": "Descubrir",
+    "services": "Servicios",
+    "coachManagement": "Gestion Coach",
+    "coachDashboard": "Coach Dashboard",
+    "myStudents": "Mis Alumnos",
+    "settings": "Configuracion",
+    "requests": "Solicitudes",
+    "provider": "Proveedor",
+    "myCourts": "Mis Canchas",
+    "myWorkshops": "Mis Talleres",
+    "admin": "Administracion"
+  },
+  "header": {
+    "openMenu": "Abrir menu",
+    "userMenu": "Menu de usuario",
+    "myProfile": "Mi Perfil",
+    "settings": "Configuracion",
+    "signOut": "Cerrar sesion",
+    "user": "Usuario",
+    "analyzeVideo": "Analizar Video",
+    "skipToContent": "Saltar al contenido"
+  },
+  "bottomNav": {
+    "home": "Inicio",
+    "rankings": "Rankings",
+    "analyze": "Analizar",
+    "alerts": "Avisos",
+    "profile": "Perfil"
+  },
+  "auth": {
+    "login": "Iniciar sesion",
+    "register": "Registrarse",
+    "forgotPassword": "Olvidaste tu contrasena?",
+    "email": "Correo electronico",
+    "password": "Contrasena",
+    "name": "Nombre completo"
+  },
+  "settings": {
+    "title": "Configuracion",
+    "appearance": "Apariencia",
+    "theme": "Tema",
+    "language": "Idioma",
+    "dangerZone": "Zona de peligro",
+    "deleteAccount": "Eliminar cuenta"
+  },
+  "search": {
+    "placeholder": "Buscar jugadores, torneos, clubes...",
+    "noResults": "Sin resultados",
+    "tryAnother": "Intenta con otro termino",
+    "pressEsc": "Presiona Esc para cerrar",
+    "players": "Jugadores",
+    "tournaments": "Torneos",
+    "clubs": "Clubes",
+    "courts": "Canchas"
+  },
+  "language": {
+    "es": "Espanol",
+    "en": "English"
+  }
+}

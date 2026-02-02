@@ -4,6 +4,8 @@ import './globals.css'
 import { Toaster } from 'sonner'
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister'
 import { ThemeProvider } from 'next-themes'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -51,18 +53,29 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Toaster position="top-right" richColors />
-        </ThemeProvider>
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-medium"
+            >
+              Saltar al contenido
+            </a>
+            {children}
+            <Toaster position="top-right" richColors />
+          </ThemeProvider>
+        </NextIntlClientProvider>
         <ServiceWorkerRegister />
       </body>
     </html>

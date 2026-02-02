@@ -23,12 +23,14 @@ export function StarRating({ value, onChange, size = 'md', readonly = false }: S
   const iconSize = sizeMap[size]
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0.5" role="group" aria-label="Calificacion">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
           type="button"
           disabled={readonly}
+          aria-label={`${star} estrella${star > 1 ? 's' : ''}`}
+          aria-pressed={star <= value}
           onClick={() => onChange?.(star)}
           onMouseEnter={() => !readonly && setHoverValue(star)}
           onMouseLeave={() => !readonly && setHoverValue(0)}

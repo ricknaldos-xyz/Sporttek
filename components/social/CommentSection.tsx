@@ -8,6 +8,7 @@ import { TierBadge } from '@/components/player/TierBadge'
 import { Loader2, Send } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { ReportButton } from '@/components/social/ReportButton'
 import type { SkillTier } from '@prisma/client'
 import { logger } from '@/lib/logger'
 
@@ -102,7 +103,7 @@ export function CommentSection({ targetId, targetType }: CommentSectionProps) {
             const avatar = comment.author.avatarUrl || comment.author.user.image
 
             return (
-              <div key={comment.id} className="flex items-start gap-3">
+              <div key={comment.id} className="group flex items-start gap-3">
                 <Link
                   href={`/player/${comment.author.userId}`}
                   className="flex-shrink-0"
@@ -141,6 +142,9 @@ export function CommentSection({ targetId, targetType }: CommentSectionProps) {
                     </span>
                   </div>
                   <p className="text-sm mt-1">{comment.content}</p>
+                </div>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity pt-1">
+                  <ReportButton targetId={comment.id} targetType="comment" ownerId={comment.author.userId} />
                 </div>
               </div>
             )

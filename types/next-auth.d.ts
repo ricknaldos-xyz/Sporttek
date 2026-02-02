@@ -12,6 +12,8 @@ declare module 'next-auth' {
       hasCoachProfile: boolean
       isProvider: boolean
       providerTypes: string[]
+      hasSport: boolean
+      onboardingCompleted: boolean
     } & DefaultSession['user']
   }
 
@@ -23,6 +25,8 @@ declare module 'next-auth' {
     hasCoachProfile: boolean
     isProvider: boolean
     providerTypes: string[]
+    hasSport: boolean
+    onboardingCompleted: boolean
   }
 }
 
@@ -36,6 +40,8 @@ declare module 'next-auth/jwt' {
     hasCoachProfile: boolean
     isProvider: boolean
     providerTypes: string[]
+    hasSport: boolean
+    onboardingCompleted: boolean
     lastRefresh: number
   }
 }

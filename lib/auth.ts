@@ -49,6 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               where: { status: 'APPROVED' },
               select: { type: true },
             },
+            favoriteSports: { select: { id: true }, take: 1 },
           },
         })
 
@@ -81,6 +82,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           hasCoachProfile: !!user.coachProfile,
           isProvider: providerTypes.length > 0,
           providerTypes,
+          hasSport: user.favoriteSports.length > 0,
+          onboardingCompleted: user.onboardingCompleted,
         }
       },
     }),
@@ -97,6 +100,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.hasCoachProfile = user.hasCoachProfile
         token.isProvider = user.isProvider
         token.providerTypes = user.providerTypes
+        token.hasSport = user.hasSport
+        token.onboardingCompleted = user.onboardingCompleted
         token.lastRefresh = Date.now()
       } else if (!token.lastRefresh || Date.now() - token.lastRefresh > 5 * 60 * 1000) {
         // Re-fetch every 5 minutes to pick up role/subscription changes
@@ -107,12 +112,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               role: true,
               subscription: true,
               accountType: true,
+              onboardingCompleted: true,
               playerProfile: { select: { id: true } },
               coachProfile: { select: { id: true } },
               providerApplications: {
                 where: { status: 'APPROVED' },
                 select: { type: true },
               },
+              favoriteSports: { select: { id: true }, take: 1 },
             },
           })
           if (dbUser) {
@@ -124,6 +131,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.hasCoachProfile = !!dbUser.coachProfile
             token.isProvider = refreshedProviderTypes.length > 0
             token.providerTypes = refreshedProviderTypes
+            token.hasSport = dbUser.favoriteSports.length > 0
+            token.onboardingCompleted = dbUser.onboardingCompleted
             token.lastRefresh = Date.now()
           }
         } catch {
@@ -142,6 +151,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.hasCoachProfile = token.hasCoachProfile as boolean
         session.user.isProvider = token.isProvider as boolean
         session.user.providerTypes = token.providerTypes as string[]
+        session.user.hasSport = token.hasSport as boolean
+        session.user.onboardingCompleted = token.onboardingCompleted as boolean
       }
       return session
     },

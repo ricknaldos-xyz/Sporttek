@@ -1,0 +1,98 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "close": "Close",
+    "or": "or",
+    "and": "and",
+    "yes": "Yes",
+    "no": "No",
+    "error": "Error",
+    "success": "Success"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "newAnalysis": "New Analysis",
+    "myAnalyses": "My Analyses",
+    "training": "Training",
+    "goals": "Goals",
+    "rankings": "Rankings",
+    "matchmaking": "Matchmaking",
+    "tournaments": "Tournaments",
+    "challenges": "Challenges",
+    "matches": "Matches",
+    "community": "Community",
+    "badges": "Badges",
+    "coaches": "Coaches",
+    "courts": "Courts",
+    "shop": "Shop",
+    "stringing": "Stringing",
+    "notifications": "Notifications",
+    "profile": "My Profile",
+    "discover": "Discover",
+    "services": "Services",
+    "coachManagement": "Coach Management",
+    "coachDashboard": "Coach Dashboard",
+    "myStudents": "My Students",
+    "settings": "Settings",
+    "requests": "Requests",
+    "provider": "Provider",
+    "myCourts": "My Courts",
+    "myWorkshops": "My Workshops",
+    "admin": "Administration"
+  },
+  "header": {
+    "openMenu": "Open menu",
+    "userMenu": "User menu",
+    "myProfile": "My Profile",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "user": "User",
+    "analyzeVideo": "Analyze Video",
+    "skipToContent": "Skip to content"
+  },
+  "bottomNav": {
+    "home": "Home",
+    "rankings": "Rankings",
+    "analyze": "Analyze",
+    "alerts": "Alerts",
+    "profile": "Profile"
+  },
+  "auth": {
+    "login": "Sign in",
+    "register": "Register",
+    "forgotPassword": "Forgot your password?",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full name"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "language": "Language",
+    "dangerZone": "Danger zone",
+    "deleteAccount": "Delete account"
+  },
+  "search": {
+    "placeholder": "Search players, tournaments, clubs...",
+    "noResults": "No results",
+    "tryAnother": "Try another search term",
+    "pressEsc": "Press Esc to close",
+    "players": "Players",
+    "tournaments": "Tournaments",
+    "clubs": "Clubs",
+    "courts": "Courts"
+  },
+  "language": {
+    "es": "Espanol",
+    "en": "English"
+  }
+}

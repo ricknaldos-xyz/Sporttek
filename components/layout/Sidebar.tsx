@@ -11,6 +11,7 @@ import { SidebarSportSelector } from '@/components/layout/SidebarSportSelector'
 import { getNavigationSections, type NavItem, type NavSection } from '@/lib/navigation'
 import { useSport } from '@/contexts/SportContext'
 import { SidebarStreak } from '@/components/layout/SidebarStreak'
+import { useTranslations } from 'next-intl'
 
 function NavSectionComponent({ section, defaultOpen = true }: { section: NavSection; defaultOpen?: boolean }) {
   const pathname = usePathname()
@@ -69,10 +70,12 @@ function NavSectionComponent({ section, defaultOpen = true }: { section: NavSect
 export function Sidebar() {
   const { data: session } = useSession()
   const { activeSport } = useSport()
-  const user = session?.user as { hasPlayerProfile?: boolean; hasCoachProfile?: boolean; role?: string } | undefined
+  const t = useTranslations('nav')
+  const tHeader = useTranslations('header')
+  const user = session?.user as { hasPlayerProfile?: boolean; hasCoachProfile?: boolean; isProvider?: boolean; providerTypes?: string[]; role?: string } | undefined
 
   const sportLabel = activeSport ? activeSport.name : 'Mi Deporte'
-  const sections = getNavigationSections(user, sportLabel)
+  const sections = getNavigationSections(user, sportLabel, t)
 
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 glass-light border-r border-glass">
@@ -109,7 +112,7 @@ export function Sidebar() {
           <GlassButton variant="solid" className="w-full" asChild>
             <Link href="/analyze">
               <Video className="h-4 w-4 mr-2" />
-              Analizar Video
+              {tHeader('analyzeVideo')}
             </Link>
           </GlassButton>
         </div>
