@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
 import { sanitizeZodError } from '@/lib/validation'
+import { calculateShipping } from '@/lib/shop'
 
 const addItemSchema = z.object({
   productId: z.string().min(1),
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
       (sum, item) => sum + item.product.priceCents * item.quantity,
       0
     )
-    const shippingCents = activeItems.length > 0 ? 1500 : 0
+    const shippingCents = activeItems.length > 0 ? calculateShipping('') : 0
 
     return NextResponse.json({
       id: updatedCart.id,

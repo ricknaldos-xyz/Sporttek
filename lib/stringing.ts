@@ -1,4 +1,5 @@
 import { StringingOrderStatus } from '@prisma/client'
+import { DELIVERY_COST_CENTS } from '@/lib/constants'
 
 export const STRINGING_SERVICE_TYPES = {
   STANDARD: {
@@ -18,7 +19,7 @@ export type StringingServiceType = keyof typeof STRINGING_SERVICE_TYPES
 export const DELIVERY_MODES = {
   HOME_PICKUP_DELIVERY: {
     label: 'Recojo y entrega a domicilio',
-    priceCents: 1500,
+    priceCents: DELIVERY_COST_CENTS,
   },
   WORKSHOP_DROP_PICKUP: {
     label: 'Dejar y recoger en taller',

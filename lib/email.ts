@@ -441,3 +441,101 @@ export async function sendStreakAtRiskEmail(
     html: getStreakAtRiskEmailHtml(name, currentStreak),
   })
 }
+
+export interface OrderItem {
+  productName: string
+  quantity: number
+  priceCents: number
+}
+
+export function getOrderConfirmationEmailHtml(
+  orderNumber: string,
+  items: OrderItem[],
+  totalCents: number,
+  shippingAddress: string
+) {
+  const itemsHtml = items
+    .map(
+      (item) =>
+        `<tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #e4e4e7; color: #3f3f46;">${item.productName}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #e4e4e7; color: #3f3f46; text-align: center;">${item.quantity}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #e4e4e7; color: #3f3f46; text-align: right;">S/ ${(item.priceCents / 100).toFixed(2)}</td>
+        </tr>`
+    )
+    .join('')
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmacion de pedido</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f4f5;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    <div style="background-color: white; border-radius: 16px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
+        <h1 style="color: #18181b; font-size: 24px; margin: 0;">Pedido Confirmado</h1>
+        <p style="color: #71717a; font-size: 14px; margin-top: 8px;">Pedido ${orderNumber}</p>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+        <thead>
+          <tr>
+            <th style="padding: 8px 0; border-bottom: 2px solid #e4e4e7; text-align: left; color: #71717a; font-size: 12px; text-transform: uppercase;">Producto</th>
+            <th style="padding: 8px 0; border-bottom: 2px solid #e4e4e7; text-align: center; color: #71717a; font-size: 12px; text-transform: uppercase;">Cant.</th>
+            <th style="padding: 8px 0; border-bottom: 2px solid #e4e4e7; text-align: right; color: #71717a; font-size: 12px; text-transform: uppercase;">Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsHtml}
+        </tbody>
+      </table>
+
+      <div style="text-align: right; margin-bottom: 24px;">
+        <p style="color: #18181b; font-size: 18px; font-weight: bold; margin: 0;">
+          Total: S/ ${(totalCents / 100).toFixed(2)}
+        </p>
+      </div>
+
+      <div style="background-color: #f4f4f5; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+        <p style="color: #71717a; font-size: 12px; text-transform: uppercase; margin: 0 0 8px 0;">Direccion de envio</p>
+        <p style="color: #3f3f46; font-size: 14px; margin: 0;">${shippingAddress}</p>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 32px;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/tienda/pedidos" style="display: inline-block; background-color: #2563eb; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+          Ver Mis Pedidos
+        </a>
+      </div>
+
+      <p style="color: #71717a; font-size: 14px; text-align: center;">
+        Te notificaremos cuando tu pedido sea enviado.
+      </p>
+    </div>
+
+    <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 24px;">
+      © ${new Date().getFullYear()} SportTek. Todos los derechos reservados.
+    </p>
+  </div>
+</body>
+</html>
+`
+}
+
+export async function sendOrderConfirmationEmail(
+  email: string,
+  orderNumber: string,
+  items: OrderItem[],
+  totalCents: number,
+  shippingAddress: string
+) {
+  return sendEmail({
+    to: email,
+    subject: `Pedido ${orderNumber} confirmado - SportTek`,
+    html: getOrderConfirmationEmailHtml(orderNumber, items, totalCents, shippingAddress),
+  })
+}

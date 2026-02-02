@@ -3,12 +3,14 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { SkillTier } from '@prisma/client'
 import { sanitizeSearchString } from '@/lib/validation'
+import { DEFAULT_COUNTRY } from '@/lib/constants'
+import { cachedQuery } from '@/lib/cache'
 
 // GET - Public rankings with filters, per sport
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const country = searchParams.get('country') || 'PE'
+    const country = searchParams.get('country') || DEFAULT_COUNTRY
     const skillTierParam = searchParams.get('skillTier')
     const ageGroup = searchParams.get('ageGroup')
     const sportSlug = searchParams.get('sport') || 'tennis'
@@ -17,11 +19,15 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
     const skip = (page - 1) * limit
 
-    // Resolve sport
-    const sport = await prisma.sport.findUnique({
-      where: { slug: sportSlug },
-      select: { id: true, name: true, slug: true },
-    })
+    // Resolve sport (cached 1h — sports rarely change)
+    const sport = await cachedQuery(
+      `sport:${sportSlug}`,
+      3600,
+      () => prisma.sport.findUnique({
+        where: { slug: sportSlug },
+        select: { id: true, name: true, slug: true },
+      })
+    )
 
     if (!sport) {
       return NextResponse.json({ error: 'Deporte no encontrado' }, { status: 404 })

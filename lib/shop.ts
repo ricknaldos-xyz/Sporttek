@@ -1,4 +1,5 @@
 import { ProductCategory, OrderStatus } from '@prisma/client'
+import { SHIPPING_COST_CENTS } from '@/lib/constants'
 
 export type { ProductCategory } from '@prisma/client'
 
@@ -43,6 +44,5 @@ export function generateOrderNumber(): string {
 }
 
 export function calculateShipping(_district: string): number {
-  // Flat rate for Lima: S/ 15.00
-  return 1500
+  return SHIPPING_COST_CENTS
 }

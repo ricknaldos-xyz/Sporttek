@@ -5,14 +5,15 @@ import { logger } from '@/lib/logger'
 import { z } from 'zod'
 import { sanitizeZodError } from '@/lib/validation'
 import { CourtSurface, CourtType } from '@prisma/client'
+import { DEFAULT_COUNTRY, DEFAULT_CITY } from '@/lib/constants'
 
 const createCourtSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   address: z.string().min(1, 'La direccion es requerida'),
   district: z.string().min(1, 'El distrito es requerido'),
-  city: z.string().optional().default('Lima'),
-  country: z.string().optional().default('PE'),
+  city: z.string().optional().default(DEFAULT_CITY),
+  country: z.string().optional().default(DEFAULT_COUNTRY),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
   website: z.string().optional(),

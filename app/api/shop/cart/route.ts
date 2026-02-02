@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { calculateShipping } from '@/lib/shop'
 
 // GET - Get or create user cart
 export async function GET() {
@@ -44,7 +45,7 @@ export async function GET() {
       (sum, item) => sum + item.product.priceCents * item.quantity,
       0
     )
-    const shippingCents = activeItems.length > 0 ? 1500 : 0
+    const shippingCents = activeItems.length > 0 ? calculateShipping('') : 0
     const totalCents = subtotalCents + shippingCents
 
     return NextResponse.json({

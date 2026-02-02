@@ -1,6 +1,7 @@
 'use client'
 
 import { formatPrice } from '@/lib/shop'
+import { DELIVERY_COST_CENTS } from '@/lib/constants'
 
 type ServiceType = 'STANDARD' | 'EXPRESS'
 type DeliveryMode = 'HOME_PICKUP_DELIVERY' | 'WORKSHOP_DROP_PICKUP'
@@ -11,7 +12,7 @@ const SERVICE_PRICES: Record<ServiceType, number> = {
 }
 
 const DELIVERY_PRICES: Record<DeliveryMode, number> = {
-  HOME_PICKUP_DELIVERY: 1500,
+  HOME_PICKUP_DELIVERY: DELIVERY_COST_CENTS,
   WORKSHOP_DROP_PICKUP: 0,
 }
 

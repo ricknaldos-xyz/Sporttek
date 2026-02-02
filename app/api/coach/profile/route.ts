@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
+import { DEFAULT_COUNTRY } from '@/lib/constants'
 
 // GET - Get current user's coach profile
 export async function GET() {
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         headline: validated.data.headline,
         bio: validated.data.bio,
-        country: validated.data.country || 'PE',
+        country: validated.data.country || DEFAULT_COUNTRY,
         city: validated.data.city,
       },
     })

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { acquireCronLock, releaseCronLock } from '@/lib/cron-lock'
 import { logger } from '@/lib/logger'
+import { DEFAULT_COUNTRY } from '@/lib/constants'
 import { timingSafeCompare } from '@/lib/validation'
 
 // POST - Auto-create weekly tournaments for active sports
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
             organizerId: adminProfile.id,
             format: 'SINGLE_ELIMINATION',
             maxPlayers: 16,
-            country: 'PE',
+            country: DEFAULT_COUNTRY,
             startDate: nextMonday,
             endDate: nextSunday,
             registrationEnd: registrationDeadline,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { deleteAccountLimiter } from '@/lib/rate-limit'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 
@@ -14,6 +15,14 @@ export async function DELETE(request: NextRequest) {
     const session = await auth()
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { success } = await deleteAccountLimiter.check(session.user.id)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Intenta de nuevo mas tarde.' },
+        { status: 429 }
+      )
     }
 
     const body = await request.json()

@@ -7,6 +7,8 @@ import { z } from 'zod'
 import { getCulqiClient } from '@/lib/culqi'
 import { Prisma } from '@prisma/client'
 import { sanitizeZodError } from '@/lib/validation'
+import { calculateShipping } from '@/lib/shop'
+import { sendOrderConfirmationEmail } from '@/lib/email'
 
 const checkoutSchema = z.object({
   shippingName: z.string().min(2, 'Nombre requerido').max(100),
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
       (sum, item) => sum + item.product.priceCents * item.quantity,
       0
     )
-    const shippingCents = 1500
+    const shippingCents = calculateShipping('')
     const totalCents = subtotalCents + shippingCents
 
     // Atomically check stock, decrement, and create order in a transaction
@@ -195,6 +197,18 @@ export async function POST(request: NextRequest) {
       const cart2 = await prisma.cart.findUnique({ where: { userId: session.user.id } })
       if (cart2) {
         await prisma.cartItem.deleteMany({ where: { cartId: cart2.id } })
+      }
+
+      // Send order confirmation email (fire-and-forget)
+      if (session.user.email) {
+        const address = [parsed.data.shippingAddress, parsed.data.shippingDistrict, parsed.data.shippingCity].filter(Boolean).join(', ')
+        sendOrderConfirmationEmail(
+          session.user.email,
+          order.orderNumber,
+          order.items.map((i) => ({ productName: i.productName, quantity: i.quantity, priceCents: i.priceCents })),
+          order.totalCents,
+          address
+        ).catch((err) => logger.error('Order confirmation email failed:', err))
       }
 
       return NextResponse.json({ success: true, orderId: order.id })

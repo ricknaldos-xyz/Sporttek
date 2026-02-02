@@ -3,6 +3,7 @@
 import { GlassCard } from '@/components/ui/glass-card'
 import { Truck, MapPin } from 'lucide-react'
 import { formatPrice } from '@/lib/shop'
+import { DELIVERY_COST_CENTS } from '@/lib/constants'
 
 type DeliveryMode = 'HOME_PICKUP_DELIVERY' | 'WORKSHOP_DROP_PICKUP'
 
@@ -17,7 +18,7 @@ const DELIVERY_INFO: Record<DeliveryMode, {
   HOME_PICKUP_DELIVERY: {
     name: 'A Domicilio',
     description: 'Recogemos y entregamos en tu direccion',
-    priceCents: 1500,
+    priceCents: DELIVERY_COST_CENTS,
     icon: Truck,
     iconColor: 'text-green-500',
     iconBg: 'bg-green-500/10',

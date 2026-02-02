@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { Prisma, SkillTier, TournamentStatus } from '@prisma/client'
 import { z } from 'zod'
+import { DEFAULT_COUNTRY } from '@/lib/constants'
 
 const createTournamentSchema = z.object({
   name: z.string().min(3).max(100),
@@ -100,7 +101,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
-    const country = searchParams.get('country') || 'PE'
+    const country = searchParams.get('country') || DEFAULT_COUNTRY
     const page = parseInt(searchParams.get('page') || '1')
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)
     const skip = (page - 1) * limit

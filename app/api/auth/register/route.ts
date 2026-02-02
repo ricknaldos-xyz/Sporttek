@@ -7,6 +7,7 @@ import { sendWelcomeEmail, sendEmailVerification } from '@/lib/email'
 import { generateToken } from '@/lib/tokens'
 import { registerLimiter } from '@/lib/rate-limit'
 import { normalizeEmail, validatePassword } from '@/lib/validation'
+import { DEFAULT_COUNTRY } from '@/lib/constants'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -68,12 +69,12 @@ export async function POST(request: NextRequest) {
         playerProfile: accountType === 'PLAYER' ? {
           create: {
             displayName: name,
-            country: 'PE',
+            country: DEFAULT_COUNTRY,
           },
         } : undefined,
         coachProfile: accountType === 'COACH' ? {
           create: {
-            country: 'PE',
+            country: DEFAULT_COUNTRY,
           },
         } : undefined,
       },

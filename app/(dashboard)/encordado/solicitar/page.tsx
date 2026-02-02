@@ -13,6 +13,7 @@ import { WorkshopSelector } from '@/components/stringing/WorkshopSelector'
 import { CoverageChecker } from '@/components/stringing/CoverageChecker'
 import { SchedulePicker } from '@/components/stringing/SchedulePicker'
 import { formatPrice } from '@/lib/shop'
+import { DELIVERY_COST_CENTS } from '@/lib/constants'
 import { toast } from 'sonner'
 import { FloatingPriceBar } from '@/components/stringing/FloatingPriceBar'
 import { ArrowLeft, ArrowRight, Loader2, Check } from 'lucide-react'
@@ -28,7 +29,7 @@ const SERVICE_PRICES: Record<ServiceType, number> = {
 }
 
 const DELIVERY_PRICES: Record<DeliveryMode, number> = {
-  HOME_PICKUP_DELIVERY: 1500,
+  HOME_PICKUP_DELIVERY: DELIVERY_COST_CENTS,
   WORKSHOP_DROP_PICKUP: 0,
 }
 

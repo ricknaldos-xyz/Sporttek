@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { sanitizeZodError } from '@/lib/validation'
 import { z } from 'zod'
+import { DEFAULT_COUNTRY } from '@/lib/constants'
 
 const setupSchema = z.object({
   displayName: z.string().min(2).max(50),
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       create: {
         userId: session.user.id,
         ...validated.data,
-        country: 'PE',
+        country: DEFAULT_COUNTRY,
       },
       update: validated.data,
     })

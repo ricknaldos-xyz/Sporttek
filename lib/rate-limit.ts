@@ -90,3 +90,4 @@ export const goalLimiter = rateLimit({ key: 'goal', limit: 5, window: 60 })     
 export const matchLimiter = rateLimit({ key: 'match', limit: 10, window: 60 })            // 10 per minute
 export const coachInviteLimiter = rateLimit({ key: 'coach-invite', limit: 5, window: 60 }) // 5 per minute
 export const reviewLimiter = rateLimit({ key: 'review', limit: 5, window: 60 })            // 5 per minute
+export const deleteAccountLimiter = rateLimit({ key: 'delete-account', limit: 3, window: 86400 }) // 3 per 24h

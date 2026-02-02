@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import { DEFAULT_COUNTRY } from '@/lib/constants'
 
 // GET - Browse coaches (public)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const country = searchParams.get('country') || 'PE'
+    const country = searchParams.get('country') || DEFAULT_COUNTRY
     const city = searchParams.get('city')
     const page = parseInt(searchParams.get('page') || '1')
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)
