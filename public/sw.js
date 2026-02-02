@@ -63,3 +63,49 @@ self.addEventListener('fetch', (event) => {
     return
   }
 })
+
+// Push notification received
+self.addEventListener('push', (event) => {
+  if (!event.data) return
+
+  try {
+    const data = event.data.json()
+    const options = {
+      body: data.body || '',
+      icon: data.icon || '/icon-192.png',
+      badge: data.badge || '/icon-192.png',
+      data: data.data || { url: '/dashboard' },
+      tag: data.tag || undefined,
+      renotify: !!data.tag,
+      vibrate: [200, 100, 200],
+    }
+
+    event.waitUntil(
+      self.registration.showNotification(data.title || 'SportTek', options)
+    )
+  } catch {
+    // Invalid push data, ignore
+  }
+})
+
+// Notification click handler
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+
+  const url = event.notification.data?.url || '/dashboard'
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      // Focus existing window if available
+      for (const client of clients) {
+        if (client.url.includes(url) && 'focus' in client) {
+          return client.focus()
+        }
+      }
+      // Otherwise open new window
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(url)
+      }
+    })
+  )
+})

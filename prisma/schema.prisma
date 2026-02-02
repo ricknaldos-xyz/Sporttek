@@ -388,7 +388,8 @@ model User {
   // Competition & Community
   playerProfile PlayerProfile?
   coachProfile  CoachProfile?
-  notifications Notification[]
+  notifications     Notification[]
+  pushSubscriptions PushSubscription[]
 
   // Shop & Stringing
   cart            Cart?
@@ -1182,6 +1183,19 @@ model Notification {
 
   @@index([userId, read, createdAt])
   @@map("notifications")
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 model Block {

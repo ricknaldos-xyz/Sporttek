@@ -227,12 +227,27 @@ export default function CourtsPage() {
         </div>
       ) : courts.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
-          <div className="text-center space-y-3">
-            <Search className="h-12 w-12 text-muted-foreground mx-auto" />
-            <h3 className="text-lg font-semibold">No se encontraron canchas</h3>
-            <p className="text-muted-foreground text-sm">
+          <div className="text-center">
+            <div className="mx-auto w-16 h-16 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center mb-5">
+              <Search className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No se encontraron canchas</h3>
+            <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
               Intenta ajustar los filtros para encontrar canchas disponibles.
             </p>
+            {(district || surface) && (
+              <GlassButton
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setDistrict('')
+                  setSurface('')
+                }}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Limpiar filtros
+              </GlassButton>
+            )}
           </div>
         </GlassCard>
       ) : (

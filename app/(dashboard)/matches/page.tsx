@@ -5,7 +5,9 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { TierBadge } from '@/components/player/TierBadge'
 import { logger } from '@/lib/logger'
 import { formatDate } from '@/lib/date-utils'
-import { Loader2, Trophy, Calendar, TrendingUp, TrendingDown } from 'lucide-react'
+import { Loader2, Trophy, Calendar, TrendingUp, TrendingDown, Swords } from 'lucide-react'
+import Link from 'next/link'
+import { GlassButton } from '@/components/ui/glass-button'
 import type { SkillTier } from '@prisma/client'
 import { useSport } from '@/contexts/SportContext'
 
@@ -74,10 +76,28 @@ export default function MatchesPage() {
 
       {matches.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
-          <div className="text-center text-muted-foreground">
-            <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">Sin partidos</p>
-            <p className="text-sm mt-1">Tus partidos apareceran aqui</p>
+          <div className="text-center">
+            <div className="mx-auto w-16 h-16 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center mb-5">
+              <Trophy className="h-8 w-8 text-primary" />
+            </div>
+            <p className="text-lg font-semibold mb-2">Sin partidos</p>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+              Desafia a otros jugadores o participa en torneos para registrar tus partidos.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <GlassButton variant="solid" size="sm" asChild>
+                <Link href="/matchmaking">
+                  <Swords className="mr-2 h-4 w-4" />
+                  Buscar oponentes
+                </Link>
+              </GlassButton>
+              <GlassButton variant="outline" size="sm" asChild>
+                <Link href="/tournaments">
+                  <Trophy className="mr-2 h-4 w-4" />
+                  Ver torneos
+                </Link>
+              </GlassButton>
+            </div>
           </div>
         </GlassCard>
       ) : (

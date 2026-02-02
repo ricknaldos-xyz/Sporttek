@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
 import { logger } from '@/lib/logger'
-import { Bell, Loader2, Check } from 'lucide-react'
+import { Bell, Loader2, Check, Swords, Trophy, Video } from 'lucide-react'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 interface Notification {
   id: string
@@ -82,9 +83,34 @@ export default function NotificationsPage() {
         </div>
       ) : notifications.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
-          <div className="text-center text-muted-foreground">
-            <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">Sin notificaciones</p>
+          <div className="text-center">
+            <div className="mx-auto w-16 h-16 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center mb-5">
+              <Bell className="h-8 w-8 text-primary" />
+            </div>
+            <p className="text-lg font-semibold mb-2">Sin notificaciones</p>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+              Aqui veras avisos de desafios, resultados de partidos, analisis completados y mas.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <GlassButton variant="outline" size="sm" asChild>
+                <Link href="/matchmaking">
+                  <Swords className="mr-2 h-4 w-4" />
+                  Buscar oponentes
+                </Link>
+              </GlassButton>
+              <GlassButton variant="outline" size="sm" asChild>
+                <Link href="/analyze">
+                  <Video className="mr-2 h-4 w-4" />
+                  Analizar tecnica
+                </Link>
+              </GlassButton>
+              <GlassButton variant="outline" size="sm" asChild>
+                <Link href="/tournaments">
+                  <Trophy className="mr-2 h-4 w-4" />
+                  Ver torneos
+                </Link>
+              </GlassButton>
+            </div>
           </div>
         </GlassCard>
       ) : (

@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
 import { OnboardingProvider } from '@/components/onboarding/OnboardingProvider'
 import { CelebrationOverlay } from '@/components/gamification/CelebrationOverlay'
+import { PushNotificationManager } from '@/components/PushNotificationManager'
 import { SportProvider } from '@/contexts/SportContext'
 import { useState } from 'react'
 import { X, Target } from 'lucide-react'
@@ -97,6 +98,7 @@ function OnboardingWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <OnboardingProvider isNewUser={isNewUser}>
+      <PushNotificationManager />
       {children}
     </OnboardingProvider>
   )

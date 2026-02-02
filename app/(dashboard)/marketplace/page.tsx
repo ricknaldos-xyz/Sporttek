@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { GlassCard } from '@/components/ui/glass-card'
 import { logger } from '@/lib/logger'
 import { GlassButton } from '@/components/ui/glass-button'
-import { GraduationCap, Star, MapPin, Loader2, ChevronRight } from 'lucide-react'
+import { GraduationCap, Star, MapPin, Loader2, ChevronRight, Trophy } from 'lucide-react'
 import Link from 'next/link'
 
 interface Coach {
@@ -125,10 +125,27 @@ export default function MarketplacePage() {
         </div>
       ) : filteredCoaches.length === 0 ? (
         <GlassCard intensity="light" padding="xl">
-          <div className="text-center text-muted-foreground">
-            <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No hay entrenadores disponibles</p>
-            <p className="text-sm mt-1">Pronto tendras entrenadores certificados en tu zona</p>
+          <div className="text-center">
+            <div className="mx-auto w-16 h-16 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center mb-5">
+              <GraduationCap className="h-8 w-8 text-primary" />
+            </div>
+            <p className="text-lg font-semibold mb-2">No hay entrenadores disponibles</p>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+              Estamos incorporando entrenadores certificados. Mientras tanto, mejora tu tecnica con analisis de IA.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <GlassButton variant="solid" size="sm" asChild>
+                <Link href="/analyze">
+                  Analizar mi tecnica
+                </Link>
+              </GlassButton>
+              <GlassButton variant="outline" size="sm" asChild>
+                <Link href="/rankings">
+                  <Trophy className="mr-2 h-4 w-4" />
+                  Explorar rankings
+                </Link>
+              </GlassButton>
+            </div>
           </div>
         </GlassCard>
       ) : (

@@ -7,11 +7,11 @@ import { cn } from '@/lib/utils'
 import { LayoutDashboard, Trophy, Bell, Video, User } from 'lucide-react'
 
 const tabs = [
-  { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Rankings', href: '/rankings', icon: Trophy },
-  { name: 'Analizar', href: '/analyze', icon: Video, primary: true },
-  { name: 'Avisos', href: '/notifications', icon: Bell },
-  { name: 'Perfil', href: '/profile', icon: User },
+  { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard, tourId: undefined },
+  { name: 'Rankings', href: '/rankings', icon: Trophy, tourId: 'rankings' },
+  { name: 'Analizar', href: '/analyze', icon: Video, primary: true, tourId: 'new-analysis' },
+  { name: 'Avisos', href: '/notifications', icon: Bell, tourId: undefined },
+  { name: 'Perfil', href: '/profile', icon: User, tourId: 'profile' },
 ]
 
 export function BottomNav() {
@@ -42,6 +42,7 @@ export function BottomNav() {
             <Link
               key={tab.name}
               href={tab.href}
+              data-tour={tab.tourId}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
                 'relative flex flex-col items-center justify-center gap-1 w-full h-full text-[11px] font-medium transition-colors',

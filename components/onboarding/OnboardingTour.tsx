@@ -11,33 +11,66 @@ const tourSteps = [
     target: '[data-tour="new-analysis"]',
     title: 'Crea un nuevo analisis',
     description: 'Sube un video o imagen de tu tecnica para recibir feedback detallado con IA.',
-    position: 'right' as const,
+    preferredPosition: 'right' as const,
   },
   {
     target: '[data-tour="analyses"]',
     title: 'Historial de analisis',
     description: 'Aqui puedes ver todos tus analisis anteriores y su progreso.',
-    position: 'right' as const,
+    preferredPosition: 'right' as const,
   },
   {
     target: '[data-tour="training"]',
     title: 'Planes de entrenamiento',
     description: 'Genera planes personalizados basados en tus analisis para mejorar tu tecnica.',
-    position: 'right' as const,
+    preferredPosition: 'right' as const,
+  },
+  {
+    target: '[data-tour="rankings"]',
+    title: 'Rankings',
+    description: 'Compite con otros jugadores y sube en el ranking de tu zona y nivel.',
+    preferredPosition: 'right' as const,
   },
   {
     target: '[data-tour="profile"]',
     title: 'Tu perfil',
-    description: 'Configura tus preferencias y gestiona tu cuenta aqui.',
-    position: 'bottom' as const,
+    description: 'Configura tus preferencias, deporte y gestiona tu cuenta aqui.',
+    preferredPosition: 'bottom' as const,
   },
 ]
+
+function getResponsivePosition(
+  targetRect: DOMRect,
+  preferred: 'right' | 'bottom',
+  tooltipWidth: number
+): 'right' | 'bottom' | 'top' | 'left' {
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+
+  // On mobile (< 1024px), prefer top/bottom positions
+  if (viewportWidth < 1024) {
+    // If target is in bottom half, show tooltip above
+    if (targetRect.top > viewportHeight / 2) {
+      return 'top'
+    }
+    return 'bottom'
+  }
+
+  // On desktop, check if right position fits
+  if (preferred === 'right' && targetRect.right + tooltipWidth + 20 < viewportWidth) {
+    return 'right'
+  }
+
+  // Fallback to bottom
+  return 'bottom'
+}
 
 export function OnboardingTour() {
   const { isTourActive, tourStep, nextTourStep, previousTourStep, endTour } =
     useOnboardingStore()
   const [mounted, setMounted] = useState(false)
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
+  const [position, setPosition] = useState<'right' | 'bottom' | 'top' | 'left'>('right')
 
   useEffect(() => {
     setMounted(true)
@@ -56,10 +89,30 @@ export function OnboardingTour() {
     if (target) {
       const rect = target.getBoundingClientRect()
       setTargetRect(rect)
+      setPosition(getResponsivePosition(rect, step.preferredPosition, 300))
 
       // Scroll into view if needed
       target.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
+  }, [isTourActive, tourStep])
+
+  // Update position on resize
+  useEffect(() => {
+    if (!isTourActive || tourStep === null) return
+
+    function handleResize() {
+      const step = tourSteps[tourStep!]
+      if (!step) return
+      const target = document.querySelector(step.target)
+      if (target) {
+        const rect = target.getBoundingClientRect()
+        setTargetRect(rect)
+        setPosition(getResponsivePosition(rect, step.preferredPosition, 300))
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [isTourActive, tourStep])
 
   if (!mounted || !isTourActive || tourStep === null || !targetRect) {
@@ -71,15 +124,16 @@ export function OnboardingTour() {
 
   const isFirst = tourStep === 0
   const isLast = tourStep === tourSteps.length - 1
-
-  // Calculate tooltip position
-  let tooltipStyle: React.CSSProperties = {}
+  const tooltipWidth = Math.min(300, window.innerWidth - 32)
   const padding = 12
-  const tooltipWidth = 300
 
-  switch (currentStep.position) {
+  // Calculate tooltip position based on responsive position
+  let tooltipStyle: React.CSSProperties = { width: tooltipWidth }
+
+  switch (position) {
     case 'right':
       tooltipStyle = {
+        ...tooltipStyle,
         top: targetRect.top + targetRect.height / 2,
         left: targetRect.right + padding,
         transform: 'translateY(-50%)',
@@ -87,9 +141,30 @@ export function OnboardingTour() {
       break
     case 'bottom':
       tooltipStyle = {
+        ...tooltipStyle,
         top: targetRect.bottom + padding,
-        left: targetRect.left + targetRect.width / 2,
-        transform: 'translateX(-50%)',
+        left: Math.max(16, Math.min(
+          targetRect.left + targetRect.width / 2 - tooltipWidth / 2,
+          window.innerWidth - tooltipWidth - 16
+        )),
+      }
+      break
+    case 'top':
+      tooltipStyle = {
+        ...tooltipStyle,
+        bottom: window.innerHeight - targetRect.top + padding,
+        left: Math.max(16, Math.min(
+          targetRect.left + targetRect.width / 2 - tooltipWidth / 2,
+          window.innerWidth - tooltipWidth - 16
+        )),
+      }
+      break
+    case 'left':
+      tooltipStyle = {
+        ...tooltipStyle,
+        top: targetRect.top + targetRect.height / 2,
+        right: window.innerWidth - targetRect.left + padding,
+        transform: 'translateY(-50%)',
       }
       break
   }
@@ -114,7 +189,7 @@ export function OnboardingTour() {
       {/* Tooltip */}
       <div
         className="absolute glass-heavy border-glass-strong rounded-xl shadow-glass-xl p-4 z-10"
-        style={{ ...tooltipStyle, width: tooltipWidth }}
+        style={tooltipStyle}
       >
         <button
           onClick={endTour}

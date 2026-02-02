@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { User, Mail, Calendar, Trophy, ArrowRight } from 'lucide-react'
+import { User, Mail, Calendar, Trophy, ArrowRight, Plus } from 'lucide-react'
 import { formatDate } from '@/lib/date-utils'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
@@ -119,9 +119,17 @@ export default async function ProfilePage() {
       </div>
 
       {/* Favorite Sports */}
-      {user.favoriteSports.length > 0 && (
-        <GlassCard intensity="light" padding="lg">
-          <h3 className="font-semibold mb-4">Deportes Favoritos</h3>
+      <GlassCard intensity="light" padding="lg">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold">Deportes Favoritos</h3>
+          <GlassButton variant="ghost" size="sm" asChild>
+            <Link href="/profile/sports/add">
+              <Plus className="h-4 w-4 mr-1" />
+              Agregar
+            </Link>
+          </GlassButton>
+        </div>
+        {user.favoriteSports.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {user.favoriteSports.map((fs) => (
               <GlassBadge key={fs.id} variant="default">
@@ -132,8 +140,20 @@ export default async function ProfilePage() {
               </GlassBadge>
             ))}
           </div>
-        </GlassCard>
-      )}
+        ) : (
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground mb-3">
+              Aun no tienes deportes configurados.
+            </p>
+            <GlassButton variant="outline" size="sm" asChild>
+              <Link href="/profile/sports/add">
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar deporte
+              </Link>
+            </GlassButton>
+          </div>
+        )}
+      </GlassCard>
     </div>
   )
 }
