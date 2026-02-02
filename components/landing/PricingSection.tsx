@@ -1,10 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { Check, Sparkles } from 'lucide-react'
+import { Check, ArrowRight } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassCard } from '@/components/ui/glass-card'
-import { GlassBadge } from '@/components/ui/glass-badge'
 import { cn } from '@/lib/utils'
 
 const plans = [
@@ -72,10 +71,7 @@ const plans = [
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="py-20 lg:py-32 relative overflow-hidden">
-      {/* Subtle background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/20 to-transparent -z-10" />
-
+    <section id="pricing" className="py-20 lg:py-32">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -91,24 +87,19 @@ export function PricingSection() {
           {plans.map((plan) => (
             <GlassCard
               key={plan.id}
-              intensity={plan.popular ? 'primary' : 'light'}
+              intensity="light"
               padding="none"
-              hover={plan.popular ? 'glow' : 'lift'}
-              className={cn(
-                'relative flex flex-col overflow-hidden',
-                plan.popular && 'md:scale-105 shadow-glass-glow'
-              )}
+              className="relative flex flex-col overflow-hidden"
             >
               {plan.popular && (
-                <div className="absolute top-4 right-4">
-                  <GlassBadge variant="primary">
-                    <Sparkles className="h-3 w-3 mr-1" />
+                <div className="absolute top-4 left-4">
+                  <span className="rounded-full bg-foreground text-background text-xs font-medium px-3 py-1">
                     Popular
-                  </GlassBadge>
+                  </span>
                 </div>
               )}
 
-              <div className="p-6 pb-0">
+              <div className={cn('p-6 pb-0', plan.popular && 'pt-12')}>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                   <p className="text-muted-foreground text-sm">
@@ -117,15 +108,15 @@ export function PricingSection() {
                 </div>
 
                 <div className="mb-4">
-                  <span className="text-4xl font-bold">
+                  <span className="inline-flex items-baseline rounded-full bg-foreground text-background px-4 py-1.5 text-2xl font-bold">
                     {plan.price === 0 ? 'Gratis' : `${plan.currency}${plan.price.toFixed(2)}`}
+                    {plan.price > 0 && (
+                      <span className="text-background/60 text-sm font-normal ml-1">/mes</span>
+                    )}
                   </span>
-                  {plan.price > 0 && (
-                    <span className="text-muted-foreground">/mes</span>
-                  )}
                 </div>
 
-                <p className="text-sm text-muted-foreground mb-6 leading-relaxed border-b border-glass pb-6">
+                <p className="text-sm text-muted-foreground mb-6 leading-relaxed border-b border-border/40 pb-6">
                   {plan.outcome}
                 </p>
               </div>
@@ -134,23 +125,27 @@ export function PricingSection() {
                 <ul className="space-y-3 mb-8 flex-1">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-3 text-sm">
-                      <div className="glass-primary border-glass rounded-full p-1 mt-0.5">
-                        <Check className="h-3 w-3 text-primary" />
-                      </div>
+                      <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
 
-                <GlassButton
-                  asChild
-                  variant={plan.popular ? 'solid' : 'outline'}
-                  className="w-full"
-                >
-                  <Link href="/register">{plan.cta}</Link>
-                </GlassButton>
+                <div className="flex items-center justify-between">
+                  <Link
+                    href="/register"
+                    className="text-sm font-medium hover:text-primary transition-colors"
+                  >
+                    {plan.cta}
+                  </Link>
+                  <GlassButton variant="default" size="icon-circle" asChild>
+                    <Link href="/register">
+                      <ArrowRight className="h-5 w-5" />
+                    </Link>
+                  </GlassButton>
+                </div>
                 {plan.note && (
-                  <p className="text-xs text-muted-foreground text-center mt-2">{plan.note}</p>
+                  <p className="text-xs text-muted-foreground mt-3">{plan.note}</p>
                 )}
               </div>
             </GlassCard>

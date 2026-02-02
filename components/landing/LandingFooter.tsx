@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Target } from 'lucide-react'
+import { Target, ArrowRight } from 'lucide-react'
+import { GlassButton } from '@/components/ui/glass-button'
 
 const footerLinks = {
   plataforma: [
@@ -36,9 +37,15 @@ export function LandingFooter() {
               <Target className="h-6 w-6 text-primary" />
               <span className="text-lg font-bold">SportTek</span>
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               La plataforma integral para tu desarrollo en tenis y padel. Analisis IA, rankings, torneos, coaches y comunidad.
             </p>
+            <GlassButton variant="default" size="sm" asChild>
+              <Link href="/register">
+                Unete
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </GlassButton>
           </div>
 
           {/* Platform Links */}
@@ -75,10 +82,26 @@ export function LandingFooter() {
             </ul>
           </div>
 
-          {/* Community Links */}
+          {/* Newsletter */}
           <div>
-            <h4 className="font-semibold mb-4">Unete</h4>
-            <ul className="space-y-2">
+            <h4 className="font-semibold mb-4">Newsletter</h4>
+            <p className="text-sm text-muted-foreground mb-3">
+              Recibe tips, torneos y novedades cada semana.
+            </p>
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="email"
+                placeholder="tu@email.com"
+                className="flex-1 min-w-0 h-10 px-4 rounded-full border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <GlassButton type="submit" variant="default" size="icon-circle" className="flex-shrink-0 h-10 w-10">
+                <ArrowRight className="h-4 w-4" />
+              </GlassButton>
+            </form>
+            <ul className="space-y-2 mt-6">
               {footerLinks.comunidad.map((link) => (
                 <li key={link.label}>
                   <Link

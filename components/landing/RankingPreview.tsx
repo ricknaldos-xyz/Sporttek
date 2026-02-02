@@ -73,14 +73,14 @@ export function RankingPreview() {
         <div className="max-w-2xl mx-auto">
           <GlassCard intensity="light" padding="none">
             {/* Header */}
-            <div className="glass-primary px-6 py-4 rounded-t-2xl flex items-center gap-3">
+            <div className="px-6 py-4 border-b border-border/50 flex items-center gap-3">
               <Trophy className="h-5 w-5 text-yellow-500" />
               <span className="font-semibold">Top 10 Peru</span>
             </div>
 
             {/* Table */}
             {players.length > 0 ? (
-              <div className="divide-y divide-glass-border-light">
+              <div className="divide-y divide-border/50">
                 {players.map((player) => (
                   <div key={player.rank} className="flex items-center gap-4 px-6 py-3">
                     <div className="w-8 text-center flex-shrink-0">
@@ -118,8 +118,8 @@ export function RankingPreview() {
             )}
 
             {/* CTA */}
-            <div className="px-6 py-4 border-t border-glass">
-              <GlassButton variant="solid" className="w-full" asChild>
+            <div className="px-6 py-4 border-t border-border/50">
+              <GlassButton variant="default" className="w-full" asChild>
                 <Link href="/rankings">
                   Ver ranking completo
                   <ArrowRight className="ml-2 h-4 w-4" />

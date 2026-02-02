@@ -26,6 +26,7 @@ const glassButtonVariants = cva(
         lg: 'h-12 px-8 text-base',
         xl: 'h-14 px-10 text-lg',
         icon: 'h-11 w-11',
+        'icon-circle': 'h-12 w-12 p-0',
       },
     },
     defaultVariants: {

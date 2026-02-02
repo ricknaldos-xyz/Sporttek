@@ -13,7 +13,6 @@ import {
 } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
-import { GlassBadge } from '@/components/ui/glass-badge'
 
 const benefits = [
   {
@@ -50,37 +49,27 @@ const benefits = [
 
 export function CoachSection() {
   return (
-    <section id="coaches" className="py-20 lg:py-32 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/20 to-transparent -z-10" />
-
+    <section id="coaches" className="py-20 lg:py-32">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-12 items-start">
             {/* Left: Main pitch */}
             <div className="lg:w-5/12">
-              <GlassBadge variant="primary" size="lg" className="mb-4">
-                <GraduationCap className="h-3.5 w-3.5 mr-1.5" />
-                Para entrenadores
-              </GlassBadge>
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <GraduationCap className="h-5 w-5 text-primary" />
+              </div>
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                 Monetiza tu expertise deportivo
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-6">
                 Unete al marketplace de coaches verificados. Gestiona alumnos, asigna planes de entrenamiento basados en IA, acumula reviews y llega a deportistas que buscan mejorar.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <GlassButton variant="solid" size="lg" asChild>
-                  <Link href="/register?type=coach">
-                    Registrarme como coach
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </GlassButton>
-                <GlassButton variant="outline" size="lg" asChild>
-                  <Link href="/coaches">
-                    Ver coaches activos
-                  </Link>
-                </GlassButton>
-              </div>
+              <GlassButton variant="default" size="lg" asChild>
+                <Link href="/register?type=coach">
+                  Registrarme como coach
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </GlassButton>
             </div>
 
             {/* Right: Benefits grid */}
@@ -90,11 +79,9 @@ export function CoachSection() {
                   key={benefit.title}
                   intensity="light"
                   padding="lg"
-                  hover="glow"
-                  className="group"
                 >
-                  <div className="glass-primary border-glass rounded-xl w-12 h-12 flex items-center justify-center mb-4 group-hover:shadow-glass-glow transition-all duration-[var(--duration-normal)]">
-                    <benefit.icon className="h-6 w-6 text-primary" />
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <benefit.icon className="h-5 w-5 text-primary" />
                   </div>
                   <h4 className="text-base font-semibold mb-2">{benefit.title}</h4>
                   <p className="text-muted-foreground text-sm leading-relaxed">

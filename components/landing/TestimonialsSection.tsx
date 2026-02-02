@@ -1,8 +1,8 @@
 'use client'
 
-import { Star, Quote } from 'lucide-react'
-import { GlassCard } from '@/components/ui/glass-card'
-import { GlassBadge } from '@/components/ui/glass-badge'
+import { useState } from 'react'
+import { Quote } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const testimonials = [
   {
@@ -48,6 +48,9 @@ const testimonials = [
 ]
 
 export function TestimonialsSection() {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const testimonial = testimonials[activeIndex]
+
   return (
     <section className="py-20 lg:py-32">
       <div className="container mx-auto px-4">
@@ -60,62 +63,44 @@ export function TestimonialsSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {testimonials.map((testimonial, index) => (
-            <GlassCard
-              key={index}
-              intensity="light"
-              padding="lg"
-              hover="lift"
-              className="relative"
-            >
-              {/* Quote decoration */}
-              <div className="absolute -top-2 left-4">
-                <div className="glass-primary border-glass rounded-full p-2">
-                  <Quote className="h-4 w-4 text-primary" />
-                </div>
-              </div>
+        <div className="max-w-3xl mx-auto text-center">
+          {/* Quote icon */}
+          <Quote className="h-12 w-12 text-primary/20 mx-auto mb-8" />
 
-              {/* Rating */}
-              <div className="flex gap-1 mb-3 mt-4">
-                {Array.from({ length: testimonial.rating }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className="h-3.5 w-3.5 text-warning fill-warning"
-                  />
-                ))}
-              </div>
+          {/* Quote text */}
+          <p className="text-xl sm:text-2xl font-medium leading-relaxed mb-8">
+            &ldquo;{testimonial.content}&rdquo;
+          </p>
 
-              {/* Content */}
-              <p className="text-muted-foreground mb-4 relative z-10 leading-relaxed text-sm">
-                {testimonial.content}
-              </p>
+          {/* Author */}
+          <div className="mb-10">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+              <span className="text-primary font-semibold">
+                {testimonial.name.charAt(0)}
+              </span>
+            </div>
+            <p className="font-semibold">{testimonial.name}</p>
+            <p className="text-sm text-muted-foreground">
+              {testimonial.role} · {testimonial.location}
+            </p>
+          </div>
 
-              {/* Highlight badge */}
-              <GlassBadge variant="primary" size="sm" className="mb-4">
-                {testimonial.highlight}
-              </GlassBadge>
-
-              {/* Author */}
-              <div className="flex items-center gap-3 pt-4 border-t border-glass">
-                <div className="w-10 h-10 rounded-full glass-primary border-glass flex items-center justify-center text-primary font-semibold">
-                  {testimonial.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">{testimonial.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {testimonial.role}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {testimonial.location}
-                  </p>
-                  <p className="text-xs text-muted-foreground/60">
-                    {testimonial.since}
-                  </p>
-                </div>
-              </div>
-            </GlassCard>
-          ))}
+          {/* Navigation dots */}
+          <div className="flex items-center justify-center gap-2">
+            {testimonials.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Ver testimonio ${index + 1}`}
+                className={cn(
+                  'h-2.5 rounded-full transition-all duration-300',
+                  index === activeIndex
+                    ? 'w-8 bg-foreground'
+                    : 'w-2.5 bg-foreground/20 hover:bg-foreground/40'
+                )}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

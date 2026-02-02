@@ -13,7 +13,6 @@ import {
 } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassButton } from '@/components/ui/glass-button'
-import { GlassBadge } from '@/components/ui/glass-badge'
 
 const providerTypes = [
   {
@@ -49,10 +48,9 @@ export function ProviderSection() {
     <section id="providers" className="py-20 lg:py-32">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <GlassBadge variant="primary" size="lg" className="mb-4">
-            <Building2 className="h-3.5 w-3.5 mr-1.5" />
-            Para proveedores
-          </GlassBadge>
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <Building2 className="h-5 w-5 text-primary" />
+          </div>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Lleva tu negocio deportivo a la plataforma
           </h2>
@@ -66,39 +64,36 @@ export function ProviderSection() {
             <GlassCard
               key={provider.badge}
               intensity="light"
-              padding="none"
-              hover="glow"
-              className="overflow-hidden"
+              padding="lg"
             >
-              {/* Header */}
-              <div className="glass-primary px-6 py-4 flex items-center gap-3">
-                <provider.icon className="h-5 w-5 text-primary" />
-                <span className="font-semibold">{provider.badge}</span>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <provider.icon className="h-5 w-5 text-primary" />
+                </div>
+                <span className="font-semibold text-lg">{provider.badge}</span>
               </div>
 
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-3">{provider.title}</h3>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  {provider.description}
-                </p>
+              <h3 className="text-xl font-bold mb-3">{provider.title}</h3>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                {provider.description}
+              </p>
 
-                <ul className="space-y-3 mb-6">
-                  {provider.features.map((feature) => (
-                    <li key={feature.text} className="flex items-center gap-3 text-sm">
-                      <div className="glass-primary border-glass rounded-full p-1.5">
-                        <feature.icon className="h-3.5 w-3.5 text-primary" />
-                      </div>
-                      <span>{feature.text}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ul className="space-y-3">
+                {provider.features.map((feature) => (
+                  <li key={feature.text} className="flex items-center gap-3 text-sm">
+                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <span>{feature.text}</span>
+                  </li>
+                ))}
+              </ul>
             </GlassCard>
           ))}
         </div>
 
         <div className="text-center mt-10">
-          <GlassButton variant="solid" size="lg" asChild>
+          <GlassButton variant="default" size="lg" asChild>
             <Link href="/register?type=provider">
               Aplicar como proveedor
               <ArrowRight className="ml-2 h-5 w-5" />

@@ -1,7 +1,6 @@
 'use client'
 
 import { Upload, Brain, Trophy } from 'lucide-react'
-import { GlassCard } from '@/components/ui/glass-card'
 
 const steps = [
   {
@@ -38,47 +37,21 @@ export function HowItWorksSection() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="relative">
-            {/* Vertical connector line */}
-            <div className="hidden md:block absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
-
-            <div className="space-y-6">
-              {steps.map((step) => (
-                <div key={step.number} className="relative flex gap-6">
-                  {/* Step number circle */}
-                  <div className="hidden md:flex flex-shrink-0 w-16 h-16 glass-primary border-glass shadow-glass-glow rounded-full items-center justify-center text-lg font-bold text-primary z-10">
-                    {step.number}
-                  </div>
-
-                  {/* Step card */}
-                  <GlassCard
-                    intensity="light"
-                    padding="lg"
-                    hover="lift"
-                    className="flex-1"
-                  >
-                    <div className="flex items-start gap-4">
-                      {/* Mobile number */}
-                      <div className="md:hidden flex-shrink-0 w-10 h-10 glass-primary border-glass rounded-full flex items-center justify-center text-sm font-bold text-primary">
-                        {step.number}
-                      </div>
-
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <step.icon className="h-5 w-5 text-primary" />
-                          <h3 className="text-lg font-semibold">{step.title}</h3>
-                        </div>
-                        <p className="text-muted-foreground leading-relaxed">
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
-                  </GlassCard>
-                </div>
-              ))}
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {steps.map((step) => (
+            <div key={step.number} className="text-center">
+              <div className="text-6xl font-bold text-foreground/[0.06] mb-4">
+                {String(step.number).padStart(2, '0')}
+              </div>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <step.icon className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+              <p className="text-muted-foreground leading-relaxed text-sm">
+                {step.description}
+              </p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

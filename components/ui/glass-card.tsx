@@ -13,6 +13,7 @@ const glassCardVariants = cva(
         medium: 'bg-secondary shadow-[var(--glass-shadow-md)]',
         heavy: 'bg-secondary border border-border shadow-[var(--glass-shadow-md)]',
         primary: 'bg-primary/5 border border-primary/10 shadow-[var(--glass-shadow-sm)]',
+        dark: 'bg-foreground text-background shadow-[var(--glass-shadow-md)]',
       },
       padding: {
         none: '',

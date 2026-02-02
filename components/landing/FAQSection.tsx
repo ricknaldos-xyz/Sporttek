@@ -42,10 +42,7 @@ export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <section id="faq" className="py-20 lg:py-32 relative overflow-hidden">
-      {/* Subtle background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/20 to-transparent -z-10" />
-
+    <section id="faq" className="py-20 lg:py-32">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -56,31 +53,29 @@ export function FAQSection() {
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto space-y-4">
+        <div className="max-w-3xl mx-auto space-y-3">
           {faqs.map((faq, index) => (
             <GlassCard
               key={index}
-              intensity={openIndex === index ? 'medium' : 'light'}
+              intensity="ultralight"
               padding="none"
-              className="overflow-hidden transition-all duration-[var(--duration-normal)]"
+              className="overflow-hidden"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left hover:glass-ultralight transition-all duration-[var(--duration-normal)] rounded-2xl"
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-secondary/50 transition-colors rounded-[inherit]"
               >
                 <span className="font-medium pr-4">{faq.question}</span>
-                <div
+                <ChevronDown
                   className={cn(
-                    'glass-primary border-glass rounded-full p-1.5 transition-transform duration-[var(--duration-normal)]',
+                    'h-5 w-5 text-muted-foreground flex-shrink-0 transition-transform duration-300',
                     openIndex === index && 'rotate-180'
                   )}
-                >
-                  <ChevronDown className="h-4 w-4 text-primary" />
-                </div>
+                />
               </button>
               <div
                 className={cn(
-                  'overflow-hidden transition-all duration-[var(--duration-slow)] ease-[var(--ease-liquid)]',
+                  'overflow-hidden transition-all duration-300',
                   openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                 )}
               >
