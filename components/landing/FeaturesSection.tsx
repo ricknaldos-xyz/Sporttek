@@ -4,17 +4,11 @@ import {
   Brain,
   Target,
   Trophy,
-  Swords,
   Medal,
   Users,
   GraduationCap,
-  ShoppingBag,
-  Wrench,
   MapPin,
-  Flame,
-  Flag,
   TrendingUp,
-  BookOpen,
 } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { GlassBadge } from '@/components/ui/glass-badge'
@@ -30,27 +24,15 @@ const pillars = [
     features: [
       {
         icon: Brain,
-        title: 'Analisis IA de video',
+        title: 'Análisis IA de video',
         description:
-          'Deteccion de errores en saque, derecha, reves, volea y bandeja con precision profesional.',
+          'Detección de errores en saque, derecha, revés, volea y bandeja con precisión profesional.',
       },
       {
         icon: Target,
         title: 'Planes personalizados',
         description:
-          'Ejercicios diarios basados en tus errores, con progresion semanal y seguimiento.',
-      },
-      {
-        icon: Flag,
-        title: 'Metas y progreso',
-        description:
-          'Define objetivos de tecnica, puntaje o tier y monitorea tu avance con datos reales.',
-      },
-      {
-        icon: BookOpen,
-        title: 'Base de conocimiento',
-        description:
-          'Articulos, ejercicios y teoria deportiva indexada con busqueda inteligente por deporte.',
+          'Ejercicios diarios basados en tus errores, con progresión semanal y seguimiento.',
       },
     ],
   },
@@ -64,27 +46,15 @@ const pillars = [
     features: [
       {
         icon: Trophy,
-        title: 'Rankings multi-categoria',
+        title: 'Rankings multi-categoría',
         description:
-          'Rankings por pais, skill tier, grupo de edad y globales. Periodos semanal, mensual y historico.',
-      },
-      {
-        icon: Swords,
-        title: 'Matchmaking ELO',
-        description:
-          'Encuentra rivales de tu nivel por ELO y ubicacion. Envia desafios y califica partidos.',
+          'Rankings por país, skill tier, grupo de edad y globales. Periodos semanal, mensual e histórico.',
       },
       {
         icon: Medal,
         title: 'Torneos organizados',
         description:
-          'Eliminacion simple, doble y round robin. Brackets con seeding, restricciones por tier y edad.',
-      },
-      {
-        icon: Flame,
-        title: 'Badges y rachas',
-        description:
-          '25+ badges por logros, rachas de 7 a 100 dias, sistema de freeze y tiers de progresion.',
+          'Eliminación simple, doble y round robin. Brackets con seeding, restricciones por tier y edad.',
       },
     ],
   },
@@ -100,25 +70,13 @@ const pillars = [
         icon: GraduationCap,
         title: 'Coach Marketplace',
         description:
-          'Coaches verificados con certificaciones, reviews, precios y gestion de alumnos.',
+          'Coaches verificados con certificaciones, reviews, precios y gestión de alumnos.',
       },
       {
         icon: MapPin,
         title: 'Reserva de canchas',
         description:
           'Canchas de tenis y padel con disponibilidad en tiempo real y pago integrado.',
-      },
-      {
-        icon: ShoppingBag,
-        title: 'Tienda deportiva',
-        description:
-          'Raquetas, cuerdas, grips, bolsos, zapatillas y accesorios con reviews y descuentos.',
-      },
-      {
-        icon: Wrench,
-        title: 'Servicio de encordado',
-        description:
-          'Talleres cercanos, servicio express o estandar, recojo a domicilio y seleccion de tension.',
       },
     ],
   },
@@ -160,7 +118,7 @@ export function FeaturesSection() {
                 </div>
 
                 {/* Right/Left: Feature cards */}
-                <div className="lg:w-7/12 grid sm:grid-cols-2 gap-4">
+                <div className="lg:w-7/12 grid gap-4">
                   {pillar.features.map((feature) => (
                     <GlassCard
                       key={feature.title}

@@ -15,27 +15,28 @@ const plans = [
     price: 0,
     currency: '',
     features: [
-      '5 analisis de video por mes',
+      '5 análisis de video por mes',
       '1 plan de entrenamiento activo',
-      'Acceso a Tenis',
+      'Tenis (un deporte)',
       'Ranking nacional basico',
       'Perfil de jugador',
       'Soporte por email',
     ],
     outcome: 'Ideal para descubrir tu skill score y entender tus errores tecnicos.',
     cta: 'Comenzar gratis',
+    note: 'Sin tarjeta de crédito',
     popular: false,
   },
   {
     id: 'PRO',
     name: 'Compite en serio',
-    tagline: 'Todo lo que necesitas para mejorar cada semana',
+    tagline: 'Menos que una clase particular',
     price: 24.90,
     currency: 'S/',
     features: [
-      'Analisis ilimitados de video',
+      'Análisis ilimitados de video',
       'Planes de entrenamiento ilimitados',
-      'Tenis y Padel',
+      'Tenis, Padel y más',
       'Rankings multi-categoria completos',
       'Historial de progreso y estadisticas',
       'Matchmaking y desafios',
@@ -44,6 +45,7 @@ const plans = [
     ],
     outcome: 'Para deportistas que entrenan varias veces por semana y quieren subir de tier.',
     cta: 'Elegir Pro',
+    note: null,
     popular: true,
   },
   {
@@ -63,6 +65,7 @@ const plans = [
     ],
     outcome: 'Para competidores que buscan cada ventaja y quieren coaching personalizado.',
     cta: 'Elegir Elite',
+    note: 'Próximamente: descuento anual',
     popular: false,
   },
 ]
@@ -146,14 +149,16 @@ export function PricingSection() {
                 >
                   <Link href="/register">{plan.cta}</Link>
                 </GlassButton>
+                {plan.note && (
+                  <p className="text-xs text-muted-foreground text-center mt-2">{plan.note}</p>
+                )}
               </div>
             </GlassCard>
           ))}
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-8">
-          Sin tarjeta de credito para el plan gratuito. Precios en soles
-          peruanos (PEN).
+          Precios en soles peruanos (PEN). Cambia o cancela cuando quieras.
         </p>
       </div>
     </section>

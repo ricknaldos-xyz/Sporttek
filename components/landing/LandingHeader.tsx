@@ -7,12 +7,10 @@ import { GlassButton } from '@/components/ui/glass-button'
 import { GlassNavbar } from '@/components/ui/glass-navbar'
 
 const navLinks = [
-  { href: '#features', label: 'Ecosistema' },
-  { href: '#how-it-works', label: 'Como funciona' },
-  { href: '#ranking', label: 'Rankings' },
-  { href: '#coaches', label: 'Coaches' },
-  { href: '#pricing', label: 'Precios' },
-  { href: '#faq', label: 'FAQ' },
+  { href: '#features', label: 'Ecosistema', mobile: true },
+  { href: '#ranking', label: 'Rankings', mobile: false },
+  { href: '#pricing', label: 'Precios', mobile: true },
+  { href: '#faq', label: 'FAQ', mobile: true },
 ]
 
 export function LandingHeader() {
@@ -89,7 +87,7 @@ export function LandingHeader() {
         {mobileMenuOpen && (
           <div className="md:hidden pt-4 pb-2 border-t border-glass mt-4">
             <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
+              {navLinks.filter((l) => l.mobile).map((link) => (
                 <a
                   key={link.href}
                   href={link.href}

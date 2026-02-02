@@ -7,49 +7,34 @@ import { cn } from '@/lib/utils'
 
 const faqs = [
   {
-    question: 'Que es SportTek exactamente?',
+    question: '¿Qué es SportTek exactamente?',
     answer:
-      'SportTek es una plataforma integral para deportistas de tenis y padel. Combina analisis de video con IA, planes de entrenamiento personalizados, rankings nacionales, torneos, matchmaking, coach marketplace, reserva de canchas, tienda deportiva y servicio de encordado. Todo en un solo lugar.',
+      'SportTek es una plataforma integral para deportistas de tenis y padel. Combina análisis de video con IA, planes de entrenamiento personalizados, rankings nacionales, torneos, matchmaking, coach marketplace, reserva de canchas, tienda deportiva y servicio de encordado. Todo en un solo lugar.',
   },
   {
-    question: 'Como funciona el analisis con IA?',
+    question: '¿Cómo funciona el análisis con IA?',
     answer:
-      'Subes un video de 10-30 segundos (MP4, MOV o WebM) de tu tecnica. La IA lo analiza en 2-5 minutos, identifica errores especificos con niveles de severidad (bajo, medio, alto, critico), te asigna un skill score y genera un plan de ejercicios para corregir cada error.',
+      'Subes un video de 10-30 segundos (MP4, MOV o WebM) de tu técnica. La IA lo analiza en 2-5 minutos, identifica errores específicos con niveles de severidad, te asigna un skill score y genera un plan de ejercicios para corregir cada error. Tus videos son privados y seguros.',
   },
   {
-    question: 'Que deportes estan disponibles?',
+    question: '¿Qué deportes están disponibles?',
     answer:
-      'Actualmente soportamos Tenis (saque, derecha, reves, volea) y Padel (bandeja, vibora, smash). Pickleball estara disponible proximamente. Cada deporte tiene su propio perfil de jugador, ranking y tecnicas especificas. El plan gratuito incluye un deporte; Pro y Elite incluyen todos.',
+      'Actualmente soportamos Tenis (saque, derecha, revés, volea) y Padel (bandeja, víbora, smash). Pickleball estará disponible próximamente. Cada deporte tiene su propio perfil, ranking y técnicas específicas. El plan gratuito incluye un deporte; Pro y Elite incluyen todos.',
   },
   {
-    question: 'Como funcionan los rankings y tiers?',
+    question: '¿Cómo funcionan los rankings y tiers?',
     answer:
-      'Cada analisis contribuye a tu skill score. Segun tu puntaje, estas en un tier: desde 5ta B (inicial) hasta 1ra A (elite). Los rankings se calculan por pais, tier, grupo de edad y globalmente, con periodos semanal, mensual e historico. Tu posicion se actualiza en tiempo real.',
+      'Cada análisis contribuye a tu skill score. Según tu puntaje, estás en un tier: desde 5ta B (inicial) hasta 1ra A (elite). Los rankings se calculan por país, tier, grupo de edad y globalmente, con periodos semanal, mensual e histórico. Tu posición se actualiza en tiempo real.',
   },
   {
-    question: 'Como encuentro rivales o participo en torneos?',
+    question: '¿Cómo encuentro rivales o participo en torneos?',
     answer:
-      'El matchmaking te sugiere rivales de tu nivel basandose en tu ELO score y ubicacion. Puedes enviar desafios y coordinar partidos. Los torneos tienen formatos de eliminacion simple, doble y round robin con brackets, seeding y restricciones por tier y edad.',
+      'El matchmaking te sugiere rivales de tu nivel basándose en tu ELO score y ubicación. Puedes enviar desafíos y coordinar partidos. Los torneos tienen formatos de eliminación simple, doble y round robin con brackets, seeding y restricciones por tier y edad.',
   },
   {
-    question: 'Que ofrece el Coach Marketplace?',
+    question: '¿Puedo cancelar mi suscripción en cualquier momento?',
     answer:
-      'Es un directorio de entrenadores verificados por deporte, ubicacion y especialidad. Los coaches tienen perfiles con certificaciones, reviews, tarifas y gestion de alumnos. Pueden asignar planes de entrenamiento basados en los analisis IA de sus alumnos.',
-  },
-  {
-    question: 'Puedo registrar mi cancha o taller de encordado?',
-    answer:
-      'Si. Los proveedores de canchas y talleres de encordado pueden aplicar desde la plataforma. Las canchas se publican con ubicacion, superficie, disponibilidad y pago integrado. Los talleres reciben pedidos con seleccion de cuerda, tension y tipo de servicio.',
-  },
-  {
-    question: 'Puedo cancelar mi suscripcion en cualquier momento?',
-    answer:
-      'Si, puedes cancelar en cualquier momento desde tu perfil. Sin compromisos ni penalizaciones. Tu acceso continua hasta el final del periodo de facturacion. El plan gratuito no requiere tarjeta de credito.',
-  },
-  {
-    question: 'Mis videos son privados?',
-    answer:
-      'Si. Tus videos se almacenan de forma segura y privada. Solo tu (y tu coach si decides compartirlos) pueden acceder a ellos. Nunca compartimos tu contenido con terceros. Ademas, contamos con deteccion de duplicados y verificacion de autenticidad.',
+      'Sí, puedes cancelar en cualquier momento desde tu perfil. Sin compromisos ni penalizaciones. Tu acceso continúa hasta el final del periodo de facturación. El plan gratuito no requiere tarjeta de crédito.',
   },
 ]
 

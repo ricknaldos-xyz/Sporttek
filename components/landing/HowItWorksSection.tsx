@@ -1,49 +1,29 @@
 'use client'
 
-import { Upload, Brain, Trophy, Swords, TrendingUp } from 'lucide-react'
+import { Upload, Brain, Trophy } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
-import { GlassBadge } from '@/components/ui/glass-badge'
 
 const steps = [
   {
     number: 1,
     icon: Upload,
-    title: 'Registrate y sube tu primer video',
+    title: 'Sube tu video',
     description:
-      'Elige tu deporte, graba tu tecnica con el movil y sube el video. Solo necesitas 10-30 segundos de grabacion.',
-    detail: 'Tenis o padel',
+      'Graba 10-30 segundos de tu técnica con el móvil y súbelo. Tenis o padel.',
   },
   {
     number: 2,
     icon: Brain,
-    title: 'Recibe tu analisis y skill score',
+    title: 'Recibe tu análisis IA',
     description:
-      'La IA analiza tu tecnica, detecta errores especificos y te asigna un skill score. Sabras exactamente en que mejorar.',
-    detail: 'Analisis en 2-5 minutos',
+      'En 2-5 minutos la IA detecta errores, te asigna un skill score y genera tu plan de entrenamiento.',
   },
   {
     number: 3,
-    icon: TrendingUp,
-    title: 'Entrena con tu plan personalizado',
-    description:
-      'Recibe ejercicios diarios para corregir cada error. Completa sesiones, registra tu progreso y sube de tier.',
-    detail: 'Ejercicios paso a paso',
-  },
-  {
-    number: 4,
     icon: Trophy,
-    title: 'Compite y sube en el ranking',
+    title: 'Compite y mejora',
     description:
-      'Tu score alimenta el ranking nacional. Encuentra rivales de tu nivel, participa en torneos y gana badges.',
-    detail: 'Rankings en vivo',
-  },
-  {
-    number: 5,
-    icon: Swords,
-    title: 'Conecta con la comunidad',
-    description:
-      'Sigue a otros jugadores, encuentra coaches, reserva canchas y accede a la tienda y servicio de encordado.',
-    detail: 'Todo en un solo lugar',
+      'Tu score alimenta el ranking nacional. Participa en torneos, encuentra rivales y sube de categoría.',
   },
 ]
 
@@ -89,12 +69,9 @@ export function HowItWorksSection() {
                           <step.icon className="h-5 w-5 text-primary" />
                           <h3 className="text-lg font-semibold">{step.title}</h3>
                         </div>
-                        <p className="text-muted-foreground leading-relaxed mb-3">
+                        <p className="text-muted-foreground leading-relaxed">
                           {step.description}
                         </p>
-                        <GlassBadge variant="default" size="sm">
-                          {step.detail}
-                        </GlassBadge>
                       </div>
                     </div>
                   </GlassCard>

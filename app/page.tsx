@@ -60,13 +60,13 @@ export default function Home() {
       <LandingHeader />
       <main>
         <HeroSection />
-        <FeaturesSection />
         <HowItWorksSection />
+        <FeaturesSection />
         <RankingPreview />
+        <TestimonialsSection />
+        <PricingSection />
         <CoachSection />
         <ProviderSection />
-        <PricingSection />
-        <TestimonialsSection />
         <FAQSection />
         <CTASection />
       </main>

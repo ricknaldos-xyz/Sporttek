@@ -72,7 +72,7 @@ export function RankingJourney({ techniqueBreakdown, skillTier, variant }: Ranki
             }`}
           />
         ))}
-        <span className="text-sm">{analyzedCount}/{MIN_TECHNIQUES_FOR_RANKING} tecnicas</span>
+        <span className="text-sm">{analyzedCount}/{MIN_TECHNIQUES_FOR_RANKING} técnicas</span>
         <Link href="/analyze">
           <GlassButton variant="solid" size="sm">
             Analizar
@@ -90,14 +90,14 @@ export function RankingJourney({ techniqueBreakdown, skillTier, variant }: Ranki
         <GlassCard intensity="primary" padding="lg">
           <div className="text-center space-y-4">
             <Sparkles className="h-8 w-8 text-yellow-500 mx-auto" />
-            <p className="text-xl font-bold">Felicidades!</p>
+            <p className="text-xl font-bold">¡Felicidades!</p>
             <TierBadge tier={skillTier} size="lg" />
             <p className="text-sm text-muted-foreground">
-              Tu categoria es {getTierLabel(skillTier)}
+              Tu categoría es {getTierLabel(skillTier)}
             </p>
             <div className="flex gap-3 justify-center">
               <Link href="/rankings">
-                <GlassButton variant="solid">Ver mi posicion</GlassButton>
+                <GlassButton variant="solid">Ver mi posición</GlassButton>
               </Link>
               <Link href="/analyze">
                 <GlassButton variant="outline">Seguir mejorando</GlassButton>
@@ -116,58 +116,51 @@ export function RankingJourney({ techniqueBreakdown, skillTier, variant }: Ranki
   if (analyzedCount === 0) {
     return (
       <GlassCard intensity="primary" padding="lg">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-2">
           <Target className="h-5 w-5" />
-          <span className="text-lg font-semibold">Obtene tu Categoria</span>
+          <span className="text-lg font-semibold">Obtén tu Categoría</span>
         </div>
 
-        {/* Visual stepper */}
-        <div className="flex items-center gap-2 mb-4">
-          {Array.from({ length: MIN_TECHNIQUES_FOR_RANKING }, (_, i) => (
-            <div key={i} className="flex items-center flex-1">
-              <div className="flex flex-col items-center">
-                <div className="h-10 w-10 rounded-full border-2 border-muted/40 flex items-center justify-center text-sm text-muted-foreground">
-                  {i + 1}
-                </div>
-                <span className="text-xs text-muted-foreground mt-1">Tecnica {i + 1}</span>
-              </div>
-              {i < MIN_TECHNIQUES_FOR_RANKING - 1 && <div className="h-0.5 flex-1 bg-muted/30 mx-2" />}
-            </div>
-          ))}
-        </div>
-
-        <p className="text-sm text-muted-foreground">
-          Analiza {MIN_TECHNIQUES_FOR_RANKING} tecnicas diferentes para recibir tu categoria y aparecer en el ranking
+        <p className="text-sm text-muted-foreground mb-4">
+          Analiza {MIN_TECHNIQUES_FOR_RANKING} técnicas diferentes para recibir tu categoría y aparecer en el ranking nacional.
         </p>
 
-        <p className="text-sm font-medium mt-4 mb-3">Tecnicas recomendadas para empezar:</p>
+        {/* Progress bar */}
+        <div className="mb-1">
+          <div className="h-2.5 rounded-full bg-primary/20 overflow-hidden">
+            <div className="h-full rounded-full bg-primary w-0" />
+          </div>
+        </div>
+        <p className="text-sm font-medium mb-4">0/{MIN_TECHNIQUES_FOR_RANKING} técnicas analizadas</p>
+
+        <p className="text-sm font-medium mb-3">Técnicas recomendadas para empezar:</p>
         {loadingTechniques ? (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {Array.from({ length: 3 }, (_, i) => (
               <GlassCard key={i} intensity="light" padding="md">
                 <div className="h-4 w-24 bg-muted/40 rounded animate-pulse mb-2" />
-                <div className="h-8 w-20 bg-muted/40 rounded animate-pulse" />
+                <div className="h-4 w-16 bg-muted/40 rounded animate-pulse" />
               </GlassCard>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {recommendedTechniques.map((t) => (
-              <GlassCard key={t.slug} intensity="light" padding="md" hover="lift">
-                <p className="font-medium text-sm mb-2">{t.name}</p>
-                <Link href={`/analyze/new?technique=${t.slug}`}>
-                  <GlassButton variant="solid" size="sm">
-                    Analizar
-                  </GlassButton>
-                </Link>
-              </GlassCard>
+              <Link key={t.slug} href={`/analyze/new?technique=${t.slug}`}>
+                <GlassCard intensity="light" padding="md" hover="lift" className="cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-sm">{t.name}</p>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </GlassCard>
+              </Link>
             ))}
           </div>
         )}
 
         <Link href="/analyze" className="block mt-4">
           <GlassButton variant="solid" className="w-full">
-            Analizar mi primera tecnica
+            Analizar mi primera técnica
           </GlassButton>
         </Link>
       </GlassCard>
@@ -181,13 +174,13 @@ export function RankingJourney({ techniqueBreakdown, skillTier, variant }: Ranki
   // Find next suggested technique
   const nextSuggested =
     recommendedTechniques.find((t) => !analyzedSlugs.includes(t.slug)) ||
-    { slug: 'tecnica', name: 'Siguiente tecnica' }
+    { slug: 'tecnica', name: 'Siguiente técnica' }
 
   return (
     <GlassCard intensity="primary" padding="lg">
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="h-5 w-5" />
-        <span className="text-lg font-semibold">Tu progreso hacia tu categoria</span>
+        <span className="text-lg font-semibold">Tu progreso hacia tu categoría</span>
       </div>
 
       {/* Progress bar */}
@@ -199,7 +192,7 @@ export function RankingJourney({ techniqueBreakdown, skillTier, variant }: Ranki
           />
         </div>
       </div>
-      <p className="text-sm font-medium mb-4">{analyzedCount}/{MIN_TECHNIQUES_FOR_RANKING} tecnicas analizadas</p>
+      <p className="text-sm font-medium mb-4">{analyzedCount}/{MIN_TECHNIQUES_FOR_RANKING} técnicas analizadas</p>
 
       {/* Visual stepper */}
       <div className="flex items-center gap-2 mb-4">
@@ -225,7 +218,7 @@ export function RankingJourney({ techniqueBreakdown, skillTier, variant }: Ranki
                     <div className="h-10 w-10 rounded-full border-2 border-muted/40 flex items-center justify-center text-sm text-muted-foreground">
                       {i + 1}
                     </div>
-                    <span className="text-xs text-muted-foreground mt-1">Tecnica {i + 1}</span>
+                    <span className="text-xs text-muted-foreground mt-1">Técnica {i + 1}</span>
                   </>
                 )}
               </div>
@@ -236,7 +229,7 @@ export function RankingJourney({ techniqueBreakdown, skillTier, variant }: Ranki
       </div>
 
       {/* Next suggestion */}
-      <p className="text-sm font-medium mb-2">Siguiente tecnica sugerida:</p>
+      <p className="text-sm font-medium mb-2">Siguiente técnica sugerida:</p>
       <GlassCard intensity="light" padding="md" hover="lift" className="mb-4">
         <div className="flex items-center justify-between">
           <p className="font-medium text-sm">{nextSuggested.name}</p>
@@ -250,7 +243,7 @@ export function RankingJourney({ techniqueBreakdown, skillTier, variant }: Ranki
       </GlassCard>
 
       <p className="text-sm text-muted-foreground">
-        Te falta {remaining} tecnica{remaining > 1 ? 's' : ''} para obtener tu categoria!
+        Te falta{remaining > 1 ? 'n' : ''} {remaining} técnica{remaining > 1 ? 's' : ''} para obtener tu categoría.
       </p>
     </GlassCard>
   )

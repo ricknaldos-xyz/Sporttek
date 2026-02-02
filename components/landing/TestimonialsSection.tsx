@@ -9,8 +9,9 @@ const testimonials = [
     name: 'Carlos M.',
     role: 'Tenista amateur',
     location: 'Lima, Peru',
+    since: 'Usa SportTek hace 4 meses',
     content:
-      'La IA detecto que mi lanzamiento de saque era inconsistente y me dio un plan especifico para corregirlo. En 3 semanas subi de 5ta B a 5ta A en el ranking.',
+      'La IA detectó que mi lanzamiento de saque era inconsistente y me dio un plan específico para corregirlo. En 3 semanas subí de 5ta B a 5ta A en el ranking.',
     rating: 5,
     highlight: '5ta B → 5ta A',
   },
@@ -18,26 +19,29 @@ const testimonials = [
     name: 'Andrea P.',
     role: 'Jugadora de padel',
     location: 'Miraflores, Peru',
+    since: 'Usa SportTek hace 2 meses',
     content:
-      'El matchmaking me conecto con una pareja de mi nivel para un torneo. La comunidad es real: seguimos jugando juntas cada semana desde que nos encontramos en la plataforma.',
-    rating: 5,
+      'El matchmaking me conectó con una pareja de mi nivel para un torneo. Seguimos jugando juntas cada semana desde que nos encontramos en la plataforma.',
+    rating: 4,
     highlight: 'Pareja de torneo',
   },
   {
     name: 'Roberto S.',
-    role: 'Entrenador certificado',
+    role: 'Entrenador de padel certificado',
     location: 'San Isidro, Peru',
+    since: 'Usa SportTek hace 5 meses',
     content:
-      'Registro mis alumnos en la plataforma y les asigno planes basados en sus analisis. Ver los errores objetivamente con la IA complementa mis sesiones presenciales.',
+      'Registro mis alumnos en la plataforma y les asigno planes basados en sus análisis. Ver los errores objetivamente con la IA complementa mis sesiones presenciales.',
     rating: 5,
     highlight: '12 alumnos activos',
   },
   {
-    name: 'Maria L.',
+    name: 'María L.',
     role: 'Jugadora de padel',
     location: 'Surco, Peru',
+    since: 'Usa SportTek hace 3 meses',
     content:
-      'Empece sin saber mi nivel real. Despues de 5 analisis tengo claro mis fortalezas y debilidades. El plan de entrenamiento me da ejercicios nuevos cada semana.',
+      'Empecé sin saber mi nivel real. Después de 5 análisis tengo claro mis fortalezas y debilidades. El plan de entrenamiento me da ejercicios nuevos cada semana.',
     rating: 5,
     highlight: 'De novata a 4ta A',
   },
@@ -56,7 +60,7 @@ export function TestimonialsSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {testimonials.map((testimonial, index) => (
             <GlassCard
               key={index}
@@ -104,6 +108,9 @@ export function TestimonialsSection() {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {testimonial.location}
+                  </p>
+                  <p className="text-xs text-muted-foreground/60">
+                    {testimonial.since}
                   </p>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Brain, Trophy, Swords, Zap } from 'lucide-react'
+import { ArrowRight, Brain, Trophy, Swords } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassBadge } from '@/components/ui/glass-badge'
 import { StatsCounter } from '@/components/landing/StatsCounter'
@@ -37,24 +37,9 @@ export function HeroSection() {
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            Analisis IA de tu tecnica, rankings en vivo, torneos, coaches certificados, matchmaking, tienda y todo lo que necesitas para tenis y padel.
+            Sube un video de tu técnica y recibe tu análisis IA en minutos.
+            Descubre tu nivel, compite en el ranking y mejora con un plan personalizado.
           </p>
-
-          {/* Value props */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mb-10 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" />
-              <span>Mejora con IA</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-primary" />
-              <span>Compite en rankings</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Swords className="h-4 w-4 text-primary" />
-              <span>Conecta con tu comunidad</span>
-            </div>
-          </div>
 
           {/* Dual CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -71,6 +56,10 @@ export function HeroSection() {
               </Link>
             </GlassButton>
           </div>
+
+          <p className="text-sm text-muted-foreground mb-16">
+            Gratis — sin tarjeta de crédito
+          </p>
 
           {/* Stats — real data from API */}
           <StatsCounter />

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Sparkles, Trophy, Brain, Users } from 'lucide-react'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import { GlassButton } from '@/components/ui/glass-button'
 import { GlassCard } from '@/components/ui/glass-card'
 
@@ -33,22 +33,6 @@ export function CTASection() {
               Analisis IA, rankings, torneos, coaches, canchas y comunidad.
               Todo lo que necesitas para tenis y padel en una sola plataforma.
             </p>
-
-            {/* Value reminder */}
-            <div className="flex flex-wrap items-center justify-center gap-6 mb-8 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Brain className="h-4 w-4 text-primary" />
-                <span>Mejora con IA</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-primary" />
-                <span>Compite en rankings</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                <span>Conecta con la comunidad</span>
-              </div>
-            </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <GlassButton variant="solid" size="xl" asChild>
