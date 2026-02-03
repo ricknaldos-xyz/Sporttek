@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 }
 import { HeroSection } from '@/components/landing/HeroSection'
 import { FeaturesSection } from '@/components/landing/FeaturesSection'
+import { ServicesSection } from '@/components/landing/ServicesSection'
 import { HowItWorksSection } from '@/components/landing/HowItWorksSection'
 import { RankingPreview } from '@/components/landing/RankingPreview'
 import { CoachSection } from '@/components/landing/CoachSection'
@@ -62,6 +63,7 @@ export default function Home() {
         <HeroSection />
         <HowItWorksSection />
         <FeaturesSection />
+        <ServicesSection />
         <RankingPreview />
         <TestimonialsSection />
         <PricingSection />

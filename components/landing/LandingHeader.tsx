@@ -7,9 +7,9 @@ import { GlassButton } from '@/components/ui/glass-button'
 
 const navLinks = [
   { href: '#features', label: 'Ecosistema', mobile: true },
-  { href: '#ranking', label: 'Rankings', mobile: false },
+  { href: '#services', label: 'Servicios', mobile: true },
   { href: '#pricing', label: 'Precios', mobile: true },
-  { href: '#faq', label: 'FAQ', mobile: true },
+  { href: '#faq', label: 'FAQ', mobile: false },
 ]
 
 export function LandingHeader() {
