@@ -9,134 +9,129 @@ import {
   GraduationCap,
   MapPin,
   TrendingUp,
-  ArrowRight,
+  Check,
 } from 'lucide-react'
-import { GlassCard } from '@/components/ui/glass-card'
-import { GlassButton } from '@/components/ui/glass-button'
 
 const pillars = [
   {
-    id: 'mejora',
+    number: '01',
     badge: 'Mejora',
-    badgeIcon: TrendingUp,
-    title: 'Mejora tu tecnica con inteligencia artificial',
+    icon: TrendingUp,
+    title: 'Mejora tu técnica con IA',
     description:
-      'Sube un video de tu golpe y recibe un analisis profesional en minutos. La IA detecta errores especificos y genera planes de entrenamiento personalizados para corregirlos.',
+      'Sube un video y recibe análisis profesional en minutos. La IA detecta errores y genera planes personalizados.',
     features: [
-      {
-        icon: Brain,
-        title: 'Análisis IA de video',
-        description:
-          'Detección de errores en saque, derecha, revés, volea y bandeja con precisión profesional.',
-      },
-      {
-        icon: Target,
-        title: 'Planes personalizados',
-        description:
-          'Ejercicios diarios basados en tus errores, con progresión semanal y seguimiento.',
-      },
+      { icon: Brain, text: 'Análisis de saque, derecha, revés, volea y bandeja' },
+      { icon: Target, text: 'Planes de entrenamiento con progresión semanal' },
     ],
+    color: 'primary',
   },
   {
-    id: 'compite',
+    number: '02',
     badge: 'Compite',
-    badgeIcon: Trophy,
-    title: 'Compite y sube en el ranking nacional',
+    icon: Trophy,
+    title: 'Sube en el ranking nacional',
     description:
-      'Sistema de rankings por pais, tier y grupo de edad. Participa en torneos con brackets reales, gana badges y mantiene rachas de entrenamiento para subir de categoria.',
+      'Rankings por país, tier y edad. Torneos con brackets reales y badges de logros.',
     features: [
-      {
-        icon: Trophy,
-        title: 'Rankings multi-categoría',
-        description:
-          'Rankings por país, skill tier, grupo de edad y globales. Periodos semanal, mensual e histórico.',
-      },
-      {
-        icon: Medal,
-        title: 'Torneos organizados',
-        description:
-          'Eliminación simple, doble y round robin. Brackets con seeding, restricciones por tier y edad.',
-      },
+      { icon: Trophy, text: 'Rankings semanal, mensual e histórico' },
+      { icon: Medal, text: 'Torneos con seeding y restricciones por nivel' },
     ],
+    color: 'dark',
   },
   {
-    id: 'conecta',
+    number: '03',
     badge: 'Conecta',
-    badgeIcon: Users,
-    title: 'Conecta con coaches, canchas y comunidad',
+    icon: Users,
+    title: 'Coaches, canchas y comunidad',
     description:
-      'Encuentra entrenadores certificados, reserva canchas, compra equipamiento y conecta con otros deportistas. Todo el ecosistema deportivo en un solo lugar.',
+      'Entrenadores certificados, reserva de canchas y matchmaking con jugadores de tu nivel.',
     features: [
-      {
-        icon: GraduationCap,
-        title: 'Coach Marketplace',
-        description:
-          'Coaches verificados con certificaciones, reviews, precios y gestión de alumnos.',
-      },
-      {
-        icon: MapPin,
-        title: 'Reserva de canchas',
-        description:
-          'Canchas de tenis y padel con disponibilidad en tiempo real y pago integrado.',
-      },
+      { icon: GraduationCap, text: 'Coaches verificados con reviews y precios' },
+      { icon: MapPin, text: 'Canchas con disponibilidad en tiempo real' },
     ],
+    color: 'primary',
   },
 ]
 
-// Flatten all features into a single bento grid array
-const bentoItems = pillars.flatMap((pillar) =>
-  pillar.features.map((feature, idx) => ({
-    ...feature,
-    pillarBadge: pillar.badge,
-    pillarBadgeIcon: pillar.badgeIcon,
-    pillarId: pillar.id,
-    featureIdx: idx,
-  }))
-)
-
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-20 lg:py-32">
+    <section id="features" className="py-20 lg:py-32 bg-secondary/30">
       <div className="container mx-auto px-4">
+        {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Un ecosistema completo para tu desarrollo deportivo
+          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
+            Ecosistema
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+            Todo lo que necesitas para crecer
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Tres pilares que cubren todo lo que necesitas: desde el analisis de tu tecnica hasta la competencia y la comunidad.
+            Tres pilares que cubren tu desarrollo deportivo completo
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
-          {bentoItems.map((item, index) => {
-            // Bento layout: first item spans 2 cols, items 2 and 5 are dark
-            const isWide = index === 0
-            const isDark = index === 2 || index === 5
+        {/* Pillars Grid */}
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {pillars.map((pillar) => {
+            const isDark = pillar.color === 'dark'
 
             return (
-              <GlassCard
-                key={item.title}
-                intensity={isDark ? 'dark' : 'light'}
-                padding="xl"
-                className={isWide ? 'lg:col-span-2' : ''}
+              <div
+                key={pillar.number}
+                className={`rounded-3xl p-8 transition-all hover:shadow-xl ${
+                  isDark
+                    ? 'bg-foreground text-background'
+                    : 'bg-white shadow-lg'
+                }`}
               >
-                <div className="flex items-start justify-between mb-6">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDark ? 'bg-background/10' : 'bg-primary/10'}`}>
-                    <item.icon className={`h-5 w-5 ${isDark ? 'text-background' : 'text-primary'}`} />
-                  </div>
-                  <GlassButton variant={isDark ? 'ghost' : 'default'} size="icon-circle" className={isDark ? 'bg-background/10 hover:bg-background/20' : ''}>
-                    <ArrowRight className={`h-5 w-5 ${isDark ? 'text-background' : ''}`} />
-                  </GlassButton>
+                {/* Number & Badge */}
+                <div className="flex items-center justify-between mb-6">
+                  <span className={`text-5xl font-bold ${isDark ? 'text-background/20' : 'text-foreground/10'}`}>
+                    {pillar.number}
+                  </span>
+                  <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                    isDark
+                      ? 'bg-background/10 text-background'
+                      : 'bg-primary/10 text-primary'
+                  }`}>
+                    {pillar.badge}
+                  </span>
                 </div>
 
-                <span className={`text-xs font-medium uppercase tracking-wider ${isDark ? 'text-background/50' : 'text-muted-foreground'}`}>
-                  {item.pillarBadge}
-                </span>
-                <h4 className="text-lg font-semibold mt-1 mb-2">{item.title}</h4>
-                <p className={`text-sm leading-relaxed ${isDark ? 'text-background/70' : 'text-muted-foreground'}`}>
-                  {item.description}
+                {/* Icon */}
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
+                  isDark
+                    ? 'bg-background/10'
+                    : 'bg-primary/10'
+                }`}>
+                  <pillar.icon className={`h-6 w-6 ${isDark ? 'text-background' : 'text-primary'}`} />
+                </div>
+
+                {/* Title & Description */}
+                <h3 className="text-xl font-bold mb-2">{pillar.title}</h3>
+                <p className={`text-sm leading-relaxed mb-6 ${isDark ? 'text-background/70' : 'text-muted-foreground'}`}>
+                  {pillar.description}
                 </p>
-              </GlassCard>
+
+                {/* Features List */}
+                <ul className="space-y-3">
+                  {pillar.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                        isDark
+                          ? 'bg-background/20'
+                          : 'bg-primary/10'
+                      }`}>
+                        <Check className={`h-3 w-3 ${isDark ? 'text-background' : 'text-primary'}`} />
+                      </div>
+                      <span className={`text-sm ${isDark ? 'text-background/80' : 'text-foreground'}`}>
+                        {feature.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )
           })}
         </div>
