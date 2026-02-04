@@ -66,10 +66,10 @@ export function RankingPreview() {
             Rankings
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Ranking Nacional Peru
+            Ranking Nacional Perú
           </h2>
           <p className="text-lg text-muted-foreground">
-            Los mejores tenistas amateur del pais. Tu podrias estar aqui.
+            Los mejores tenistas amateur del país. Tú podrías estar aquí.
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export function RankingPreview() {
             {/* Header */}
             <div className="px-6 py-4 border-b border-border/50 flex items-center gap-3">
               <Trophy className="h-5 w-5 text-yellow-500" />
-              <span className="font-semibold">Top 10 Peru</span>
+              <span className="font-semibold">Top 10 Perú</span>
             </div>
 
             {/* Table */}
@@ -116,7 +116,7 @@ export function RankingPreview() {
               </div>
             ) : (
               <div className="py-12 text-center text-muted-foreground">
-                <p className="text-sm">Se el primero en aparecer en el ranking</p>
+                <p className="text-sm">Sé el primero en aparecer en el ranking</p>
               </div>
             )}
 

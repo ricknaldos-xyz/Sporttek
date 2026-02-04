@@ -7,34 +7,34 @@ import { cn } from '@/lib/utils'
 
 const faqs = [
   {
-    question: '¿Qué es SportTek exactamente?',
+    question: '¿Qué es SportTek?',
     answer:
-      'SportTek es una plataforma integral para deportistas de tenis y padel. Combina análisis de video con IA, planes de entrenamiento personalizados, rankings nacionales, torneos, matchmaking, coach marketplace, reserva de canchas, tienda deportiva y servicio de encordado. Todo en un solo lugar.',
+      'SportTek es una plataforma para jugadores de tenis y padel. Combina análisis de video con IA, planes de entrenamiento personalizados, rankings nacionales, torneos, matchmaking, marketplace de coaches, reserva de canchas, tienda y servicio de encordado. Todo en un solo lugar.',
   },
   {
     question: '¿Cómo funciona el análisis con IA?',
     answer:
-      'Subes un video de 10-30 segundos (MP4, MOV o WebM) de tu técnica. La IA lo analiza en 2-5 minutos, identifica errores específicos con niveles de severidad, te asigna un skill score y genera un plan de ejercicios para corregir cada error. Tus videos son privados y seguros.',
+      'Subes un video de 15-30 segundos de tu técnica desde tu celular. La IA lo analiza en minutos, detecta errores específicos, te asigna un skill score y te genera un plan de ejercicios para mejorar. Tus videos son privados y seguros.',
   },
   {
-    question: '¿Qué deportes están disponibles?',
+    question: '¿Qué deportes puedo analizar?',
     answer:
-      'Actualmente soportamos Tenis (saque, derecha, revés, volea) y Padel (bandeja, víbora, smash). Pickleball estará disponible próximamente. Cada deporte tiene su propio perfil, ranking y técnicas específicas. El plan gratuito incluye un deporte; Pro y Elite incluyen todos.',
+      'Soportamos Tenis (saque, derecha, revés, volea, slice) y Padel (bandeja, víbora, smash, globo, pared). Cada deporte tiene su propio perfil, ranking y técnicas. El plan gratuito incluye tenis; Pro y Elite incluyen tenis y padel.',
   },
   {
-    question: '¿Cómo funcionan los rankings y tiers?',
+    question: '¿Cómo funcionan los rankings?',
     answer:
-      'Cada análisis contribuye a tu skill score. Según tu puntaje, estás en un tier: desde 5ta B (inicial) hasta 1ra A (elite). Los rankings se calculan por país, tier, grupo de edad y globalmente, con periodos semanal, mensual e histórico. Tu posición se actualiza en tiempo real.',
+      'Cada análisis contribuye a tu skill score. Según tu puntaje, estás en un tier: desde 5ta B (inicial) hasta 1ra A (elite). Los rankings son por país, tier y edad, con periodos semanal, mensual e histórico. Tu posición se actualiza automáticamente.',
   },
   {
-    question: '¿Cómo encuentro rivales o participo en torneos?',
+    question: '¿Cómo encuentro rivales o torneos?',
     answer:
-      'El matchmaking te sugiere rivales de tu nivel basándose en tu ELO score y ubicación. Puedes enviar desafíos y coordinar partidos. Los torneos tienen formatos de eliminación simple, doble y round robin con brackets, seeding y restricciones por tier y edad.',
+      'El matchmaking te sugiere rivales de tu nivel basándose en tu puntaje y ubicación. Puedes enviar desafíos y coordinar partidos. Los torneos tienen formato de eliminación con brackets, seeding y restricciones por nivel.',
   },
   {
-    question: '¿Puedo cancelar mi suscripción en cualquier momento?',
+    question: '¿Puedo cancelar cuando quiera?',
     answer:
-      'Sí, puedes cancelar en cualquier momento desde tu perfil. Sin compromisos ni penalizaciones. Tu acceso continúa hasta el final del periodo de facturación. El plan gratuito no requiere tarjeta de crédito.',
+      'Sí, cancelas en cualquier momento desde tu perfil. Sin compromisos ni penalizaciones. Tu acceso sigue hasta el final del periodo pagado. El plan gratuito no pide tarjeta de crédito.',
   },
 ]
 
@@ -46,13 +46,13 @@ export function FAQSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-            FAQ
+            Preguntas frecuentes
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Preguntas frecuentes
+            ¿Tienes dudas? Te las resolvemos
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Todo lo que necesitas saber sobre la plataforma, desde el analisis IA hasta los servicios del ecosistema.
+            Todo lo que necesitas saber sobre la plataforma
           </p>
         </div>
 

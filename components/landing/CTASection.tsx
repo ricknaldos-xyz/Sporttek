@@ -16,11 +16,11 @@ export function CTASection() {
 
             <div className="relative z-10 text-center">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-                Tu desarrollo deportivo empieza hoy
+                Tu siguiente nivel empieza hoy
               </h2>
               <p className="text-lg text-white/80 mb-10 max-w-xl mx-auto leading-relaxed">
-                Analisis IA, rankings, torneos, coaches, canchas y comunidad.
-                Todo lo que necesitas para tenis y padel en una sola plataforma.
+                Análisis IA, rankings, torneos, coaches, canchas y comunidad.
+                Todo para tenis y padel en una sola plataforma.
               </p>
 
               <div className="flex items-center justify-center mb-6">
@@ -29,7 +29,7 @@ export function CTASection() {
                     href="/register"
                     className="px-8 py-4 text-foreground font-semibold text-lg"
                   >
-                    Comenzar gratis
+                    Empieza gratis
                   </Link>
                   <Link
                     href="/register"
@@ -41,7 +41,7 @@ export function CTASection() {
               </div>
 
               <p className="text-sm text-white/60">
-                Sin tarjeta de credito · Comienza en segundos
+                Sin tarjeta de crédito · Listo en segundos
               </p>
             </div>
           </div>

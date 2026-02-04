@@ -19,17 +19,17 @@ export function HeroSection() {
       {/* Content */}
       <div className="container relative z-10 mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Headline - serif style for elegance */}
+          {/* Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6 text-white leading-tight">
             Mejora tu técnica,{' '}
             <span className="italic">compite en el ranking</span>{' '}
-            y disfruta del juego
+            y disfruta cada partido
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Análisis de video con IA, planes personalizados, torneos, coaches y comunidad.
-            Todo lo que necesitas para tenis y padel.
+            Sube tu video, recibe análisis con IA en minutos y sigue un plan personalizado.
+            Tenis y padel en una sola plataforma.
           </p>
 
           {/* CTA - White pill with arrow */}
@@ -39,7 +39,7 @@ export function HeroSection() {
                 href="/register"
                 className="px-8 py-4 text-foreground font-semibold text-lg"
               >
-                Comenzar gratis
+                Empieza gratis
               </Link>
               <Link
                 href="/register"
@@ -51,7 +51,7 @@ export function HeroSection() {
           </div>
 
           <p className="text-sm text-white/60">
-            Sin tarjeta de crédito · Comienza en segundos
+            Sin tarjeta de crédito · Listo en segundos
           </p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export function HeroSection() {
             ))}
           </div>
           <div>
-            <p className="text-sm font-bold text-foreground">1,200+ jugadores</p>
+            <p className="text-sm font-bold text-foreground">+1,200 jugadores</p>
             <p className="text-xs text-muted-foreground">activos este mes</p>
           </div>
         </div>
@@ -79,7 +79,7 @@ export function HeroSection() {
       {/* Floating Badge - Bottom Left - App download hint */}
       <div className="absolute bottom-8 left-8 z-10 hidden lg:block">
         <div className="bg-white rounded-2xl shadow-xl px-5 py-3 flex items-center gap-3">
-          <span className="text-sm font-medium text-foreground">Analiza desde el móvil</span>
+          <span className="text-sm font-medium text-foreground">Graba desde tu celular</span>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-foreground rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
