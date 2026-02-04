@@ -10,6 +10,36 @@ export interface AnalysisIssue {
   frameUrl: string | null
 }
 
+export interface ExerciseForPDF {
+  id: string
+  name: string
+  description: string
+  instructions: string
+  sets: number | null
+  reps: number | null
+  durationMins: number | null
+  frequency: string
+  videoUrl: string | null
+}
+
+export interface TrainingPlanForPDF {
+  id: string
+  title: string
+  description: string | null
+  durationDays: number
+  difficulty: number
+  exercises: ExerciseForPDF[]
+}
+
+export interface PreviousAnalysisForPDF {
+  id: string
+  createdAt: Date
+  overallScore: number | null
+  technique: {
+    name: string
+  }
+}
+
 export interface AnalysisForPDF {
   id: string
   createdAt: Date
@@ -34,6 +64,15 @@ export interface AnalysisForPDF {
   mediaItems: {
     url: string
     type: string
+  }[]
+  // Page 3: Training Plan
+  trainingPlan?: TrainingPlanForPDF | null
+  // Page 4: History
+  previousAnalysis?: PreviousAnalysisForPDF | null
+  // Previous analyses for history chart (last 5)
+  analysisHistory?: {
+    createdAt: Date
+    overallScore: number | null
   }[]
 }
 

@@ -21,13 +21,25 @@ function getSeverityStyle(severity: string) {
   }
 }
 
-export async function renderAnalysisPDF(analysis: AnalysisForPDF): Promise<Buffer> {
-  const date = new Date(analysis.createdAt).toLocaleDateString('es-PE', {
+// Helper to format date
+function formatDate(date: Date): string {
+  return new Date(date).toLocaleDateString('es-PE', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   })
+}
 
+// Helper to format short date
+function formatShortDate(date: Date): string {
+  return new Date(date).toLocaleDateString('es-PE', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+export async function renderAnalysisPDF(analysis: AnalysisForPDF): Promise<Buffer> {
+  const date = formatDate(analysis.createdAt)
   const tier = analysis.user.playerProfile?.skillTier
   const tierLabel = tier ? tierLabels[tier] || tier : null
 
@@ -42,10 +54,32 @@ export async function renderAnalysisPDF(analysis: AnalysisForPDF): Promise<Buffe
     {} as Record<string, typeof analysis.issues>
   )
 
-  const totalPages = 2
   const highPriorityCount = analysis.issues.filter(
     (i) => i.severity === 'CRITICAL' || i.severity === 'HIGH'
   ).length
+
+  // Calculate total pages
+  const hasTrainingPlan = analysis.trainingPlan && analysis.trainingPlan.exercises.length > 0
+  const hasHistory = analysis.previousAnalysis || (analysis.analysisHistory && analysis.analysisHistory.length > 1)
+
+  let totalPages = 2 // Base: summary + issues
+  if (hasTrainingPlan) totalPages++
+  if (hasHistory) totalPages++
+
+  // Get top 3 exercises for page 3
+  const topExercises = hasTrainingPlan
+    ? analysis.trainingPlan!.exercises.slice(0, 3)
+    : []
+
+  // Calculate score change for page 4
+  const previousScore = analysis.previousAnalysis?.overallScore
+  const currentScore = analysis.overallScore
+  const scoreChange = previousScore && currentScore
+    ? currentScore - previousScore
+    : null
+  const changePercent = previousScore && scoreChange
+    ? ((scoreChange / previousScore) * 100).toFixed(1)
+    : null
 
   const doc = (
     <Document>
@@ -211,6 +245,246 @@ export async function renderAnalysisPDF(analysis: AnalysisForPDF): Promise<Buffe
           <Text style={styles.footerPage}>Página 2 de {totalPages}</Text>
         </View>
       </Page>
+
+      {/* PAGE 3: PLAN DE ACCIÓN (if training plan exists) */}
+      {hasTrainingPlan && (
+        <Page size="A4" style={styles.page}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.logo}>SportTek</Text>
+            <View style={styles.headerRight}>
+              <Text style={styles.headerDate}>Plan de Acción</Text>
+              <Text style={styles.headerId}>{analysis.technique.name}</Text>
+            </View>
+          </View>
+
+          {/* Plan Summary */}
+          <View style={styles.planSummary}>
+            <View style={styles.planSummaryItem}>
+              <Text style={styles.planSummaryValue}>{analysis.trainingPlan!.durationDays}</Text>
+              <Text style={styles.planSummaryLabel}>días</Text>
+            </View>
+            <View style={styles.planSummaryItem}>
+              <Text style={styles.planSummaryValue}>{analysis.trainingPlan!.exercises.length}</Text>
+              <Text style={styles.planSummaryLabel}>ejercicios</Text>
+            </View>
+            <View style={styles.planSummaryItem}>
+              <Text style={styles.planSummaryValue}>Nivel {analysis.trainingPlan!.difficulty}</Text>
+              <Text style={styles.planSummaryLabel}>dificultad</Text>
+            </View>
+          </View>
+
+          {/* Section Title */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Top 3 Ejercicios Recomendados</Text>
+            <Text style={styles.issuesIntro}>
+              Estos son los ejercicios más importantes para trabajar las áreas de mejora identificadas.
+              Realízalos de forma consistente para ver resultados.
+            </Text>
+
+            {/* Exercises */}
+            {topExercises.map((exercise, idx) => (
+              <View key={exercise.id} style={styles.exerciseCard}>
+                <View style={styles.exerciseHeader}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <View style={styles.exerciseNumber}>
+                      <Text style={styles.exerciseNumberText}>{idx + 1}</Text>
+                    </View>
+                    <Text style={styles.exerciseName}>{exercise.name}</Text>
+                  </View>
+                  <Text style={styles.exerciseFrequency}>{exercise.frequency}</Text>
+                </View>
+
+                <Text style={styles.exerciseDescription}>{exercise.description}</Text>
+
+                {exercise.instructions && (
+                  <Text style={styles.exerciseInstructions}>{exercise.instructions}</Text>
+                )}
+
+                {/* Metrics */}
+                <View style={styles.exerciseMetrics}>
+                  {exercise.sets && (
+                    <View style={styles.exerciseMetric}>
+                      <Text style={styles.exerciseMetricLabel}>Series:</Text>
+                      <Text style={styles.exerciseMetricValue}>{exercise.sets}</Text>
+                    </View>
+                  )}
+                  {exercise.reps && (
+                    <View style={styles.exerciseMetric}>
+                      <Text style={styles.exerciseMetricLabel}>Reps:</Text>
+                      <Text style={styles.exerciseMetricValue}>{exercise.reps}</Text>
+                    </View>
+                  )}
+                  {exercise.durationMins && (
+                    <View style={styles.exerciseMetric}>
+                      <Text style={styles.exerciseMetricLabel}>Duración:</Text>
+                      <Text style={styles.exerciseMetricValue}>{exercise.durationMins} min</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Video QR placeholder */}
+                {exercise.videoUrl && (
+                  <View style={styles.qrSection}>
+                    <View style={styles.qrPlaceholder}>
+                      <Text style={styles.qrText}>QR</Text>
+                    </View>
+                    <Text style={styles.qrHint}>
+                      Escanea para ver el video tutorial de este ejercicio
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+
+          {/* Notes Section */}
+          <View style={styles.notesSection}>
+            <Text style={styles.notesTitle}>Notas del Coach</Text>
+            <View style={styles.notesLines} />
+            <View style={styles.notesLines} />
+            <View style={styles.notesLines} />
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footer} fixed>
+            <Text style={styles.footerText}>
+              Generado por SportTek • sporttek.pe
+            </Text>
+            <Text style={styles.footerPage}>Página 3 de {totalPages}</Text>
+          </View>
+        </Page>
+      )}
+
+      {/* PAGE 4: HISTORIAL Y PROGRESO (if previous analysis exists) */}
+      {hasHistory && (
+        <Page size="A4" style={styles.page}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.logo}>SportTek</Text>
+            <View style={styles.headerRight}>
+              <Text style={styles.headerDate}>Historial de Progreso</Text>
+              <Text style={styles.headerId}>{analysis.technique.name}</Text>
+            </View>
+          </View>
+
+          {/* Intro */}
+          <Text style={styles.historyIntro}>
+            Compara tu progreso con análisis anteriores de la misma técnica.
+            La consistencia en el entrenamiento es clave para mejorar.
+          </Text>
+
+          {/* Comparison Cards */}
+          {analysis.previousAnalysis && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Comparación con Análisis Anterior</Text>
+
+              <View style={styles.comparisonCard}>
+                {/* Previous */}
+                <View style={styles.comparisonBox}>
+                  <Text style={styles.comparisonLabel}>Anterior</Text>
+                  <Text style={styles.comparisonScore}>
+                    {analysis.previousAnalysis.overallScore?.toFixed(1) ?? '--'}
+                  </Text>
+                  <Text style={styles.comparisonDate}>
+                    {formatShortDate(analysis.previousAnalysis.createdAt)}
+                  </Text>
+                </View>
+
+                {/* Current */}
+                <View style={[styles.comparisonBox, styles.comparisonBoxCurrent]}>
+                  <Text style={[styles.comparisonLabel, styles.comparisonLabelWhite]}>Actual</Text>
+                  <Text style={[styles.comparisonScore, styles.comparisonScoreWhite]}>
+                    {currentScore?.toFixed(1) ?? '--'}
+                  </Text>
+                  <Text style={[styles.comparisonDate, styles.comparisonDateWhite]}>
+                    {formatShortDate(analysis.createdAt)}
+                  </Text>
+                  {scoreChange !== null && (
+                    <View style={[
+                      styles.changeBadge,
+                      scoreChange > 0 ? styles.changeBadgePositive :
+                      scoreChange < 0 ? styles.changeBadgeNegative :
+                      styles.changeBadgeNeutral
+                    ]}>
+                      <Text style={[
+                        styles.changeText,
+                        scoreChange > 0 ? styles.changeTextPositive :
+                        scoreChange < 0 ? styles.changeTextNegative :
+                        styles.changeTextNeutral
+                      ]}>
+                        {scoreChange > 0 ? '↑' : scoreChange < 0 ? '↓' : '='} {Math.abs(scoreChange).toFixed(1)} pts
+                        {changePercent && ` (${scoreChange > 0 ? '+' : ''}${changePercent}%)`}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* Progress Chart (simple bar representation) */}
+          {analysis.analysisHistory && analysis.analysisHistory.length > 1 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Evolución de Puntuación</Text>
+
+              <View style={styles.chartContainer}>
+                <Text style={styles.chartTitle}>Últimos {analysis.analysisHistory.length} análisis</Text>
+                <View style={styles.chartArea}>
+                  {analysis.analysisHistory.map((hist, idx) => {
+                    const score = hist.overallScore ?? 0
+                    const maxScore = 100
+                    const heightPercent = (score / maxScore) * 100
+                    const isLast = idx === analysis.analysisHistory!.length - 1
+
+                    return (
+                      <View key={idx} style={{ alignItems: 'center' }}>
+                        <View
+                          style={[
+                            styles.chartBar,
+                            isLast ? styles.chartBarCurrent : {},
+                            { height: Math.max(heightPercent, 20) }
+                          ]}
+                        >
+                          <Text style={styles.chartBarValue}>
+                            {score.toFixed(0)}
+                          </Text>
+                        </View>
+                        <Text style={styles.chartBarLabel}>
+                          {formatShortDate(hist.createdAt)}
+                        </Text>
+                      </View>
+                    )
+                  })}
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* Insight */}
+          <View style={styles.insightBox}>
+            <Text style={styles.insightTitle}>💡 Insight</Text>
+            <Text style={styles.insightText}>
+              {scoreChange !== null && scoreChange > 0
+                ? `¡Excelente progreso! Has mejorado ${scoreChange.toFixed(1)} puntos desde tu último análisis. Sigue trabajando en los ejercicios recomendados para continuar mejorando.`
+                : scoreChange !== null && scoreChange < 0
+                ? `Tu puntuación bajó ${Math.abs(scoreChange).toFixed(1)} puntos. No te desanimes, esto puede ser normal al trabajar en nuevos aspectos técnicos. Revisa las áreas de mejora y enfócate en la consistencia.`
+                : scoreChange === 0
+                ? 'Tu puntuación se mantiene estable. Para seguir mejorando, considera aumentar la frecuencia de práctica o trabajar en aspectos técnicos específicos.'
+                : 'Sigue analizando tu técnica regularmente para ver tu progreso a lo largo del tiempo. La consistencia es clave para mejorar.'
+              }
+            </Text>
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footer} fixed>
+            <Text style={styles.footerText}>
+              Generado por SportTek • sporttek.pe
+            </Text>
+            <Text style={styles.footerPage}>Página {hasTrainingPlan ? 4 : 3} de {totalPages}</Text>
+          </View>
+        </Page>
+      )}
     </Document>
   )
 
