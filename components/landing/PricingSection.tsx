@@ -1,71 +1,41 @@
 'use client'
 
 import Link from 'next/link'
-import { Check, ArrowRight } from 'lucide-react'
-import { GlassButton } from '@/components/ui/glass-button'
-import { GlassCard } from '@/components/ui/glass-card'
-import { cn } from '@/lib/utils'
+import { ArrowUpRight } from 'lucide-react'
 
 const plans = [
   {
     id: 'FREE',
-    name: 'Descubre tu nivel',
-    tagline: 'Prueba el poder del analisis IA',
+    name: 'Gratis',
+    subtitle: 'Descubre tu nivel',
     price: 0,
-    currency: '',
-    features: [
-      '5 análisis de video por mes',
-      '1 plan de entrenamiento activo',
-      'Tenis (un deporte)',
-      'Ranking nacional basico',
-      'Perfil de jugador',
-      'Soporte por email',
-    ],
-    outcome: 'Ideal para descubrir tu skill score y entender tus errores tecnicos.',
+    period: null,
+    description: '5 análisis de video, 1 plan de entrenamiento, ranking básico',
+    badge: null,
+    background: 'light',
     cta: 'Comenzar gratis',
-    note: 'Sin tarjeta de crédito',
-    popular: false,
   },
   {
     id: 'PRO',
-    name: 'Compite en serio',
-    tagline: 'Menos que una clase particular',
+    name: 'Pro',
+    subtitle: 'Compite en serio',
     price: 24.90,
-    currency: 'S/',
-    features: [
-      'Análisis ilimitados de video',
-      'Planes de entrenamiento ilimitados',
-      'Tenis, Padel y más',
-      'Rankings multi-categoria completos',
-      'Historial de progreso y estadisticas',
-      'Matchmaking y desafios',
-      'Torneos y badges',
-      'Soporte prioritario',
-    ],
-    outcome: 'Para deportistas que entrenan varias veces por semana y quieren subir de tier.',
+    period: '/mes',
+    description: 'Análisis ilimitados, todos los deportes, torneos y matchmaking',
+    badge: 'Popular',
+    background: 'primary',
     cta: 'Elegir Pro',
-    note: null,
-    popular: true,
   },
   {
     id: 'ELITE',
-    name: 'Entrena como profesional',
-    tagline: 'Acceso total con herramientas avanzadas',
+    name: 'Elite',
+    subtitle: 'Entrena como profesional',
     price: 39.90,
-    currency: 'S/',
-    features: [
-      'Todo en Pro',
-      'Analisis en video HD',
-      'Comparacion de progreso entre analisis',
-      'Exportar informes PDF profesionales',
-      'Sesiones de coaching virtual',
-      'Acceso anticipado a nuevas funciones',
-      'Soporte 24/7',
-    ],
-    outcome: 'Para competidores que buscan cada ventaja y quieren coaching personalizado.',
+    period: '/mes',
+    description: 'Todo en Pro + coaching virtual, informes PDF, soporte 24/7',
+    badge: 'Premium',
+    background: 'image',
     cta: 'Elegir Elite',
-    note: 'Próximamente: descuento anual',
-    popular: false,
   },
 ]
 
@@ -73,90 +43,181 @@ export function PricingSection() {
   return (
     <section id="pricing" className="py-20 lg:py-32">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-            Precios
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Elige como quieres crecer
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+            Encuentra el plan perfecto para tu{' '}
+            <span className="inline-flex items-center gap-2">
+              desarrollo
+              <span className="inline-block w-10 h-10 rounded-full bg-primary/20 text-2xl flex items-center justify-center">
+                🎾
+              </span>
+            </span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Cada plan esta disenado para un nivel de compromiso diferente.
-            Cambia o cancela cuando quieras.
+          <p className="text-lg text-muted-foreground">
+            Cambia o cancela cuando quieras
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
-          {plans.map((plan) => (
-            <GlassCard
-              key={plan.id}
-              intensity="light"
-              padding="none"
-              className="relative flex flex-col overflow-hidden"
-            >
-              {plan.popular && (
-                <div className="absolute top-4 left-4">
-                  <span className="rounded-full bg-foreground text-background text-xs font-medium px-3 py-1">
-                    Popular
-                  </span>
-                </div>
-              )}
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {plans.map((plan) => {
+            const isPrimary = plan.background === 'primary'
+            const isImage = plan.background === 'image'
+            const isDark = isPrimary || isImage
 
-              <div className={cn('p-6 pb-0', plan.popular && 'pt-12')}>
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold">{plan.name}</h3>
-                  <p className="text-muted-foreground text-sm">
-                    {plan.tagline}
+            return (
+              <div
+                key={plan.id}
+                className={`relative rounded-3xl overflow-hidden transition-all hover:shadow-xl ${
+                  isPrimary
+                    ? 'bg-[#c8f7c5]'
+                    : isImage
+                    ? 'bg-cover bg-center'
+                    : 'bg-white shadow-lg'
+                }`}
+                style={
+                  isImage
+                    ? {
+                        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('/images/tennis-court-bg.jpg')`,
+                        backgroundColor: '#1a3d2b',
+                      }
+                    : undefined
+                }
+              >
+                {/* Top badges row */}
+                <div className="flex items-start justify-between p-6 pb-0">
+                  {/* Left badge */}
+                  {plan.badge && (
+                    <span
+                      className={`px-3 py-1 text-xs font-medium rounded-full ${
+                        isImage
+                          ? 'bg-white/20 text-white backdrop-blur-sm'
+                          : 'bg-foreground/10 text-foreground'
+                      }`}
+                    >
+                      {plan.badge}
+                    </span>
+                  )}
+                  {!plan.badge && <span />}
+
+                  {/* Right: Social proof */}
+                  {(isPrimary || isImage) && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex -space-x-2">
+                        {[1, 2].map((i) => (
+                          <div
+                            key={i}
+                            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold ${
+                              isImage
+                                ? 'bg-white/20 border-white/40 text-white'
+                                : 'bg-white border-white text-foreground/60'
+                            }`}
+                          >
+                            {String.fromCharCode(64 + i)}
+                          </div>
+                        ))}
+                      </div>
+                      <span
+                        className={`text-xs ${
+                          isImage ? 'text-white/80' : 'text-foreground/60'
+                        }`}
+                      >
+                        Recomendado
+                        <br />
+                        por coaches
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Main content */}
+                <div className="p-6 pt-8">
+                  {/* Plan name - large */}
+                  <h3
+                    className={`text-4xl sm:text-5xl font-bold mb-1 ${
+                      isImage ? 'text-white' : 'text-foreground'
+                    }`}
+                  >
+                    {plan.name}
+                  </h3>
+                  <p
+                    className={`text-sm mb-8 ${
+                      isImage ? 'text-white/70' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {plan.subtitle}
+                  </p>
+
+                  {/* Price pill */}
+                  <div className="mb-6">
+                    <span
+                      className={`inline-flex items-baseline rounded-full px-5 py-2 text-2xl font-bold ${
+                        isImage
+                          ? 'bg-white text-foreground'
+                          : isPrimary
+                          ? 'bg-[#256F50] text-white'
+                          : 'bg-foreground text-background'
+                      }`}
+                    >
+                      {plan.price === 0 ? (
+                        'S/0'
+                      ) : (
+                        <>
+                          S/{plan.price.toFixed(0)}
+                        </>
+                      )}
+                      {plan.period && (
+                        <span className="text-sm font-normal ml-1 opacity-70">
+                          {plan.period}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Description */}
+                  <p
+                    className={`text-sm leading-relaxed mb-8 ${
+                      isImage ? 'text-white/80' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {plan.description}
                   </p>
                 </div>
 
-                <div className="mb-4">
-                  <span className="inline-flex items-baseline rounded-full bg-foreground text-background px-4 py-1.5 text-2xl font-bold">
-                    {plan.price === 0 ? 'Gratis' : `${plan.currency}${plan.price.toFixed(2)}`}
-                    {plan.price > 0 && (
-                      <span className="text-background/60 text-sm font-normal ml-1">/mes</span>
-                    )}
-                  </span>
-                </div>
-
-                <p className="text-sm text-muted-foreground mb-6 leading-relaxed border-b border-border/40 pb-6">
-                  {plan.outcome}
-                </p>
-              </div>
-
-              <div className="p-6 pt-0 flex-1 flex flex-col">
-                <ul className="space-y-3 mb-8 flex-1">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3 text-sm">
-                      <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="flex items-center justify-between">
-                  <Link
-                    href="/register"
-                    className="text-sm font-medium hover:text-primary transition-colors"
+                {/* Footer with CTA */}
+                <div className="px-6 pb-6">
+                  <div
+                    className={`flex items-center justify-between pt-4 border-t ${
+                      isImage ? 'border-white/20' : 'border-foreground/10'
+                    }`}
                   >
-                    {plan.cta}
-                  </Link>
-                  <GlassButton variant="default" size="icon-circle" asChild>
-                    <Link href="/register">
-                      <ArrowRight className="h-5 w-5" />
+                    <span
+                      className={`text-sm font-medium ${
+                        isImage ? 'text-white' : 'text-foreground'
+                      }`}
+                    >
+                      {plan.cta}
+                    </span>
+                    <Link
+                      href="/register"
+                      className={`w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 ${
+                        isImage
+                          ? 'bg-white text-foreground'
+                          : 'bg-foreground text-background'
+                      }`}
+                    >
+                      <ArrowUpRight className="h-5 w-5" />
                     </Link>
-                  </GlassButton>
+                  </div>
                 </div>
-                {plan.note && (
-                  <p className="text-xs text-muted-foreground mt-3">{plan.note}</p>
-                )}
               </div>
-            </GlassCard>
-          ))}
+            )
+          })}
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-8">
-          Precios en soles peruanos (PEN). Cambia o cancela cuando quieras.
+          Precios en soles peruanos (PEN). Sin compromisos.
         </p>
       </div>
     </section>
