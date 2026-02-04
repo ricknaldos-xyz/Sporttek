@@ -43,7 +43,7 @@ export const PLANS = {
       'Todo en Pro',
       'Analisis en calidad HD',
       'Comparacion de progreso entre analisis',
-      'Exportar informes para imprimir',
+      'Informes PDF profesionales descargables',
       'Acceso anticipado a nuevas funciones',
       'Badge Elite en tu perfil',
       'Soporte prioritario',

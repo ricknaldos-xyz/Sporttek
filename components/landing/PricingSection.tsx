@@ -38,7 +38,7 @@ const playerPlans = [
     subtitle: 'Entrena como profesional',
     price: 39.90,
     period: '/mes',
-    description: 'Todo en Pro + análisis HD, comparación de progreso, informes y badge Elite',
+    description: 'Todo en Pro + análisis HD, comparación de progreso, informes PDF y badge Elite',
     badge: 'Premium',
     background: 'image' as const,
     cta: 'Elegir Elite',

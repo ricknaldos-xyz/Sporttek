@@ -128,8 +128,8 @@ export default async function AnalysisDetailPage({
         <div className="flex items-center gap-2">
           {analysis.status === 'COMPLETED' && (
             <>
-              <GlassButton variant="ghost" size="icon" asChild title="Ver informe">
-                <a href={`/api/analyze/${analysis.id}/pdf`} target="_blank" rel="noopener noreferrer">
+              <GlassButton variant="ghost" size="icon" asChild title="Descargar PDF">
+                <a href={`/api/analyze/${analysis.id}/pdf`} download>
                   <FileDown className="h-5 w-5" />
                 </a>
               </GlassButton>
