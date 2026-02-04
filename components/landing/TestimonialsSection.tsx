@@ -8,42 +8,30 @@ const testimonials = [
   {
     name: 'Carlos M.',
     role: 'Tenista amateur',
-    location: 'Lima, Peru',
-    since: 'Usa SportTek hace 4 meses',
+    location: 'Lima',
     content:
-      'La IA detectó que mi lanzamiento de saque era inconsistente y me dio un plan específico para corregirlo. En 3 semanas subí de 5ta B a 5ta A en el ranking.',
-    rating: 5,
-    highlight: '5ta B → 5ta A',
+      'La IA detectó que mi lanzamiento de saque era inconsistente y me dio un plan específico para corregirlo. En 3 semanas subí de 5ta B a 5ta A.',
   },
   {
     name: 'Andrea P.',
     role: 'Jugadora de padel',
-    location: 'Miraflores, Peru',
-    since: 'Usa SportTek hace 2 meses',
+    location: 'Miraflores',
     content:
-      'El matchmaking me conectó con una pareja de mi nivel para un torneo. Seguimos jugando juntas cada semana desde que nos encontramos en la plataforma.',
-    rating: 4,
-    highlight: 'Pareja de torneo',
+      'El matchmaking me conectó con una pareja de mi nivel para un torneo. Seguimos jugando juntas cada semana desde que nos conocimos acá.',
   },
   {
     name: 'Roberto S.',
-    role: 'Entrenador de padel certificado',
-    location: 'San Isidro, Peru',
-    since: 'Usa SportTek hace 5 meses',
+    role: 'Entrenador certificado',
+    location: 'San Isidro',
     content:
-      'Registro mis alumnos en la plataforma y les asigno planes basados en sus análisis. Ver los errores objetivamente con la IA complementa mis sesiones presenciales.',
-    rating: 5,
-    highlight: '12 alumnos activos',
+      'Registro a mis alumnos y les asigno planes basados en sus análisis. Ver los errores con la IA complementa mis sesiones presenciales.',
   },
   {
     name: 'María L.',
     role: 'Jugadora de padel',
-    location: 'Surco, Peru',
-    since: 'Usa SportTek hace 3 meses',
+    location: 'Surco',
     content:
-      'Empecé sin saber mi nivel real. Después de 5 análisis tengo claro mis fortalezas y debilidades. El plan de entrenamiento me da ejercicios nuevos cada semana.',
-    rating: 5,
-    highlight: 'De novata a 4ta A',
+      'Empecé sin saber mi nivel real. Después de 5 análisis tengo claro mis fortalezas y debilidades. El plan me da ejercicios nuevos cada semana.',
   },
 ]
 
@@ -59,10 +47,10 @@ export function TestimonialsSection() {
             Testimonios
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Historias de la comunidad
+            Lo que dice nuestra comunidad
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Jugadores y entrenadores que usan SportTek para mejorar su rendimiento y conectar con otros deportistas.
+            Jugadores y entrenadores de todo el Perú que ya mejoran con SportTek
           </p>
         </div>
 

@@ -6,20 +6,20 @@ const steps = [
   {
     number: '01',
     icon: Upload,
-    title: 'Sube tu video',
-    description: 'Graba 10-30 segundos de tu técnica con el móvil.',
+    title: 'Graba tu técnica',
+    description: 'Solo necesitas 15-30 segundos con tu celular. Así de fácil.',
   },
   {
     number: '02',
     icon: Brain,
-    title: 'Análisis IA',
-    description: 'En minutos detectamos errores y generamos tu plan.',
+    title: 'Recibe tu análisis',
+    description: 'La IA detecta errores y te arma un plan para mejorar.',
   },
   {
     number: '03',
     icon: Trophy,
-    title: 'Compite y mejora',
-    description: 'Sube en el ranking y participa en torneos.',
+    title: 'Sube en el ranking',
+    description: 'Entrena, compite en torneos y mide tu progreso.',
   },
 ]
 
@@ -34,6 +34,9 @@ export function HowItWorksSection() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             De tu video al ranking en 3 pasos
           </h2>
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+            Sin complicaciones. Empieza a mejorar hoy mismo.
+          </p>
         </div>
 
         <div className="max-w-4xl mx-auto">

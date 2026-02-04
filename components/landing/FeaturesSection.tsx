@@ -19,10 +19,10 @@ const pillars = [
     icon: TrendingUp,
     title: 'Mejora tu técnica con IA',
     description:
-      'Sube un video y recibe análisis profesional en minutos. La IA detecta errores y genera planes personalizados.',
+      'Sube un video y en minutos sabrás exactamente qué corregir. La IA analiza tu golpe y te arma un plan paso a paso.',
     features: [
       { icon: Brain, text: 'Análisis de saque, derecha, revés, volea y bandeja' },
-      { icon: Target, text: 'Planes de entrenamiento con progresión semanal' },
+      { icon: Target, text: 'Planes con ejercicios que avanzan cada semana' },
     ],
     color: 'primary',
   },
@@ -32,10 +32,10 @@ const pillars = [
     icon: Trophy,
     title: 'Sube en el ranking nacional',
     description:
-      'Rankings por país, tier y edad. Torneos con brackets reales y badges de logros.',
+      'Compara tu nivel con otros jugadores de Perú. Participa en torneos reales y gana badges por tus logros.',
     features: [
       { icon: Trophy, text: 'Rankings semanal, mensual e histórico' },
-      { icon: Medal, text: 'Torneos con seeding y restricciones por nivel' },
+      { icon: Medal, text: 'Torneos con brackets y premios' },
     ],
     color: 'dark',
   },
@@ -45,9 +45,9 @@ const pillars = [
     icon: Users,
     title: 'Coaches, canchas y comunidad',
     description:
-      'Entrenadores certificados, reserva de canchas y matchmaking con jugadores de tu nivel.',
+      'Encuentra entrenadores certificados, reserva canchas cerca de ti y conoce jugadores de tu nivel.',
     features: [
-      { icon: GraduationCap, text: 'Coaches verificados con reviews y precios' },
+      { icon: GraduationCap, text: 'Coaches con reviews y precios claros' },
       { icon: MapPin, text: 'Canchas con disponibilidad en tiempo real' },
     ],
     color: 'primary',
@@ -67,7 +67,7 @@ export function FeaturesSection() {
             Todo lo que necesitas para crecer
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Tres pilares que cubren tu desarrollo deportivo completo
+            Tres pilares para tu desarrollo deportivo completo
           </p>
         </div>
 

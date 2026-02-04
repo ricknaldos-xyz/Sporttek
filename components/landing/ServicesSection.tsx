@@ -25,7 +25,7 @@ const services = [
   {
     icon: MapPin,
     title: 'Canchas',
-    description: 'Reserva canchas cerca de ti con pago online.',
+    description: 'Reserva canchas cerca de ti y paga online.',
     href: '/courts',
   },
   {
@@ -48,7 +48,7 @@ export function ServicesSection() {
             Todo en un solo lugar
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Tienda, encordado, canchas y matchmaking para que solo te preocupes por jugar.
+            Tienda, encordado, canchas y rivales. Tú solo preocúpate por jugar.
           </p>
         </div>
 

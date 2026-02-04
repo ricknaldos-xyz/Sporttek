@@ -6,18 +6,18 @@ import { GraduationCap, Users, Star, ArrowUpRight } from 'lucide-react'
 const benefits = [
   {
     icon: Users,
-    title: 'Gestiona alumnos',
-    description: 'Asigna planes basados en análisis IA',
+    title: 'Gestiona tus alumnos',
+    description: 'Asigna planes basados en el análisis de IA',
   },
   {
     icon: Star,
     title: 'Acumula reviews',
-    description: 'Rating visible en tu perfil público',
+    description: 'Tu rating visible para nuevos alumnos',
   },
   {
     icon: GraduationCap,
     title: 'Perfil verificado',
-    description: 'Certificaciones y especialidades',
+    description: 'Muestra tus certificaciones y especialidades',
   },
 ]
 
@@ -31,13 +31,13 @@ export function CoachSection() {
               {/* Left: Main pitch */}
               <div>
                 <span className="inline-block px-4 py-1.5 bg-background/10 text-background text-sm font-medium rounded-full mb-4">
-                  Para coaches
+                  Para entrenadores
                 </span>
                 <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                  Monetiza tu expertise deportivo
+                  Haz crecer tu carrera como coach
                 </h2>
                 <p className="text-background/70 leading-relaxed mb-8">
-                  Únete al marketplace de coaches verificados. Llega a deportistas que buscan mejorar.
+                  Únete al marketplace de entrenadores verificados. Conecta con deportistas que buscan mejorar y gestiona todo desde la app.
                 </p>
                 <div className="flex items-center">
                   <Link

@@ -17,13 +17,13 @@ const playerPlans = [
     description: '5 análisis de video, 1 plan de entrenamiento, ranking básico',
     badge: null,
     background: 'light' as const,
-    cta: 'Comenzar gratis',
+    cta: 'Empezar gratis',
     href: '/register?type=player',
   },
   {
     id: 'PRO',
     name: 'Pro',
-    subtitle: 'Compite en serio',
+    subtitle: 'Para competir en serio',
     price: 24.90,
     period: '/mes',
     description: 'Análisis ilimitados, todos los deportes, torneos y matchmaking',
@@ -63,7 +63,7 @@ const coachPlans = [
   {
     id: 'PRO',
     name: 'Pro',
-    subtitle: 'Escala tu negocio',
+    subtitle: 'Haz crecer tu negocio',
     price: 49.90,
     period: '/mes',
     commission: '8%',
@@ -97,17 +97,14 @@ export function PricingSection() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-10">
+          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
+            Precios
+          </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-            Encuentra el plan perfecto para tu{' '}
-            <span className="inline-flex items-center gap-2">
-              desarrollo
-              <span className="inline-block w-10 h-10 rounded-full bg-primary/20 text-2xl flex items-center justify-center">
-                🎾
-              </span>
-            </span>
+            Elige el plan que va contigo
           </h2>
           <p className="text-lg text-muted-foreground">
-            Cambia o cancela cuando quieras
+            Cambia o cancela cuando quieras, sin compromisos
           </p>
         </div>
 
@@ -123,7 +120,7 @@ export function PricingSection() {
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              Para jugadores
+              Soy jugador
             </button>
             <button
               onClick={() => setActiveTab('coaches')}
@@ -134,7 +131,7 @@ export function PricingSection() {
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              Para coaches
+              Soy entrenador
             </button>
           </div>
         </div>
@@ -204,9 +201,9 @@ export function PricingSection() {
                           isImage ? 'text-white/80' : 'text-foreground/60'
                         )}
                       >
-                        {activeTab === 'players' ? 'Recomendado' : '+50 coaches'}
+                        {activeTab === 'players' ? 'El más' : '+50 coaches'}
                         <br />
-                        {activeTab === 'players' ? 'por coaches' : 'activos'}
+                        {activeTab === 'players' ? 'elegido' : 'activos'}
                       </span>
                     </div>
                   )}
